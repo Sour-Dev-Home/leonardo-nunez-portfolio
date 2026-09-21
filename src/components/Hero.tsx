@@ -1,12 +1,12 @@
 export function Hero() {
   return (
     <section id="top" className="hero">
-      <p className="eyebrow">Full-stack developer</p>
       <h1>Leonardo Nunez</h1>
       <p className="hero-subtitle">
-        Electrical &amp; Computer Engineering + Computer Science, Rice University.
-        Building full-stack web applications with the same rigor I bring to embedded
-        systems and infrastructure — real tests, real deployment, no shortcuts.
+        Full-stack developer with a background in electrical &amp; computer
+        engineering from Rice University. I build web applications with the same
+        rigor I bring to embedded systems and infrastructure — real tests, real
+        deployment, no shortcuts.
       </p>
       <div className="hero-links">
         <a className="button" href="#projects">
