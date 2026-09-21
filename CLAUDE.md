@@ -24,6 +24,12 @@ this workspace (starting with `satisfactory-dash`).
    `src/data/projects.ts` should only say "shipped" or link to a live demo once that's
    actually true — checked, not assumed. Same principle as `satisfactory-dash`'s
    "cite or flag" rule, applied to portfolio claims instead of API claims.
+5. **Never push directly to `main`.** `main` is wired to Netlify production — a push
+   there is instantly live on the public site. Work on a feature branch and open a PR
+   instead; Netlify auto-builds a deploy-preview URL for every PR, and CI runs the
+   same lint/typecheck/test/build gate on it. Review the preview URL (ideally via a
+   Chrome-connected session, same as production verification) before merging. Only
+   merge to `main` once the preview looks right and CI is green.
 
 ## Stack
 
