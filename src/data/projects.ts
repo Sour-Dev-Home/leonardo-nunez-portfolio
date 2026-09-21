@@ -17,7 +17,7 @@ export const projects: Project[] = [
       "A dashboard and backend for a live Satisfactory dedicated server: production rate, overflow, and power-outage monitoring. Built as an npm workspaces monorepo (Vite/React frontend, Express/TypeScript backend) with a documentation-grounded approach to avoid hallucinated API calls, full CI (lint/typecheck/test/build), and a module structure designed for future multi-agent ownership.",
     status: "in-progress",
     stack: ["React", "TypeScript", "Express", "Vite", "Docker"],
-    repoUrl: "https://github.com/SourE-dev/satisfactory-dash",
+    repoUrl: "https://github.com/Sour-Dev-Home/satisfactory-dash",
   },
   {
     name: "Home Lab",

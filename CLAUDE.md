@@ -4,6 +4,9 @@ A simple personal portfolio site: Leonardo Nunez's projects, background, and con
 info, meant to be the permanent public home for showcasing finished project work from
 this workspace (starting with `satisfactory-dash`).
 
+This is a **public-facing** project per `../DEPLOYMENT.md` — public repo, Netlify
+hosting. See that file before changing repo visibility or hosting.
+
 ## Ground rules
 
 1. **Simple by design.** Single-page, plain client-side React (hooks, components) — no
