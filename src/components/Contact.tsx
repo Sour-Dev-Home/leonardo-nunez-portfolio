@@ -1,5 +1,4 @@
-// TODO: replace with your real LinkedIn profile URL
-const LINKEDIN_URL = "https://www.linkedin.com/in/REPLACE-ME";
+const LINKEDIN_URL = "https://www.linkedin.com/in/leonardo-nunez-708634248";
 
 export function Contact() {
   return (
