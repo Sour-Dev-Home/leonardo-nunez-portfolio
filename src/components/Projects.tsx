@@ -19,16 +19,20 @@ export function Projects() {
                 <li key={tech}>{tech}</li>
               ))}
             </ul>
-            <div className="project-links">
-              <a href={project.repoUrl} target="_blank" rel="noreferrer">
-                Repo
-              </a>
-              {project.liveUrl && (
-                <a href={project.liveUrl} target="_blank" rel="noreferrer">
-                  Live demo
-                </a>
-              )}
-            </div>
+            {(project.repoUrl || project.liveUrl) && (
+              <div className="project-links">
+                {project.repoUrl && (
+                  <a href={project.repoUrl} target="_blank" rel="noreferrer">
+                    Repo
+                  </a>
+                )}
+                {project.liveUrl && (
+                  <a href={project.liveUrl} target="_blank" rel="noreferrer">
+                    Live demo
+                  </a>
+                )}
+              </div>
+            )}
           </article>
         ))}
       </div>

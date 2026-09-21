@@ -3,7 +3,7 @@ export interface Project {
   description: string;
   status: "in-progress" | "shipped";
   stack: string[];
-  repoUrl: string;
+  repoUrl?: string;
   liveUrl?: string;
 }
 
@@ -18,5 +18,13 @@ export const projects: Project[] = [
     status: "in-progress",
     stack: ["React", "TypeScript", "Express", "Vite", "Docker"],
     repoUrl: "https://github.com/SourE-dev/satisfactory-dash",
+  },
+  {
+    name: "Home Lab",
+    description:
+      "A self-hosted infrastructure stack running since late 2023: a Proxmox server handling Plex media streaming, Steam server hosting, and automated DVD ripping via shell scripts across VMs and Docker containers. Includes UPS-backed power, network-wide monitoring via a Raspberry Pi running Pi-hole, and a DAS providing media storage plus nightly personal-device snapshots over Syncthing. Also includes a LAN file-upload backend built to OWASP security guidelines.",
+    status: "shipped",
+    stack: ["Proxmox", "Docker", "Linux", "Raspberry Pi", "Syncthing"],
+    // No public repo for this one yet — let me know if you want to link one.
   },
 ];
