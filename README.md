@@ -17,8 +17,9 @@ npm run dev
 
 ## Deployment
 
-Netlify (`netlify.toml` sets the build command and publish directory — connect the
-repo in the Netlify dashboard, no extra config needed).
+Cloudflare Pages — build command `npm run build`, output directory `dist`. Connect
+the repo in the Cloudflare dashboard (Workers & Pages → Create → Pages → Connect to
+Git), no config file needed for a build this simple.
 
 ## Adding a project
 

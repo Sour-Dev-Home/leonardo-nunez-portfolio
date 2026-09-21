@@ -4,8 +4,9 @@ A simple personal portfolio site: Leonardo Nunez's projects, background, and con
 info, meant to be the permanent public home for showcasing finished project work from
 this workspace (starting with `satisfactory-dash`).
 
-This is a **public-facing** project per `../DEPLOYMENT.md` — public repo, Netlify
-hosting. See that file before changing repo visibility or hosting.
+This is a **public-facing** project per `../DEPLOYMENT.md` — public repo, Cloudflare
+Pages hosting (migrating from Netlify). See that file before changing repo visibility
+or hosting.
 
 ## Ground rules
 
@@ -27,18 +28,19 @@ hosting. See that file before changing repo visibility or hosting.
    `src/data/projects.ts` should only say "shipped" or link to a live demo once that's
    actually true — checked, not assumed. Same principle as `satisfactory-dash`'s
    "cite or flag" rule, applied to portfolio claims instead of API claims.
-5. **Never push directly to `main`.** `main` is wired to Netlify production — a push
+5. **Never push directly to `main`.** `main` is wired to production hosting — a push
    there is instantly live on the public site. Work on a feature branch and open a PR
-   instead; Netlify auto-builds a deploy-preview URL for every PR, and CI runs the
+   instead; the host auto-builds a deploy-preview URL for every PR, and CI runs the
    same lint/typecheck/test/build gate on it. Review the preview URL (ideally via a
    Chrome-connected session, same as production verification) before merging. Only
    merge to `main` once the preview looks right and CI is green.
 
 ## Stack
 
-Vite + React + TypeScript, deployed to Netlify (`netlify.toml` configures the build).
-Vitest + React Testing Library for tests; oxlint for linting. CI
-(`.github/workflows/ci.yml`) runs lint/typecheck/test/build on every push and PR.
+Vite + React + TypeScript, deployed to Cloudflare Pages per `../DEPLOYMENT.md` (build
+command `npm run build`, output directory `dist`). Vitest + React Testing Library for
+tests; oxlint for linting. CI (`.github/workflows/ci.yml`) runs
+lint/typecheck/test/build on every push and PR.
 
 ## Commands
 
