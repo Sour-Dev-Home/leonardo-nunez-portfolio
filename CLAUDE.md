@@ -5,8 +5,11 @@ info, meant to be the permanent public home for showcasing finished project work
 this workspace (starting with `satisfactory-dash`).
 
 This is a **public-facing** project per `../DEPLOYMENT.md` — public repo, Cloudflare
-Pages hosting (migrating from Netlify). See that file before changing repo visibility
-or hosting.
+Pages hosting. See that file before changing repo visibility or hosting.
+
+See `../WORKFLOW.md` for the cross-project branch/PR workflow, session roles, and the
+GitHub setup checklist (branch protection gotchas, security baseline) — written from
+this repo's own verified setup, since it's ahead of `satisfactory-dash` on most of it.
 
 ## Ground rules
 
