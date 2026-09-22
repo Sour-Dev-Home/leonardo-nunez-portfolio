@@ -49,8 +49,11 @@ lint/typecheck/test/build on every push and PR.
 
 ## The portfolio-updater agent
 
-See `../.claude/agents/portfolio-updater.md` (workspace root, not in this repo — it
-needs to see sibling project repos too). Its job: watch other projects in this
-workspace for real, verifiable milestones and update `src/data/projects.ts`
-accordingly. Designed but not yet exercised — there's nothing to update until a
+See `~/.claude/agents/portfolio-updater.md` (user-global, not in this repo — it needs
+to see sibling project repos too, and a workspace-root `.claude/agents/` was tried
+first but never actually got discovered as an invocable agent, since `ReactApps/`
+isn't itself a git repository). Its job: watch other projects in this workspace for
+real, verifiable milestones and update `src/data/projects.ts` accordingly. Confirmed
+discoverable via the Agent tool as of a fresh session, but not yet exercised on real
+data — there's nothing to update until a
 project ships something real.
