@@ -25,3 +25,35 @@ jobs:
       - run: npm run test
 
       - run: npm run build
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for PII or hardcoded local paths
+        run: |
+          # Per CLAUDE.md ground rule 3, this site intentionally displays Leonardo's
+          # name and professional email (soure393@gmail.com) — not leaks, so they're
+          # not checked here. CLAUDE.md itself is excluded since it has to document
+          # these patterns as examples of what NOT to commit.
+          EXCLUDE='^(\.github/|.*CLAUDE\.md$)'
+          FILES=$(git ls-files | grep -vE "$EXCLUDE" || true)
+          OTHER_EMAIL=$(echo "$FILES" | xargs -r grep -n -iF -e 'leonunez9821' || true)
+          PATHS=$(echo "$FILES" | xargs -r grep -n -E 'C:\\Users|C:/Users' || true)
+          if [ -n "$OTHER_EMAIL" ] || [ -n "$PATHS" ]; then
+            echo "$OTHER_EMAIL"
+            echo "$PATHS"
+            echo "::error::Found a possible PII or hardcoded-path leak — see CLAUDE.md ground rule 3."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
