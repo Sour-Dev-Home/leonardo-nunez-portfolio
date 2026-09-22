@@ -17,6 +17,8 @@ npm run dev
 
 ## Deployment
 
+Live at [leonardo-nunez-portfolio.pages.dev](https://leonardo-nunez-portfolio.pages.dev).
+
 Cloudflare Pages — build command `npm run build`, output directory `dist`. Connect
 the repo in the Cloudflare dashboard (Workers & Pages → Create → Pages → Connect to
 Git), no config file needed for a build this simple.
