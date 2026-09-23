@@ -14,9 +14,9 @@ export const projects: Project[] = [
   {
     name: "satisfactory-dash",
     description:
-      "A dashboard and backend for a live Satisfactory dedicated server: production rate, overflow, and power-outage monitoring. Built as an npm workspaces monorepo (Vite/React frontend, Express/TypeScript backend) with a documentation-grounded approach to avoid hallucinated API calls, full CI (lint/typecheck/test/build), and a module structure designed for future multi-agent ownership.",
+      "A dashboard and backend for a live Satisfactory dedicated server: production rate, overflow, and power-outage monitoring. Built as an npm workspaces monorepo (Vite/React frontend, Express/TypeScript backend) around a schema-first API contract: a shared package of Zod schemas, an endpoint map, and fixtures used by both sides. The backend has pino structured logging with per-request IDs and a uniform error envelope, including explicit codes for unknown routes and oversized or unsupported request bodies. Design decisions are recorded in 13 architecture decision records, and CI runs lint/typecheck/test/build, a PII-leak and npm audit check, CodeQL, and an automated fresh-eyes code review.",
     status: "in-progress",
-    stack: ["React", "TypeScript", "Express", "Vite", "Docker"],
+    stack: ["React", "TypeScript", "Express", "Vite", "Zod", "pino", "Docker"],
     repoUrl: "https://github.com/Sour-Dev-Home/satisfactory-dash",
   },
   {
