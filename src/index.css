@@ -305,9 +305,13 @@ main {
   font-size: 0.9rem;
 }
 
-.case-study-body .reasoning-label {
-  color: var(--text);
-  font-weight: 600;
+.case-study-body .tradeoff {
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  max-width: 68ch;
+  background: var(--bg-elevated);
+  border-radius: 6px;
 }
 
 .case-study-body .link-list {
