@@ -108,9 +108,7 @@ runtime-validated contract package.
   person can use the dashboard, closed to invited emails at first. Postgres runs locally on the
   game PC to start, no new network exposure and no added cost; multi-server config and the
   database foundation are already merged.
-- **A public demo, coming.** An accepted ADR adds an offline build at demo.satis-manager.com
-  that can never reach the real API, so the dashboard can be tried with no account and no live
-  game server. Not live yet — a demo link and a short walkthrough video will go here once it is.
+- **A walkthrough video** for the live demo below.
 - **Multiple users and AWS.** The planned path is a modular monolith now, then a few coarse
   services, with a small agent next to each game server pushing data outbound. That removes any
   need to reach into a user's network. AWS comes in only when managed hosting is needed.
@@ -118,6 +116,7 @@ runtime-validated contract package.
 ## Links
 
 <ul class="link-list">
+<li><a href="https://demo.satis-manager.com">Try the live demo</a></li>
 <li><a href="https://github.com/Sour-Dev-Home/satisfactory-dash">Repository</a></li>
 <li><a href="https://satis-manager.com">Live site</a></li>
 <li><a href="https://github.com/Sour-Dev-Home/satisfactory-dash/tree/main/docs-vault/wiki/decisions">Architecture decisions</a></li>
