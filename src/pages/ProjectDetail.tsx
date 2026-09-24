@@ -5,6 +5,7 @@ import { Footer } from "../components/Footer";
 import { StackList } from "../components/StackList";
 import { ProjectLinks } from "../components/ProjectLinks";
 import { Link } from "../router/Link";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 interface ProjectDetailProps {
   slug: string;
@@ -12,6 +13,12 @@ interface ProjectDetailProps {
 
 export function ProjectDetail({ slug }: ProjectDetailProps) {
   const project = projects.find((p) => p.slug === slug);
+  useDocumentMeta(
+    project
+      ? `${project.name} — Case Study | Leonardo Nunez`
+      : "Project not found | Leonardo Nunez",
+    project?.description,
+  );
 
   if (!project) {
     return (
