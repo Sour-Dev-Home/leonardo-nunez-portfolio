@@ -277,13 +277,62 @@ main {
 .case-study-body p,
 .case-study-body li {
   color: var(--text-muted);
+  max-width: 68ch;
 }
 
 .case-study-body img {
   max-width: 100%;
   height: auto;
+}
+
+.case-study-body .diagram-frame {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
+}
+
+.case-study-body .diagram-frame img {
+  display: block;
+  margin: 0;
+}
+
+.case-study-body .diagram-frame figcaption {
+  margin-top: 1rem;
+  max-width: 68ch;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.case-study-body .reasoning-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.case-study-body .link-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+}
+
+.case-study-body .link-list a {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.case-study-body .link-list a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  text-decoration: none;
 }
 
 .case-study-body details {
