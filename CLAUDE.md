@@ -13,9 +13,13 @@ this repo's own verified setup, since it's ahead of `satisfactory-dash` on most 
 
 ## Ground rules
 
-1. **Simple by design.** Single-page, plain client-side React (hooks, components) — no
-   router, no CMS, no backend. If a feature needs more than that, reconsider whether
-   it belongs on this site before adding complexity.
+1. **Simple by design.** Plain client-side React (hooks, components) — no CMS, no
+   backend. The one deliberate exception is a minimal hand-written router (`/` and
+   `/projects/:slug` only, no routing library) added for per-project case-study pages;
+   see `docs/superpowers/specs/2026-09-23-project-case-study-pages-design.md` for why.
+   Don't add route shapes beyond those two without the same level of justification —
+   if a feature needs more than that, reconsider whether it belongs on this site
+   before adding complexity.
 2. **Projects are data, not prose.** Every project shown lives in `src/data/projects.ts`
    as a `Project` entry. Never hand-edit project copy directly into JSX — add or update
    the data entry instead, so the same structure works whether a human or the
