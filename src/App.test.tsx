@@ -18,10 +18,11 @@ describe("App", () => {
     expect(repoLink).toHaveAttribute("href", expect.stringContaining("github.com"));
   });
 
-  it("renders the project detail page at a /projects/:slug path", () => {
+  it("renders the project detail page at a /projects/:slug path, with the real generated case-study body", () => {
     window.history.pushState(null, "", "/projects/satisfactory-dash");
     render(<App />);
     expect(screen.getByRole("heading", { level: 1, name: "satisfactory-dash" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "The problem" })).toBeInTheDocument();
     window.history.pushState(null, "", "/");
   });
 });

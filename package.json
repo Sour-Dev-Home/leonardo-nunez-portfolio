@@ -10,6 +10,7 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "lint": "oxlint",
+    "pretest": "node scripts/generate-case-studies.mjs",
     "test": "vitest run",
     "preview": "vite preview"
   },
