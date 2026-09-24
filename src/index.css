@@ -287,7 +287,8 @@ main {
   max-width: 68ch;
 }
 
-.case-study-body img {
+.case-study-body img,
+.case-study-body video {
   max-width: 100%;
   height: auto;
 }
@@ -303,6 +304,14 @@ main {
 
 .case-study-body .diagram-frame a {
   display: block;
+}
+
+.case-study-body .diagram-frame video {
+  display: block;
+  width: 100%;
+  margin: 0;
+  border-radius: 6px;
+  background: #000;
 }
 
 .case-study-body .diagram-frame img {

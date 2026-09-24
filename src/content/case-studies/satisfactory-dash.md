@@ -6,6 +6,23 @@ exposes factory and power data. Both are undocumented in the places that matter 
 conventions, what "0" means), and FRM speaks only plain HTTP. So the project had two problems:
 getting correct data out, and never exposing the game server itself to the internet.
 
+## See it running
+
+The [live demo](https://demo.satis-manager.com) runs the real dashboard against a made-up factory,
+with no sign-in and no connection to the real API. This is a one-minute tour of it.
+
+<figure class="diagram-frame">
+<video controls playsinline preload="none" poster="/demo/satisfactory-dash-walkthrough-poster.png" aria-describedby="demo-video-caption">
+<source src="/demo/satisfactory-dash-walkthrough.mp4" type="video/mp4">
+</video>
+<figcaption id="demo-video-caption">A 64-second screen recording of the demo. There is no audio.</figcaption>
+</figure>
+
+<details>
+<summary>Text description of this video</summary>
+<p>The recording starts on the demo's entry screen, which explains that the factory is made up and needs no sign-in, and clicks Enter demo. The Overview page shows all systems operational: a server with 3 of 4 players connected, two power circuits drawing 4,232.5 MW of 6,150 MW capacity, and 9 factory machines with 1 backed up. The Power tab shows each circuit's production, consumption, capacity, peak demand and battery state, with a chart of the last five minutes. The Factory tab lists every machine with its recipe and output rate, and marks a Rotor assembler as backed up. The Settings tab ticks the auto-pause option, and the page shows the change as pending until the server applies it. The tour ends back on the Overview page. A banner across the top of every screen says the data is not live.</p>
+</details>
+
 ## Architecture
 
 <figure class="diagram-frame">
@@ -108,7 +125,6 @@ runtime-validated contract package.
   person can use the dashboard, closed to invited emails at first. Postgres runs locally on the
   game PC to start, no new network exposure and no added cost; multi-server config and the
   database foundation are already merged.
-- **A walkthrough video** for the live demo below.
 - **Multiple users and AWS.** The planned path is a modular monolith now, then a few coarse
   services, with a small agent next to each game server pushing data outbound. That removes any
   need to reach into a user's network. AWS comes in only when managed hosting is needed.

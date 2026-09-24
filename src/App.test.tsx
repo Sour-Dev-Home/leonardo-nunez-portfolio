@@ -25,4 +25,15 @@ describe("App", () => {
     expect(screen.getByRole("heading", { level: 2, name: "The problem" })).toBeInTheDocument();
     window.history.pushState(null, "", "/");
   });
+
+  it("embeds the demo walkthrough video with controls, a poster and a text description", () => {
+    window.history.pushState(null, "", "/projects/satisfactory-dash");
+    const { container } = render(<App />);
+    const video = container.querySelector("video");
+    expect(video).toHaveAttribute("controls");
+    expect(video).toHaveAttribute("poster", "/demo/satisfactory-dash-walkthrough-poster.png");
+    expect(video?.querySelector("source")).toHaveAttribute("src", "/demo/satisfactory-dash-walkthrough.mp4");
+    expect(screen.getByText("Text description of this video")).toBeInTheDocument();
+    window.history.pushState(null, "", "/");
+  });
 });
