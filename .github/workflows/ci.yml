@@ -36,10 +36,13 @@ jobs:
 
       - name: Check for PII or hardcoded local paths
         env:
-          PII_PATTERNS: ${{ vars.PII_PATTERNS }}
+          PII_PATTERNS: ${{ secrets.PII_PATTERNS }}
         run: |
-          # Identifying patterns live in the PII_PATTERNS repository variable, not in
-          # this file, so this public workflow doesn't publish what it protects. See
+          # Identifying patterns live in the PII_PATTERNS repository SECRET, not in this
+          # file, so this public workflow doesn't publish what it protects. It must be a
+          # secret, not a variable: Actions prints a step's env: block unmasked at the top
+          # of the log, and only secrets are masked. Dependabot runs read a Dependabot
+          # secret of the same name. See
           # CLAUDE.md ground rule 3 for this repo's own PII exceptions. Only file:line
           # is ever printed below, never the matched content, so a real hit doesn't
           # get echoed into a public Actions log either. PII_PATTERNS isn't passed to
@@ -51,10 +54,12 @@ jobs:
           PII_HITS=""
           if [ -n "$PII_PATTERNS" ]; then
             PATTERN_FILE=$(mktemp)
-            printf '%s\n' "$PII_PATTERNS" > "$PATTERN_FILE"
+            # tr: CRLF would leave "\r" on every pattern so none match; sed: an empty
+            # line is an empty fixed string, which matches every line.
+            printf '%s\n' "$PII_PATTERNS" | tr -d '\r' | sed '/^[[:space:]]*$/d' > "$PATTERN_FILE"
             PII_HITS=$(echo "$FILES" | xargs -r grep -Hn -iF -f "$PATTERN_FILE" 2>/dev/null | cut -d: -f1,2 || true)
           else
-            echo "::warning::PII_PATTERNS variable is empty (expected on fork PRs) — skipping identifier check, only checking local paths."
+            echo "::warning::PII_PATTERNS secret is not available (expected on fork PRs) — skipping identifier check, only checking local paths."
           fi
 
           PATH_HITS=$(echo "$FILES" | xargs -r grep -Hn -E 'C:\\Users|C:/Users' | cut -d: -f1,2 || true)
