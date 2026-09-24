@@ -291,11 +291,26 @@ main {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 10px;
+  overflow-x: auto;
+}
+
+.case-study-body .diagram-frame a {
+  display: block;
 }
 
 .case-study-body .diagram-frame img {
   display: block;
   margin: 0;
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+
+.case-study-body .diagram-frame a:hover img {
+  opacity: 0.85;
+}
+
+.case-study-body .diagram-frame img.diagram-img-native {
+  max-width: none;
 }
 
 .case-study-body .diagram-frame figcaption {
