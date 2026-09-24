@@ -46,6 +46,13 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Inline links within flowing text need a non-color cue (WCAG 1.4.1); nav, card
+   and button-style links are already distinguished by position and shape. */
+p a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 h1,
 h2,
 h3 {
