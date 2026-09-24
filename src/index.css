@@ -255,3 +255,53 @@ main {
     font-size: 0.85rem;
   }
 }
+
+.case-study-back {
+  margin-bottom: 1rem;
+}
+
+.case-study h1 {
+  font-size: 2rem;
+  margin: 0 0 0.75rem;
+}
+
+.case-study-body {
+  margin-top: 1.5rem;
+}
+
+.case-study-body h2 {
+  font-size: 1.3rem;
+  margin: 2rem 0 0.75rem;
+}
+
+.case-study-body p,
+.case-study-body li {
+  color: var(--text-muted);
+}
+
+.case-study-body img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.case-study-body details {
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.case-study-body summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.project-card-compact {
+  padding: 1rem 1.5rem;
+}
+
+.project-card-compact .project-card-header h3 {
+  font-size: 1rem;
+}

@@ -18,10 +18,10 @@ describe("App", () => {
     expect(repoLink).toHaveAttribute("href", expect.stringContaining("github.com"));
   });
 
-  it("renders the project detail stub at a /projects/:slug path", () => {
+  it("renders the project detail page at a /projects/:slug path", () => {
     window.history.pushState(null, "", "/projects/satisfactory-dash");
     render(<App />);
-    expect(screen.getByText(/Case study: satisfactory-dash/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "satisfactory-dash" })).toBeInTheDocument();
     window.history.pushState(null, "", "/");
   });
 });
