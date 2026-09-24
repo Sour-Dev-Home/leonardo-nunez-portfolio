@@ -17,6 +17,7 @@ export function RouterProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const navigate = (to: string) => {
+    if (to === window.location.pathname) return;
     window.history.pushState(null, "", to);
     setPath(to);
   };

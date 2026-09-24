@@ -48,6 +48,17 @@ describe("RouterProvider / useRouter", () => {
     fireEvent.popState(window);
     expect(screen.getByTestId("path")).toHaveTextContent("/projects/satisfactory-dash");
   });
+
+  it("does not push a duplicate history entry when navigating to the current path", () => {
+    render(
+      <RouterProvider>
+        <Link to="/">Home</Link>
+      </RouterProvider>,
+    );
+    const lengthBefore = window.history.length;
+    fireEvent.click(screen.getByText("Home"), { button: 0 });
+    expect(window.history.length).toBe(lengthBefore);
+  });
 });
 
 describe("Link", () => {
