@@ -17,4 +17,11 @@ describe("App", () => {
     const repoLink = screen.getByRole("link", { name: /repo/i });
     expect(repoLink).toHaveAttribute("href", expect.stringContaining("github.com"));
   });
+
+  it("renders the project detail stub at a /projects/:slug path", () => {
+    window.history.pushState(null, "", "/projects/satisfactory-dash");
+    render(<App />);
+    expect(screen.getByText(/Case study: satisfactory-dash/i)).toBeInTheDocument();
+    window.history.pushState(null, "", "/");
+  });
 });
