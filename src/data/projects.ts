@@ -20,6 +20,7 @@ export const projects: Project[] = [
     status: "in-progress",
     stack: ["React", "TypeScript", "Express", "Vite", "Zod", "pino", "Docker"],
     repoUrl: "https://github.com/Sour-Dev-Home/satisfactory-dash",
+    liveUrl: "https://demo.satis-manager.com",
     slug: "satisfactory-dash",
   },
   {
