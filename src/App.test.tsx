@@ -14,7 +14,14 @@ describe("App", () => {
 
   it("lists at least one project with a working repo link", () => {
     render(<App />);
-    const repoLink = screen.getByRole("link", { name: /repo/i });
+    const repoLink = screen.getAllByRole("link", { name: /repo/i })[0];
     expect(repoLink).toHaveAttribute("href", expect.stringContaining("github.com"));
+  });
+
+  it("renders the project detail page at a /projects/:slug path", () => {
+    window.history.pushState(null, "", "/projects/satisfactory-dash");
+    render(<App />);
+    expect(screen.getByRole("heading", { level: 1, name: "satisfactory-dash" })).toBeInTheDocument();
+    window.history.pushState(null, "", "/");
   });
 });
