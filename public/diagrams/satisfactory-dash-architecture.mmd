@@ -1,8 +1,0 @@
-flowchart LR
-  B["Browser"] -->|HTTPS| W["satis-manager.com<br/>Cloudflare Worker (static SPA)"]
-  B -->|"HTTPS + session cookie"| T["api.satis-manager.com<br/>Cloudflare Tunnel"]
-  T -->|"outbound-only tunnel"| BE["Backend: Node + Express<br/>on the game PC, bound to 127.0.0.1"]
-  BE -->|"HTTPS (loopback)"| V["Game server HTTPS API"]
-  BE -->|"HTTP (loopback only)"| F["FRM mod API"]
-  S["packages/shared<br/>zod contract"] --- W
-  S --- BE

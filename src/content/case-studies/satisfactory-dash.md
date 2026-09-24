@@ -9,14 +9,32 @@ getting correct data out, and never exposing the game server itself to the inter
 ## Architecture
 
 <figure class="diagram-frame">
-<img src="/diagrams/satisfactory-dash-architecture.svg" alt="Architecture diagram: the browser reaches the Cloudflare Worker frontend over HTTPS; an outbound-only Cloudflare Tunnel carries HTTPS plus a session cookie to the Node/Express backend on the game PC, which talks to the game server and FRM mod only over loopback; frontend and backend share one zod-validated contract package.">
-<figcaption>Browser → Cloudflare Worker (static SPA) → outbound-only Tunnel → Express backend, loopback-only to the game server and FRM mod.</figcaption>
+<a href="/diagrams/satisfactory-dash-deployment.svg" target="_blank" rel="noreferrer">
+<img class="diagram-img-native" src="/diagrams/satisfactory-dash-deployment.svg" alt="C4 deployment diagram: Cloudflare hosts the web app as Workers static assets and fronts api.satis-manager.com with TLS and a WAF login rate limit. On the owner's gaming PC, cloudflared runs an outbound-only tunnel that forwards over loopback HTTP to the Node.js backend API, which reads the Satisfactory dedicated server's HTTPS API and the FRM mod's HTTP API, both on loopback.">
+</a>
+<figcaption>Deployment today, generated from the Structurizr model that CI validates on every change. Click to view full size.</figcaption>
 </figure>
 
 <details>
 <summary>Text description of this diagram</summary>
-<p>The browser reaches satis-manager.com over HTTPS, served by a Cloudflare Worker as static files. HTTPS plus a session cookie reaches api.satis-manager.com through an outbound-only Cloudflare Tunnel. That tunnel carries requests to the backend, a Node and Express server running on the same PC as the game server, bound to localhost. The backend talks to the game server's HTTPS API and the FRM mod's HTTP API, both over loopback only. A shared zod-validated contract package sits between the frontend and backend so both sides agree on the shape of every request and response.</p>
+<p>The browser reaches the web app, served as static assets from Cloudflare Workers, over HTTPS. The web app calls api.satis-manager.com, which terminates TLS and enforces a WAF login rate limit, then routes traffic through an outbound-only Cloudflare Tunnel to cloudflared, running on the owner's gaming PC. cloudflared forwards over loopback HTTP to the backend API (Node.js, Express, TypeScript), which authenticates every request and validates every response against the shared zod contract. The backend reads and writes the Satisfactory dedicated server's HTTPS API (port 7777, application token) to read server state and toggle auto-pause, and reads the Ficsit Remote Monitoring (FRM) mod's HTTP API (port 8080, loopback only) for factory, power, and building data.</p>
 </details>
+
+<figure class="diagram-frame">
+<a href="/diagrams/satisfactory-dash-backend-modules.svg" target="_blank" rel="noreferrer">
+<img src="/diagrams/satisfactory-dash-backend-modules.svg" alt="C4 component diagram of the backend modular monolith: the web app calls identity (sign-in and sessions), servers (server discovery), telemetry (status, power history, factory) and settings (auto-pause). Telemetry and settings resolve the requested server through servers and reach the game only through the gameserver module, the one component that calls the game and FRM APIs.">
+</a>
+<figcaption>Backend modules. CI checks these boundaries against the real imports. Click to view full size.</figcaption>
+</figure>
+
+<details>
+<summary>Text description of this diagram</summary>
+<p>The backend is a modular monolith of five components, and a CI test checks these dependency boundaries against the real imports. The web app signs in and out through identity, which manages sessions, a logout denylist, and login rate limits. It discovers available servers through servers, the server registry. It reads status, power history, and factory data through telemetry, and reads and toggles auto-pause through settings — both telemetry and settings first resolve the requested server through servers. Neither talks to the game directly: only gameserver calls the Satisfactory dedicated server's HTTPS API (port 7777) and the FRM mod's HTTP API (port 8080, loopback), through vanilla and FRM clients built on shared zod schemas.</p>
+</details>
+
+These diagrams aren't hand-drawn — they're rendered from a
+[C4 model](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/workspace.dsl)
+(Structurizr DSL) that CI validates on every change, with an ADR recording each decision.
 
 The frontend is a React single-page app served as static assets from Cloudflare. The backend runs
 on the same PC as the game server and talks to it only over loopback. It refuses to start if
