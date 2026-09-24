@@ -98,16 +98,22 @@ runtime-validated contract package.
 - **A leak check that proved itself.** CI scans every change for personal identifiers and local
   paths. The scan's patterns were later moved into a repository variable, so the public workflow
   no longer lists what it protects, and a hit reports only file and line.
-- **Decisions are recorded.** Nineteen architecture decision records document context,
+- **Decisions are recorded.** Twenty-eight architecture decision records document context,
   trade-offs and the specific trigger that would reopen each one.
 
 ## What's next
 
 - **A live factory map** with buildings at their in-game positions, which FRM already reports.
+- **Accounts, in progress.** An accepted ADR adds Postgres and Google sign-in so more than one
+  person can use the dashboard, closed to invited emails at first. Postgres runs locally on the
+  game PC to start, no new network exposure and no added cost; multi-server config and the
+  database foundation are already merged.
+- **A public demo, coming.** An accepted ADR adds an offline build at demo.satis-manager.com
+  that can never reach the real API, so the dashboard can be tried with no account and no live
+  game server. Not live yet — a demo link and a short walkthrough video will go here once it is.
 - **Multiple users and AWS.** The planned path is a modular monolith now, then a few coarse
   services, with a small agent next to each game server pushing data outbound. That removes any
-  need to reach into a user's network. Postgres and AWS come in only when a second user or
-  managed hosting requires them.
+  need to reach into a user's network. AWS comes in only when managed hosting is needed.
 
 ## Links
 
