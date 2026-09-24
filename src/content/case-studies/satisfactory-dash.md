@@ -31,32 +31,32 @@ runtime-validated contract package.
 - **Server-scoped routes before a second server exists**. Every data route is
   `/api/servers/:serverId/...`, and a single server is a "registry of one". Adding a second
   server becomes a configuration change instead of a rewrite of every URL the frontend knows.
-  <span class="tradeoff">One extra indirection and an id in every request, today.</span>
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>One extra indirection and an id in every request, today.</span>
 - **A zod contract as the single source of truth**. Types are inferred from runtime
   schemas in `packages/shared`. The frontend parses every response, and the backend validates every
   response it sends and transmits only the parsed output. Drift fails in CI or loudly at
   runtime, never silently in the UI, and an accidental internal field can't leak.
-  <span class="tradeoff">A little CPU per response.</span>
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>A little CPU per response.</span>
 - **A snapshot envelope with staleness**. Every data response is
   `{ serverId, observedAt, stale, data }`, and the backend decides `stale`. Moving from live
   calls to a background poller later needs no frontend change.
-  <span class="tradeoff">A wrapper around data that is always fresh today.</span>
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>A wrapper around data that is always fresh today.</span>
 - **Units verified against the live game**. Units and sign conventions were checked
   against a populated save and the in-game UI before being written into field names
   (`productionMW`, `batteryCapacityMWh`). The captures also exposed a real mapping bug: the
   "backed up" detector required a machine to still be producing, so it never fired — 0 of 71
   backed-up machines were detected on the captured save before the fix.
-  <span class="tradeoff">Renames were done early, while there were no consumers yet.</span>
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>Renames were done early, while there were no consumers yet.</span>
 - **Login before exposure**. Every API route except health needs a signed, httpOnly
   session cookie. Login is rate-limited per client, and cross-site mutations are refused.
   The repository and frontend are public; the API must not be.
-  <span class="tradeoff">Stateless 12-hour sessions, where revocation means rotating the signing secret,
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>Stateless 12-hour sessions, where revocation means rotating the signing secret,
   accepted for a single operator.</span>
 - **No database and no cache until a trigger fires**. Requests go straight
   to the game server. That was measured before deciding against caching: about 25 ms for the
   factory call, well under the 463 KB raw upstream payload it's built from. Postgres is
   pre-decided for when history or user accounts are needed.
-  <span class="tradeoff">Game-server load grows with viewers until then.</span>
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>Game-server load grows with viewers until then.</span>
 
 ## How it's built
 

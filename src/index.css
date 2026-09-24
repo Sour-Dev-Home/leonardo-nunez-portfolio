@@ -314,6 +314,14 @@ main {
   border-radius: 6px;
 }
 
+.case-study-body .tradeoff-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 .case-study-body .link-list {
   display: flex;
   flex-wrap: wrap;
