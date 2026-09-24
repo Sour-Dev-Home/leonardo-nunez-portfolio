@@ -10,7 +10,7 @@ getting correct data out, and never exposing the game server itself to the inter
 
 <figure class="diagram-frame">
 <a href="/diagrams/satisfactory-dash-deployment.svg" target="_blank" rel="noreferrer">
-<img class="diagram-img-native" src="/diagrams/satisfactory-dash-deployment.svg" alt="C4 deployment diagram: Cloudflare hosts the web app as Workers static assets and fronts api.satis-manager.com with TLS and a WAF login rate limit. On the owner's gaming PC, cloudflared runs an outbound-only tunnel that forwards over loopback HTTP to the Node.js backend API, which reads the Satisfactory dedicated server's HTTPS API and the FRM mod's HTTP API, both on loopback.">
+<img src="/diagrams/satisfactory-dash-deployment.svg" alt="C4 deployment diagram: Cloudflare hosts the web app as Workers static assets and fronts api.satis-manager.com with TLS and a WAF login rate limit. On the owner's gaming PC, cloudflared runs an outbound-only tunnel that forwards over loopback HTTP to the Node.js backend API, which reads the Satisfactory dedicated server's HTTPS API and the FRM mod's HTTP API, both on loopback.">
 </a>
 <figcaption>Deployment today, generated from the Structurizr model that CI validates on every change. Click to view full size.</figcaption>
 </figure>
