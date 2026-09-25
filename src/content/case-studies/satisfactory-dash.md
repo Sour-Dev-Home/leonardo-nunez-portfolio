@@ -27,14 +27,14 @@ with no sign-in and no connection to the real API. This is a one-minute tour of 
 
 <figure class="diagram-frame">
 <a href="/diagrams/satisfactory-dash-deployment.svg" target="_blank" rel="noreferrer">
-<img src="/diagrams/satisfactory-dash-deployment.svg" alt="C4 deployment diagram: Cloudflare hosts the web app as Workers static assets and fronts api.satis-manager.com with TLS and a WAF login rate limit. On the owner's gaming PC, cloudflared runs an outbound-only tunnel that forwards over loopback HTTP to the Node.js backend API, which reads the Satisfactory dedicated server's HTTPS API and the FRM mod's HTTP API, both on loopback.">
+<img src="/diagrams/satisfactory-dash-deployment.svg" alt="C4 deployment diagram: Cloudflare hosts the web app as Workers static assets and fronts api.satis-manager.com with TLS and a WAF login rate limit. On the owner's gaming PC, cloudflared runs an outbound-only tunnel that forwards over loopback HTTP to the Node.js backend API, which reads the Satisfactory dedicated server's HTTPS API and the FRM mod's HTTP API, both on loopback. The backend stores its data in a PostgreSQL 18 service on the same PC. A nightly backup task dumps the database, encrypts it, and uploads it to a versioned S3 bucket in an AWS node used for backups only.">
 </a>
 <figcaption>Deployment, generated from the Structurizr model that CI validates on every change. Click to view full size.</figcaption>
 </figure>
 
 <details>
 <summary>Text description of this diagram</summary>
-<p>The browser reaches the web app, served as static assets from Cloudflare Workers, over HTTPS. The web app calls api.satis-manager.com, which terminates TLS and enforces a WAF login rate limit, then routes traffic through an outbound-only Cloudflare Tunnel to cloudflared, running on the owner's gaming PC. cloudflared forwards over loopback HTTP to the backend API (Node.js, Express, TypeScript), which authenticates every request and validates every response against the shared zod contract. The backend reads and writes the Satisfactory dedicated server's HTTPS API (port 7777, application token) to read server state and toggle auto-pause, and reads the Ficsit Remote Monitoring (FRM) mod's HTTP API (port 8080, loopback only) for factory, power, and building data.</p>
+<p>The browser reaches the web app, served as static assets from Cloudflare Workers, over HTTPS. The web app calls api.satis-manager.com, which terminates TLS and enforces a WAF login rate limit, then routes traffic through an outbound-only Cloudflare Tunnel to cloudflared, running on the owner's gaming PC. cloudflared forwards over loopback HTTP to the backend API (Node.js, Express, TypeScript), which authenticates every request and validates every response against the shared zod contract. The backend reads and writes the Satisfactory dedicated server's HTTPS API (port 7777, application token) to read server state and toggle auto-pause, and reads the Ficsit Remote Monitoring (FRM) mod's HTTP API (port 8080, loopback only) for factory, power, and building data. The backend keeps users, sessions, servers, memberships and audit events in the Database container, a PostgreSQL 18 service on the same PC. A nightly scheduled task on that PC runs pg_dump, encrypts the dump with age, and uploads it to an S3 bucket in the AWS node, which is used for backups only; the bucket is versioned and expires copies after 30 days plus 7 days of version retention.</p>
 </details>
 
 <figure class="diagram-frame">
@@ -51,9 +51,7 @@ with no sign-in and no connection to the real API. This is a one-minute tour of 
 
 These diagrams aren't hand-drawn — they're rendered from a
 [C4 model](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/workspace.dsl)
-(Structurizr DSL) that CI validates on every change, with an ADR recording each decision. The
-model still lists the database as planned, so the deployment view above doesn't show it yet,
-although PostgreSQL 18 now runs on the game PC beside the backend.
+(Structurizr DSL) that CI validates on every change, with an ADR recording each decision.
 
 The frontend is a React single-page app served as static assets from Cloudflare. The backend runs
 on the same PC as the game server and talks to it only over loopback. It refuses to start if
