@@ -29,7 +29,7 @@ with no sign-in and no connection to the real API. This is a one-minute tour of 
 <a href="/diagrams/satisfactory-dash-deployment.svg" target="_blank" rel="noreferrer">
 <img src="/diagrams/satisfactory-dash-deployment.svg" alt="C4 deployment diagram: Cloudflare hosts the web app as Workers static assets and fronts api.satis-manager.com with TLS and a WAF login rate limit. On the owner's gaming PC, cloudflared runs an outbound-only tunnel that forwards over loopback HTTP to the Node.js backend API, which reads the Satisfactory dedicated server's HTTPS API and the FRM mod's HTTP API, both on loopback.">
 </a>
-<figcaption>Deployment today, generated from the Structurizr model that CI validates on every change. Click to view full size.</figcaption>
+<figcaption>Deployment, generated from the Structurizr model that CI validates on every change. Click to view full size.</figcaption>
 </figure>
 
 <details>
@@ -51,7 +51,9 @@ with no sign-in and no connection to the real API. This is a one-minute tour of 
 
 These diagrams aren't hand-drawn — they're rendered from a
 [C4 model](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/workspace.dsl)
-(Structurizr DSL) that CI validates on every change, with an ADR recording each decision.
+(Structurizr DSL) that CI validates on every change, with an ADR recording each decision. The
+model still lists the database as planned, so the deployment view above doesn't show it yet,
+although PostgreSQL 18 now runs on the game PC beside the backend.
 
 The frontend is a React single-page app served as static assets from Cloudflare. The backend runs
 on the same PC as the game server and talks to it only over loopback. It refuses to start if
@@ -82,16 +84,42 @@ runtime-validated contract package.
   "backed up" detector required a machine to still be producing, so it never fired — 0 of 71
   backed-up machines were detected on the captured save before the fix.
   <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>Renames were done early, while there were no consumers yet.</span>
-- **Login before exposure**. Every API route except health needs a signed, httpOnly
-  session cookie. Login is rate-limited per client, and cross-site mutations are refused.
-  The repository and frontend are public; the API must not be.
-  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>Stateless 12-hour sessions, where revocation means rotating the signing secret,
-  accepted for a single operator.</span>
+- **Login before exposure**. Every API route except health needs an httpOnly session cookie.
+  Login is rate-limited per client, and cross-site mutations are refused. The repository and
+  frontend are public; the API must not be. Sessions started as stateless signed tokens and are now
+  server-side in Postgres: the cookie holds a random 32-byte id, the table stores only its SHA-256,
+  every login gets a new id, and a session can be revoked for real.
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>Every authenticated request needs a database lookup, so a database outage answers 503, never 401: an outage must not look like being signed out.</span>
 - **No database and no cache until a trigger fires**. Requests go straight
   to the game server. That was measured before deciding against caching: about 25 ms for the
-  factory call, well under the 463 KB raw upstream payload it's built from. Postgres is
-  pre-decided for when history or user accounts are needed.
+  factory call, well under the 463 KB raw upstream payload it's built from. Postgres was
+  pre-decided for when history or user accounts were needed, and accounts have since brought it in.
   <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>Game-server load grows with viewers until then.</span>
+- **PostgreSQL 18 with hand-written SQL and least-privilege roles**. The database runs on the
+  game PC beside the backend. SQL is hand-written and parameterized, every row set is parsed by a
+  zod schema, and correctness lives in single statements and constraints: a partial unique index
+  allows one owner per server, and a guarded `DELETE ... RETURNING` makes a login attempt
+  single-use. Migrations are forward-only (node-pg-migrate) and run as an explicit step, never at
+  startup. A migrator role owns the schema, the app role gets only the reads and writes it needs,
+  and a read-only role exists for backups. Database tests run against a real Postgres in CI.
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>No query builder means no compile-time column checks: a mistyped column fails the integration tests instead. The ADR names the trigger for revisiting it, the first query that needs runtime composition.</span>
+- **An audit trail the app cannot rewrite**. Sign-ins, sign-outs and membership changes write audit
+  rows that carry ids, never emails or tokens. The app role can insert rows but not update, delete
+  or truncate them, and it cannot set the timestamp, so no row can be back-dated (and purged
+  early) or future-dated (and never purged). The one-year retention is enforced by a narrow
+  `SECURITY DEFINER` function that deletes only older events and leaves a count-only trace row.
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>A `SECURITY DEFINER` function runs with its owner's rights, so it has to stay narrow: a pinned search path, schema-qualified names, and EXECUTE granted to the app role only.</span>
+- **Sign-in with Google, keyed on the account, not the email**. The OpenID Connect flow uses
+  `openid-client` and checks state, nonce and PKCE. An account is found by Google's subject id,
+  never by email, and sign-up is closed: an account that isn't already invited is refused and
+  nothing about it is stored. Failures redirect to the login screen with a fixed error code, never
+  a JSON body, and the one-time callback parameters are kept out of the request log. It was
+  security-reviewed, and the review's low-severity findings were fixed.
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>It is implemented but not open to the public: the Google app stays in testing until the owner's go-live gate passes.</span>
+- **Player names, and nothing else**. The Players card shows who is online from the game's own
+  monitoring data. The raw schema declares only a name and an online flag, so ids, locations,
+  health, speed and inventory are dropped at the boundary before the rest of the code sees them,
+  and the route is limited to members of that server. The privacy page has a row for it.
 
 ## How it's built
 
@@ -115,19 +143,37 @@ runtime-validated contract package.
 - **A leak check that proved itself.** CI scans every change for personal identifiers and local
   paths. The scan's patterns were later moved into a repository variable, so the public workflow
   no longer lists what it protects, and a hit reports only file and line.
-- **Decisions are recorded.** Twenty-eight architecture decision records document context,
+- **Encrypted backups, off the machine.** A nightly job runs `pg_dump`, encrypts the dump with
+  `age` to a public key (the private key stays offline, so neither the PC nor a leaked AWS key
+  can read old backups), and uploads it to a versioned S3 bucket in the owner's own AWS account
+  through a put-only IAM identity that can't read, list or delete. A lifecycle rule expires copies
+  after 30 days (up to 37 with versioning), a Better Stack heartbeat alerts when a night is
+  missed, and a retry wrapper handles a dropped connection. This is implemented and documented,
+  with a restore-rehearsal procedure; a passed rehearsal is a required check before Google
+  sign-in goes live.
+- **A root-cause hunt, written down.** After a restart, the backend's first database connects to
+  `127.0.0.1` failed with `ETIMEDOUT` and never reached Postgres. The first hypothesis, Windows
+  Defender, was tested and excluded. A kernel TCP/IP trace (`netsh trace`) showed the server
+  sending the SYN-ACK on loopback and the client never receiving it. Node on Windows doesn't
+  retransmit a loopback SYN, so one lost packet became a timeout at about 310 ms. The loopback
+  filter of Npcap, the packet-capture driver that ships with Wireshark, was dropping it: 34 of 40
+  connects failed with it running and 40 of 40 succeeded with its service stopped. Setting the
+  service to manual start fixed it (20 of 20 afterwards), and a startup-ordering change stays as
+  defence in depth.
+- **Decisions are recorded.** Twenty-nine architecture decision records document context,
   trade-offs and the specific trigger that would reopen each one.
 
 ## What's next
 
 - **A live factory map** with buildings at their in-game positions, which FRM already reports.
-- **Accounts, in progress.** An accepted ADR adds Postgres and Google sign-in so more than one
-  person can use the dashboard, closed to invited emails at first. Postgres runs locally on the
-  game PC to start, no new network exposure and no added cost; multi-server config and the
-  database foundation are already merged.
+- **Opening sign-in to more people.** Google sign-in is implemented and reviewed but not yet
+  public. Before it goes live the owner tests it end to end, revoke-all is tested, and a backup
+  restore is rehearsed. Sign-up then opens to invited emails only, not to anyone with a Google
+  account.
 - **Multiple users and AWS.** The planned path is a modular monolith now, then a few coarse
   services, with a small agent next to each game server pushing data outbound. That removes any
-  need to reach into a user's network. AWS comes in only when managed hosting is needed.
+  need to reach into a user's network. The API and database move to AWS only when managed hosting
+  is needed; the backup upload to S3 is the only AWS piece so far.
 
 ## Links
 
