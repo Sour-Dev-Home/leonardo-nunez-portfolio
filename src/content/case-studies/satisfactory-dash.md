@@ -148,9 +148,10 @@ runtime-validated contract package.
   can read old backups), and uploads it to a versioned S3 bucket in the owner's own AWS account
   through a put-only IAM identity that can't read, list or delete. A lifecycle rule expires copies
   after 30 days (up to 37 with versioning), a Better Stack heartbeat alerts when a night is
-  missed, and a retry wrapper handles a dropped connection. This is implemented and documented,
-  with a restore-rehearsal procedure; a passed rehearsal is a required check before Google
-  sign-in goes live.
+  missed, and a retry wrapper handles a dropped connection. It is proven end to end: the first
+  real nightly run succeeded, and a restore rehearsal passed. The newest S3 object was decrypted
+  with the offline key and restored into a scratch database, and the row counts matched the live
+  database (the one audit event that differed was newer than the dump).
 - **A root-cause hunt, written down.** After a restart, the backend's first database connects to
   `127.0.0.1` failed with `ETIMEDOUT` and never reached Postgres. The first hypothesis, Windows
   Defender, was tested and excluded. A kernel TCP/IP trace (`netsh trace`) showed the server
@@ -167,8 +168,8 @@ runtime-validated contract package.
 
 - **A live factory map** with buildings at their in-game positions, which FRM already reports.
 - **Opening sign-in to more people.** Google sign-in is implemented and reviewed but not yet
-  public. Before it goes live the owner tests it end to end, revoke-all is tested, and a backup
-  restore is rehearsed. Sign-up then opens to invited emails only, not to anyone with a Google
+  public. Before it goes live the owner tests it end to end and revoke-all is tested; the backup
+  restore rehearsal has already passed. Sign-up then opens to invited emails only, not to anyone with a Google
   account.
 - **Multiple users and AWS.** The planned path is a modular monolith now, then a few coarse
   services, with a small agent next to each game server pushing data outbound. That removes any
