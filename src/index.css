@@ -6,10 +6,33 @@
   --border: #e7e5e4;
   --accent: #0d9488;
   --accent-contrast: #ffffff;
+  --media-bg: #000000;
+  --shadow-color: rgb(28 28 26 / 0.12);
   --font-sans:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
+
+  /* Layout */
   --max-width: 880px;
+  --gutter: 1.5rem;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+
+  /* Motion: change these to retune every transition on the site. */
+  --duration-fast: 150ms;
+  --duration: 250ms;
+  --duration-slow: 500ms;
+  --ease: ease-in-out;
+  --transition: var(--duration) var(--ease);
+  --transition-fast: var(--duration-fast) var(--ease);
+  --lift: -2px;
+
+  /* Derived from the palette, so they follow the light and dark themes. */
+  --accent-border: color-mix(in srgb, var(--accent) 55%, var(--border));
+  --shadow: 0 6px 18px var(--shadow-color);
+  --focus-ring: 2px solid var(--accent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,6 +44,17 @@
     --border: #2e2e33;
     --accent: #2dd4bf;
     --accent-contrast: #0b1120;
+    --shadow-color: rgb(0 0 0 / 0.45);
+  }
+}
+
+/* No motion for people who ask for less of it. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration: 0ms;
+    --duration-slow: 0ms;
+    --lift: 0px;
   }
 }
 
@@ -40,10 +74,26 @@ body {
 a {
   color: var(--accent);
   text-decoration: none;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 a:hover {
   text-decoration: underline;
+}
+
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 
 /* Inline links within flowing text need a non-color cue (WCAG 1.4.1); nav, card
@@ -67,7 +117,7 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
+  padding: 1rem var(--gutter);
   background: color-mix(in srgb, var(--bg) 85%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
@@ -89,10 +139,16 @@ h3 {
   font-size: 0.95rem;
 }
 
+.site-header nav a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 main {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 var(--gutter);
+  animation: fade-in var(--duration-slow) var(--ease) both;
 }
 
 .hero {
@@ -119,22 +175,39 @@ main {
 .button {
   display: inline-block;
   padding: 0.65rem 1.25rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: var(--accent);
   color: var(--accent-contrast);
   font-weight: 600;
   text-decoration: none;
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition);
 }
 
 .button:hover {
-  opacity: 0.9;
+  transform: translateY(var(--lift));
+  box-shadow: var(--shadow);
   text-decoration: none;
+}
+
+.button:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .button-secondary {
   background: transparent;
   color: var(--text);
   border: 1px solid var(--border);
+}
+
+.button-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .section {
@@ -183,8 +256,19 @@ main {
 .project-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  padding: var(--gutter);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    border-color var(--transition);
+}
+
+.project-card:hover,
+.project-card:focus-within {
+  transform: translateY(var(--lift));
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow);
 }
 
 .project-card-header {
@@ -203,7 +287,7 @@ main {
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.15rem 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--accent);
 }
@@ -225,8 +309,16 @@ main {
   font-size: 0.85rem;
   color: var(--text-muted);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 0.15rem 0.5rem;
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.stack-list li:hover {
+  border-color: var(--accent-border);
+  color: var(--text);
 }
 
 .project-links {
@@ -247,7 +339,7 @@ main {
 
 .site-footer {
   border-top: 1px solid var(--border);
-  padding: 2rem 1.5rem;
+  padding: 2rem var(--gutter);
   text-align: center;
   color: var(--text-muted);
   font-size: 0.9rem;
@@ -298,8 +390,16 @@ main {
   padding: 1.5rem;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow-x: auto;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.case-study-body .diagram-frame:hover {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow);
 }
 
 .case-study-body .diagram-frame a {
@@ -310,15 +410,15 @@ main {
   display: block;
   width: 100%;
   margin: 0;
-  border-radius: 6px;
-  background: #000;
+  border-radius: var(--radius-md);
+  background: var(--media-bg);
 }
 
 .case-study-body .diagram-frame img {
   display: block;
   margin: 0;
   opacity: 1;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition);
 }
 
 .case-study-body .diagram-frame a:hover img {
@@ -338,7 +438,7 @@ main {
   padding: 0.5rem 0.75rem;
   max-width: 68ch;
   background: var(--bg-elevated);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 .case-study-body .tradeoff-label {
@@ -362,28 +462,44 @@ main {
   display: inline-block;
   padding: 0.35rem 0.85rem;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--text);
   font-weight: 600;
   font-size: 0.9rem;
+  transition:
+    transform var(--transition),
+    border-color var(--transition),
+    color var(--transition);
 }
 
 .case-study-body .link-list a:hover {
   border-color: var(--accent);
   color: var(--accent);
   text-decoration: none;
+  transform: translateY(var(--lift));
 }
 
 .case-study-body details {
   margin: 0.75rem 0 1.5rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.75rem 1rem;
+  transition: border-color var(--transition);
+}
+
+.case-study-body details:hover,
+.case-study-body details[open] {
+  border-color: var(--accent-border);
 }
 
 .case-study-body summary {
   cursor: pointer;
   font-weight: 600;
+  transition: color var(--transition-fast);
+}
+
+.case-study-body summary:hover {
+  color: var(--accent);
 }
 
 .project-card-compact {
