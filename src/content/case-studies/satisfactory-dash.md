@@ -117,7 +117,25 @@ runtime-validated contract package.
 - **Player names, and nothing else**. The Players card shows who is online from the game's own
   monitoring data. The raw schema declares only a name and an online flag, so ids, locations,
   health, speed and inventory are dropped at the boundary before the rest of the code sees them,
-  and the route is limited to members of that server. The privacy page has a row for it.
+  and the route is limited to members of that server. The privacy page has a row for it. The card
+  shows all 12 player slots, beside a Health card that shows the server's tick.
+- **Managing several servers, with the credentials encrypted and the network path guarded**.
+  Servers now live in Postgres instead of a config file. Each server's API and FRM tokens are
+  sealed with AES-256-GCM, a random nonce per value and a stored key id so the key can be rotated.
+  The API never returns them, only "set" and the last four characters, and they are never logged.
+  Only the operator can add, edit or remove a server. Because the backend now connects to
+  addresses someone typed in, it is an SSRF surface, so every address a hostname resolves to must
+  be allowed, the client never follows a redirect (which would carry the token to wherever it
+  points), and non-loopback (LAN) addresses are refused in code until certificate pinning exists.
+  A combined security review of the whole phase ran before it shipped and led to two fixes.
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>Refusing LAN addresses until pinning exists means a server on another machine in the house can't be added yet, and other people's servers wait for the edge agent instead of the backend calling them.</span>
+- **Production history in SQL, with rollups and retention**. The backend records power and
+  per-item production into Postgres. Raw samples are kept for 48 hours, then folded into
+  one-minute rollups (kept 30 days) and one-hour rollups (kept a year) by an idempotent
+  `INSERT ... ON CONFLICT DO UPDATE` job, with retention as batched deletes. Nothing is recorded
+  while the game is paused, because the monitoring mod returns frozen values then. A history API
+  picks the resolution from the range asked for.
+  <span class="tradeoff"><span class="tradeoff-label">Trade-off</span>One server produces a few hundred thousand raw rows a day, so the short raw window and rollups keep the database small at the cost of fine detail beyond two days.</span>
 
 ## How it's built
 
@@ -141,6 +159,13 @@ runtime-validated contract package.
 - **A leak check that proved itself.** CI scans every change for personal identifiers and local
   paths. The scan's patterns were later moved into a repository variable, so the public workflow
   no longer lists what it protects, and a hit reports only file and line.
+- **A merge queue with a review gate that fails closed.** Merges to `main` go through a GitHub
+  merge queue, and a custom workflow only lets a change through if an independent fresh-eyes
+  review has passed on that exact commit; anything it can't identify is refused. Its first real
+  run was dropped because the gate itself misread the queue's full branch ref, so the fix parses
+  it strictly and keeps failing closed on anything else, with tests using the real value. Each PR
+  also adds its own log fragment, enforced in CI, which ended merge conflicts in the shared log.
+  Work is tracked on a GitHub Projects board against a written roadmap with measurable targets.
 - **Encrypted backups, off the machine.** A nightly job runs `pg_dump`, encrypts the dump with
   `age` to a public key (the private key stays offline, so neither the PC nor a leaked AWS key
   can read old backups), and uploads it to a versioned S3 bucket in the owner's own AWS account
@@ -159,11 +184,12 @@ runtime-validated contract package.
   connects failed with it running and 40 of 40 succeeded with its service stopped. Setting the
   service to manual start fixed it (20 of 20 afterwards), and a startup-ordering change stays as
   defence in depth.
-- **Decisions are recorded.** Twenty-nine architecture decision records document context,
+- **Decisions are recorded.** Thirty-one architecture decision records document context,
   trade-offs and the specific trigger that would reopen each one.
 
 ## What's next
 
+- **Alerts to Discord**, built on the recorded history, are in progress.
 - **A live factory map** with buildings at their in-game positions, which FRM already reports.
 - **Opening sign-in to more people.** Google sign-in is implemented and reviewed but not yet
   public. Before it goes live the owner tests it end to end and revoke-all is tested; the backup
