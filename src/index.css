@@ -15,6 +15,7 @@
   /* Layout */
   --max-width: 880px;
   --gutter: 1.5rem;
+  --header-padding: 1rem;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 10px;
@@ -28,11 +29,13 @@
   --transition: var(--duration) var(--ease);
   --transition-fast: var(--duration-fast) var(--ease);
   --lift: -2px;
+  --fade-distance: 8px;
 
   /* Derived from the palette, so they follow the light and dark themes. */
   --accent-border: color-mix(in srgb, var(--accent) 55%, var(--border));
   --shadow: 0 6px 18px var(--shadow-color);
   --focus-ring: 2px solid var(--accent);
+  --focus-offset: 2px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -86,13 +89,13 @@ a:hover {
 
 :focus-visible {
   outline: var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: var(--focus-offset);
 }
 
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(var(--fade-distance));
   }
 }
 
@@ -117,7 +120,7 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem var(--gutter);
+  padding: var(--header-padding) var(--gutter);
   background: color-mix(in srgb, var(--bg) 85%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
