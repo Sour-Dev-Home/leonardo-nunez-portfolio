@@ -26,7 +26,7 @@ The [live demo](https://demo.satis-manager.com) runs the real dashboard against 
 with no sign-in and no connection to the real API. This is a one-minute tour of it.
 
 <figure class="diagram-frame">
-<video controls playsinline preload="none" poster="/demo/satisfactory-dash-walkthrough-poster.png" aria-describedby="demo-video-caption">
+<video width="1920" height="1080" style="aspect-ratio: 1920 / 1080" controls playsinline preload="none" poster="/demo/satisfactory-dash-walkthrough-poster.png" aria-describedby="demo-video-caption">
 <source src="/demo/satisfactory-dash-walkthrough.mp4" type="video/mp4">
 </video>
 <figcaption id="demo-video-caption">A 64-second screen recording of the demo. There is no audio.</figcaption>
@@ -41,7 +41,7 @@ with no sign-in and no connection to the real API. This is a one-minute tour of 
 
 <figure class="diagram-frame">
 <a href="/diagrams/satisfactory-dash-deployment.svg" target="_blank" rel="noreferrer">
-<img src="/diagrams/satisfactory-dash-deployment.svg" alt="C4 deployment diagram: Cloudflare hosts the web app as Workers static assets and fronts api.satis-manager.com with TLS and a WAF login rate limit. On the owner's gaming PC, cloudflared runs an outbound-only tunnel that forwards over loopback HTTP to the Node.js backend API, which reads the Satisfactory dedicated server's HTTPS API and the FRM mod's HTTP API, both on loopback. The backend stores its data in a PostgreSQL 18 service on the same PC. A nightly backup task dumps the database, encrypts it, and uploads it to a versioned S3 bucket in an AWS node used for backups only.">
+<img src="/diagrams/satisfactory-dash-deployment.svg" width="5070" height="2454" alt="C4 deployment diagram: Cloudflare hosts the web app as Workers static assets and fronts api.satis-manager.com with TLS and a WAF login rate limit. On the owner's gaming PC, cloudflared runs an outbound-only tunnel that forwards over loopback HTTP to the Node.js backend API, which reads the Satisfactory dedicated server's HTTPS API and the FRM mod's HTTP API, both on loopback. The backend stores its data in a PostgreSQL 18 service on the same PC. A nightly backup task dumps the database, encrypts it, and uploads it to a versioned S3 bucket in an AWS node used for backups only.">
 </a>
 <figcaption>Deployment, generated from the Structurizr model that CI validates on every change. Click to view full size.</figcaption>
 </figure>
@@ -53,7 +53,7 @@ with no sign-in and no connection to the real API. This is a one-minute tour of 
 
 <figure class="diagram-frame">
 <a href="/diagrams/satisfactory-dash-backend-modules.svg" target="_blank" rel="noreferrer">
-<img src="/diagrams/satisfactory-dash-backend-modules.svg" alt="C4 component diagram of the backend modular monolith: the web app calls identity (sign-in and sessions), servers (server discovery), telemetry (status, power history, factory) and settings (auto-pause). Telemetry and settings resolve the requested server through servers and reach the game only through the gameserver module, the one component that calls the game and FRM APIs.">
+<img src="/diagrams/satisfactory-dash-backend-modules.svg" width="2663" height="2417" alt="C4 component diagram of the backend modular monolith: the web app calls identity (sign-in and sessions), servers (server discovery), telemetry (status, power history, factory) and settings (auto-pause). Telemetry and settings resolve the requested server through servers and reach the game only through the gameserver module, the one component that calls the game and FRM APIs.">
 </a>
 <figcaption>Backend modules. CI checks these boundaries against the real imports. Click to view full size.</figcaption>
 </figure>

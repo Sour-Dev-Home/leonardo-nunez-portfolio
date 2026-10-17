@@ -16,7 +16,9 @@ export default defineConfig({
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   // 127.0.0.1, not localhost: "localhost" can resolve to IPv6 on one side and
   // IPv4 on the other, and the readiness check then never connects.
-  use: { baseURL: "http://127.0.0.1:4321" },
+  // A failed test keeps a trace (frame-by-frame timeline: npx playwright
+  // show-trace) and a video, which is how a brief glitch during load is diagnosed.
+  use: { baseURL: "http://127.0.0.1:4321", trace: "retain-on-failure", video: "retain-on-failure" },
   projects: viewports.map(({ name, width, height }) => ({
     name,
     use: { browserName: "chromium", viewport: { width, height } },
