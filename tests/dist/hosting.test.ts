@@ -22,4 +22,9 @@ describe("Cloudflare Worker config", () => {
       html_handling: "drop-trailing-slash",
     });
   });
+
+  it("allows per-PR previews (Workers Builds runs `wrangler preview` on non-production branches)", () => {
+    const config = JSON.parse(readFileSync(path, "utf-8"));
+    expect(config.previews).toEqual({});
+  });
 });
