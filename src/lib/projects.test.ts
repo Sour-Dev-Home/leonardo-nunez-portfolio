@@ -20,8 +20,8 @@ describe("projectSchema", () => {
   it("requires a summary short enough for search and link previews", () => {
     const { summary: _omitted, ...withoutSummary } = valid;
     expect(() => projectSchema.parse(withoutSummary)).toThrow();
-    expect(() => projectSchema.parse({ ...valid, summary: "x".repeat(161) })).toThrow();
-    expect(projectSchema.parse({ ...valid, summary: "x".repeat(160) }).summary).toHaveLength(160);
+    expect(() => projectSchema.parse({ ...valid, summary: "x".repeat(126) })).toThrow();
+    expect(projectSchema.parse({ ...valid, summary: "x".repeat(125) }).summary).toHaveLength(125);
   });
 
   it("accepts a minimal project and defaults world to false", () => {

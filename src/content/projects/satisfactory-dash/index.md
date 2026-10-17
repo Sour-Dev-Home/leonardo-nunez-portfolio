@@ -1,7 +1,7 @@
 ---
 name: satisfactory-dash
 summary: >-
-  A dashboard and backend for a live Satisfactory dedicated server: production, overflow and power monitoring, with a public demo.
+  A dashboard and backend for a live Satisfactory server: production, overflow and power monitoring, with a public demo.
 description: >-
   A dashboard and backend for a live Satisfactory dedicated server: production rate, overflow, and power-outage monitoring, with a public offline demo. Full-stack TypeScript in an npm workspaces monorepo (Vite/React frontend, Express backend) around a schema-first Zod contract shared by both sides. Data lives in PostgreSQL 18 with hand-written parameterized SQL, forward-only migrations, and separate migrator, app and read-only backup roles, plus an audit trail the app role cannot rewrite. Google sign-in (OpenID Connect with PKCE) is implemented and security-reviewed but not yet public, and encrypted database backups to a versioned S3 bucket through a put-only IAM identity run nightly, with a restore rehearsal passed. Servers are stored in Postgres with their API tokens encrypted at rest (AES-256-GCM) and an SSRF guard on the addresses the backend will call, and production history is recorded with retention and rollups. Design decisions are recorded in 31 architecture decision records, and changes merge through a GitHub merge queue with a fail-closed review gate, plus CI lint/typecheck/test/build, a PII-leak and npm audit check, CodeQL, and an architecture drift check.
 status: in-progress

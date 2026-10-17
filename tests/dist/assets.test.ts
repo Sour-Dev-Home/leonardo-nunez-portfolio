@@ -34,7 +34,7 @@ describe("shared assets", () => {
       for (const selector of ['meta[name="description"]', 'meta[property="og:description"]']) {
         const content = metaContent(doc, selector) ?? "";
         expect(content.length, `${file} ${selector}`).toBeGreaterThan(0);
-        expect(content.length, `${file} ${selector}`).toBeLessThanOrEqual(160);
+        expect(content.length, `${file} ${selector}`).toBeLessThanOrEqual(125);
       }
     }
   });
