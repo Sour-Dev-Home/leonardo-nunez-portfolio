@@ -1,7 +1,11 @@
-import { projects } from "../data/projects";
+import type { Project } from "../lib/projects";
 import { ProjectCard } from "./ProjectCard";
 
-export function Projects() {
+interface ProjectsProps {
+  projects: Project[];
+}
+
+export function Projects({ projects }: ProjectsProps) {
   return (
     <section id="projects" className="section">
       <h2>Projects</h2>

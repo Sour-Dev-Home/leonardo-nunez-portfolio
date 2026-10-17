@@ -4,21 +4,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node scripts/generate-case-studies.mjs",
-    "dev": "vite",
-    "prebuild": "node scripts/generate-case-studies.mjs",
-    "build": "tsc -b && vite build",
-    "typecheck": "tsc -b",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro sync && tsc -b",
     "lint": "oxlint",
-    "pretest": "node scripts/generate-case-studies.mjs",
     "test": "vitest run",
-    "preview": "vite preview"
+    "test:dist": "vitest run --config vitest.dist.config.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "8.1.0",
     "@astrojs/react": "7.1.0",
     "astro": "7.4.0",
-    "marked": "^18.0.14",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
@@ -28,7 +25,6 @@
     "@types/node": "^26.6.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
-    "@vitejs/plugin-react": "^6.1.1",
     "jsdom": "^30.1.0",
     "node-html-parser": "^9.0.4",
     "oxlint": "^1.81.0",
