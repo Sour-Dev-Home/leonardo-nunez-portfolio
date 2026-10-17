@@ -9,8 +9,10 @@ test.skip(!process.env.PW_VISUAL, "visual comparisons run in the Playwright cont
 // The finished page is captured in full. The in-between states are captured as
 // the first screen only: the geometry tests in loading.spec.ts already check the
 // whole page, and full-page copies would triple the size of every baseline refresh.
-const loaded = { fullPage: true, maxDiffPixelRatio: 0.002 } as const;
-const firstScreen = { fullPage: false, maxDiffPixelRatio: 0.002 } as const;
+// An absolute pixel budget, not a ratio: 0.2% of an 8,000 px-tall page is ~21k
+// pixels, enough to hide a missing badge or icon.
+const loaded = { fullPage: true, maxDiffPixels: 200 } as const;
+const firstScreen = { fullPage: false, maxDiffPixels: 200 } as const;
 
 for (const { name, path } of PAGES) {
   test(`${name} looks the same when loaded`, async ({ page }) => {

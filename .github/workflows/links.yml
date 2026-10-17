@@ -26,11 +26,14 @@ jobs:
 
       - uses: lycheeverse/lychee-action@v2.9.0
         with:
+          # Quoted so lychee expands the glob (the action's bash has no globstar).
           args: >-
             --no-progress
+            --max-retries 3
+            --accept 200..=299,429
             --root-dir ${{ github.workspace }}/dist
             --fallback-extensions html
             --exclude linkedin\.com
-            dist/**/*.html
+            'dist/**/*.html'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

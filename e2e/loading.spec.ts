@@ -28,7 +28,9 @@ for (const { name, path } of pages) {
   for (const progress of [0, 0.5, 1]) {
     test(`${name}: no content overlaps at ${progress * 100}% of every animation`, async ({ page }) => {
       await page.goto(path, { waitUntil: "networkidle" });
-      await scrubAnimations(page, progress);
+      // Every page fades its sections in; if nothing was frozen, the overlap
+      // check below would be testing a finished page and prove nothing.
+      expect(await scrubAnimations(page, progress)).toBeGreaterThan(0);
       expect(await overlaps(page)).toEqual([]);
     });
   }

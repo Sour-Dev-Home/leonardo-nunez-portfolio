@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
@@ -36,6 +36,21 @@ describe("pageScriptBytes", () => {
     const dir = fixtureDir({ "_astro/a.js": code });
     const html = `<script>${code}</script><script src="/_astro/a.js"></script>`;
     expect(pageScriptBytes(html, dir)).toBe(gzipSync(code).length * 2);
+  });
+
+  it("counts chunks a script imports, once each, however they are imported", () => {
+    const dir = fixtureDir({
+      "_astro/island.js": 'import { a } from "./shared.js"; import "./side.js"; const b = () => import("./lazy.js");',
+      "_astro/shared.js": 'export * from "./deep.js"; export const a = 1;',
+      "_astro/side.js": "console.log('side')",
+      "_astro/lazy.js": 'import { a } from "./shared.js"; export const lazy = a;',
+      "_astro/deep.js": "export const deep = 'x'.repeat(40);",
+    });
+    const files = ["island", "shared", "side", "lazy", "deep"].map((n) =>
+      gzipSync(readFileSync(join(dir, "_astro", `${n}.js`))).length,
+    );
+    const html = '<script type="module" src="/_astro/island.js"></script>';
+    expect(pageScriptBytes(html, dir)).toBe(files.reduce((a, b) => a + b, 0));
   });
 
   it("refuses third-party scripts", () => {
