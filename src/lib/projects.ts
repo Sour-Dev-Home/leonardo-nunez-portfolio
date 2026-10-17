@@ -4,6 +4,9 @@ import { z } from "astro/zod";
 // src/content.config.ts uses this schema, so an invalid entry fails the build.
 export const projectSchema = z.object({
   name: z.string().min(1),
+  // The meta and link-preview description. Search results cut at about 155-160
+  // characters, so the full card text (description) is too long for it.
+  summary: z.string().min(1).max(160),
   description: z.string().min(1),
   status: z.enum(["in-progress", "shipped"]),
   stack: z.array(z.string().min(1)).min(1),

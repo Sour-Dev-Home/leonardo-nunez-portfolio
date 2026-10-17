@@ -1,5 +1,7 @@
 ---
 name: local-worker
+summary: >-
+  An MCP server that offloads bulk reading and first drafts to a local Ollama model on the GPU, keeping large inputs out of Claude's context.
 description: >-
   An MCP server that offloads bulk reading (CI logs, diffs, long docs) and first drafts to a local Ollama model on the GPU, so large inputs never enter Claude's context — plus Markdown-to-PDF rendering and a weekly devlog CLI. 233 tests, CI on Ubuntu and Windows, with path confinement hardened through an independent bug hunt and two security reviews.
 status: shipped

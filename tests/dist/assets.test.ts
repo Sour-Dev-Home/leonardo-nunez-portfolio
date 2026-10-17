@@ -27,4 +27,15 @@ describe("shared assets", () => {
       expect(distFileExists(new URL(image!).pathname.slice(1)), `${file} -> ${image}`).toBe(true);
     }
   });
+
+  it("keeps every page's description short enough that search and previews don't cut it", () => {
+    for (const file of builtPages()) {
+      const doc = page(file);
+      for (const selector of ['meta[name="description"]', 'meta[property="og:description"]']) {
+        const content = metaContent(doc, selector) ?? "";
+        expect(content.length, `${file} ${selector}`).toBeGreaterThan(0);
+        expect(content.length, `${file} ${selector}`).toBeLessThanOrEqual(160);
+      }
+    }
+  });
 });

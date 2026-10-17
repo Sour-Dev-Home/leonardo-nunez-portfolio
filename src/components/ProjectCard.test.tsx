@@ -5,6 +5,7 @@ import type { Project } from "../lib/projects";
 
 const baseProject: Project = {
   name: "Test Project",
+  summary: "A test project.",
   description: "A project for testing.",
   status: "shipped",
   stack: ["React", "TypeScript"],

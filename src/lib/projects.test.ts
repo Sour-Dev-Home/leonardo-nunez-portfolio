@@ -1,13 +1,29 @@
 import { describe, it, expect } from "vitest";
 import { projectSchema, hasCaseStudy, toProjects, type ProjectData } from "./projects";
 
-const valid = { name: "P", description: "D", status: "shipped", stack: ["TS"], order: 1 };
+const valid = { name: "P", summary: "S", description: "D", status: "shipped", stack: ["TS"], order: 1 };
 
 function data(over: Partial<ProjectData> = {}): ProjectData {
-  return { name: "P", description: "D", status: "shipped", stack: ["TS"], order: 1, world: false, ...over };
+  return {
+    name: "P",
+    summary: "S",
+    description: "D",
+    status: "shipped",
+    stack: ["TS"],
+    order: 1,
+    world: false,
+    ...over,
+  };
 }
 
 describe("projectSchema", () => {
+  it("requires a summary short enough for search and link previews", () => {
+    const { summary: _omitted, ...withoutSummary } = valid;
+    expect(() => projectSchema.parse(withoutSummary)).toThrow();
+    expect(() => projectSchema.parse({ ...valid, summary: "x".repeat(161) })).toThrow();
+    expect(projectSchema.parse({ ...valid, summary: "x".repeat(160) }).summary).toHaveLength(160);
+  });
+
   it("accepts a minimal project and defaults world to false", () => {
     expect(projectSchema.parse(valid).world).toBe(false);
   });
