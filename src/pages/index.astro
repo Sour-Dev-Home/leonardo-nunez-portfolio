@@ -1,0 +1,26 @@
+---
+import { getCollection } from "astro:content";
+import Shell from "../layouts/Shell.astro";
+import { Hero } from "../components/Hero";
+import { About } from "../components/About";
+import { Projects } from "../components/Projects";
+import { Skills } from "../components/Skills";
+import { Contact } from "../components/Contact";
+import { toProjects } from "../lib/projects";
+
+const projects = toProjects(await getCollection("projects"));
+---
+
+<Shell
+  title="Leonardo Nunez — Full-Stack Developer"
+  description="Leonardo Nunez — full-stack developer portfolio: projects, background, and case studies."
+  path="/"
+>
+  <main>
+    <Hero />
+    <About />
+    <Projects projects={projects} />
+    <Skills />
+    <Contact />
+  </main>
+</Shell>

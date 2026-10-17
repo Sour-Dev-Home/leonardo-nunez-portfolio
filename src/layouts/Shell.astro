@@ -1,0 +1,42 @@
+---
+import "../index.css";
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
+import { buildMeta } from "../lib/meta";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Root-relative path of this page, e.g. "/" or "/projects/satisfactory-dash". */
+  path: string;
+  image?: string;
+}
+
+const { title, description, path, image } = Astro.props;
+const meta = buildMeta({ title, description, path, image }, Astro.site!);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{meta.title}</title>
+    <link rel="canonical" href={meta.canonical} />
+    {
+      meta.tags.map((tag) =>
+        tag.property ? (
+          <meta property={tag.property} content={tag.content} />
+        ) : (
+          <meta name={tag.name} content={tag.content} />
+        ),
+      )
+    }
+  </head>
+  <body>
+    <Header />
+    <slot />
+    <Footer />
+  </body>
+</html>

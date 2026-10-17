@@ -1,23 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
-import { RouterProvider } from "../router/Router";
 import { ProjectCard } from "./ProjectCard";
-import type { Project } from "../data/projects";
+import type { Project } from "../lib/projects";
 
 const baseProject: Project = {
   name: "Test Project",
+  summary: "A test project.",
   description: "A project for testing.",
   status: "shipped",
   stack: ["React", "TypeScript"],
   repoUrl: "https://github.com/example/test-project",
+  order: 1,
+  world: false,
 };
 
 function renderCard(project: Project) {
-  return render(
-    <RouterProvider>
-      <ProjectCard project={project} />
-    </RouterProvider>,
-  );
+  return render(<ProjectCard project={project} />);
 }
 
 describe("ProjectCard", () => {

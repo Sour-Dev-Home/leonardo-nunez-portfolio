@@ -8,8 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+/dist
 dist-ssr
+.astro/
 *.local
 
 # Editor directories and files
@@ -31,3 +32,6 @@ dist-ssr
 
 # Generated at build/dev time by scripts/generate-case-studies.mjs
 src/content/case-studies/generated/
+
+# Brainstorming companion sessions
+.superpowers/

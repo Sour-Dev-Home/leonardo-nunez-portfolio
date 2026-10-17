@@ -1,5 +1,4 @@
-import type { Project } from "../data/projects";
-import { Link } from "../router/Link";
+import type { Project } from "../lib/projects";
 
 interface ProjectLinksProps {
   project: Project;
@@ -15,7 +14,7 @@ export function ProjectLinks({ project, showCaseStudyLink = false }: ProjectLink
 
   return (
     <div className="project-links">
-      {hasCaseStudyLink && <Link to={`/projects/${project.slug}`}>Read case study →</Link>}
+      {hasCaseStudyLink && <a href={`/projects/${project.slug}`}>Read case study →</a>}
       {project.repoUrl && (
         <a href={project.repoUrl} target="_blank" rel="noreferrer">
           Repo
