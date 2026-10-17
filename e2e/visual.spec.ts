@@ -16,7 +16,13 @@ for (const { name, path } of PAGES) {
   test(`${name} looks the same when loaded`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(path, { waitUntil: "networkidle" });
-    await expect(page).toHaveScreenshot(`${name}.png`, { ...loaded, animations: "disabled" });
+    // The page is a fractional number of pixels tall, and Chrome's full-page
+    // capture rounds that differently from one shot to the next (seen: 8194 vs
+    // 8197 px, identical content). Clipping to a whole-pixel height measured once
+    // keeps every capture the same size.
+    const height = await page.evaluate(() => Math.floor(document.body.getBoundingClientRect().bottom));
+    const clip = { x: 0, y: 0, width: page.viewportSize()!.width, height };
+    await expect(page).toHaveScreenshot(`${name}.png`, { ...loaded, clip, animations: "disabled" });
   });
 
   test(`${name} looks the same while its media loads`, async ({ page }) => {
