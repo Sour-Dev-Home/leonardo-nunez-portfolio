@@ -11,7 +11,8 @@
     "lint": "oxlint",
     "test": "vitest run",
     "test:dist": "vitest run --config vitest.dist.config.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "lhci": "npx -y @lhci/cli@0.15.1 autorun"
   },
   "dependencies": {
     "@astrojs/mdx": "8.1.0",

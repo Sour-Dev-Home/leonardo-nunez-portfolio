@@ -91,6 +91,31 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
 
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      # Lighthouse CI runs through npx at a pinned version rather than as a
+      # dependency: its own dependencies carry advisories that would fail npm audit.
+      - run: npm run lhci
+
+      - if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: lighthouse
+          path: .lighthouseci/
+          if-no-files-found: ignore
+
   security:
     runs-on: ubuntu-latest
     steps:
