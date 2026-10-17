@@ -4,7 +4,8 @@
   --text: #1c1c1a;
   --text-muted: #57534e;
   --border: #e7e5e4;
-  --accent: #0d9488;
+  /* teal-700: 5.2:1 on --bg and 5.5:1 under white text (WCAG AA). */
+  --accent: #0f766e;
   --accent-contrast: #ffffff;
   --media-bg: #000000;
   --shadow-color: rgb(28 28 26 / 0.12);
@@ -291,7 +292,8 @@ main {
   font-weight: 600;
   padding: 0.15rem 0.6rem;
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  /* 10%, not more: the accent text must keep 4.5:1 on its own tint. */
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--accent);
 }
 
