@@ -20,9 +20,10 @@ npm run dev
 
 Live at [leonardo-nunez-portfolio.pages.dev](https://leonardo-nunez-portfolio.pages.dev).
 
-Cloudflare Pages — build command `npm run build`, output directory `dist`, Node
-version from `.node-version`. Connect the repo in the Cloudflare dashboard (Workers &
-Pages → Create → Pages → Connect to Git); no other config file is needed.
+A Cloudflare Worker serving static assets, built and deployed by Workers Builds on
+every push to `main` (build command `npm run build`, Node version from
+`.node-version`). `wrangler.json` points the Worker at `dist/`, serves `404.html` for
+unknown paths and redirects `/path/` to `/path`.
 
 ## Adding a project
 

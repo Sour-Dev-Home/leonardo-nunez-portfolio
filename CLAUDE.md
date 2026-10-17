@@ -4,8 +4,9 @@ A simple personal portfolio site: Leonardo Nunez's projects, background, and con
 info, meant to be the permanent public home for showcasing finished project work from
 this workspace (starting with `satisfactory-dash`).
 
-This is a **public-facing** project per `../DEPLOYMENT.md` — public repo, Cloudflare
-Pages hosting. See that file before changing repo visibility or hosting.
+This is a **public-facing** project per `../DEPLOYMENT.md` — public repo, hosted on
+Cloudflare (a Worker serving static assets, in the same Cloudflare account as
+satis-manager). See that file before changing repo visibility or hosting.
 
 See `../WORKFLOW.md` for the cross-project branch/PR workflow, session roles, and the
 GitHub setup checklist (branch protection gotchas, security baseline) — written from
@@ -45,8 +46,9 @@ this repo's own verified setup, since it's ahead of `satisfactory-dash` on most 
 ## Stack
 
 Astro (static; React components rendered at build time, no client JavaScript yet) +
-TypeScript, deployed to Cloudflare Pages per `../DEPLOYMENT.md` (build command
-`npm run build`, output directory `dist`, Node from `.node-version`). Vitest + React
+TypeScript, deployed as a Cloudflare Worker with static assets by Workers Builds
+(build command `npm run build`, Node from `.node-version`; `wrangler.json` serves
+`dist/` with a real 404 page and slashless URLs). Vitest + React
 Testing Library for unit tests; `npm run test:dist` checks the built HTML (meta tags,
 links, media, 404). oxlint for linting. CI (`.github/workflows/ci.yml`) runs
 lint/typecheck/test/build/test:dist on every push and PR.
