@@ -1,0 +1,39 @@
+name: Links
+
+# External links rot without any commit; check main's built site every night.
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - uses: lycheeverse/lychee-action@v2.9.0
+        with:
+          # Quoted so lychee expands the glob (the action's bash has no globstar).
+          args: >-
+            --no-progress
+            --max-retries 3
+            --accept 200..=299,429
+            --root-dir ${{ github.workspace }}/dist
+            --fallback-extensions html
+            --exclude linkedin\.com
+            'dist/**/*.html'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

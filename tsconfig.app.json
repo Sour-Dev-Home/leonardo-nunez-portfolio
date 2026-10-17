@@ -22,5 +22,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "tests", ".astro/types.d.ts"]
+  "include": ["src", "tests", "e2e", ".astro/types.d.ts"]
 }

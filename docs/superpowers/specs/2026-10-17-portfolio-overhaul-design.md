@@ -246,16 +246,30 @@ sidenote, and flag anything wrong or off-voice.
 
 | Job | Checks | Fails when |
 |---|---|---|
-| verify | oxlint, `astro check` (types and content schema), Vitest, build | any error; invalid project frontmatter |
-| size | `size-limit` on each page's JavaScript | home page over budget (start about 60 kB gzipped); a world over its own budget |
-| e2e | Playwright at 360, 390, 768 and 1280 px: no horizontal overflow, reduced-motion final states, axe | any overflow; any serious or critical axe violation |
-| lighthouse | Lighthouse CI, mobile profile, on the built site | performance or accessibility below 90 |
-| visual | Argos screenshots from the e2e run | unapproved visual diffs (approved in Argos) |
+| verify | oxlint, `astro sync && tsc -b` (types and content schema), Vitest, build, build-output tests including the JS budget (`tests/dist/budget.test.ts`) | any error; invalid project frontmatter; a page's gzipped JS over budget (60 kB default; a world sets its own) |
+| e2e | Playwright at 360, 390, 768 and 1280 px in the `mcr.microsoft.com/playwright` container: status codes, no horizontal overflow, layout unchanged by scrollbars, axe, no motion under reduced motion, loading states (media held back, animations paused at 0/50/100%, mid-navigation) checked by geometry | any overflow, overlap or pop-in; any serious or critical axe violation |
+| visual | Playwright `toHaveScreenshot` in the same job: each page loaded (full page), while media loads and halfway through animations (first screen) | any difference from the committed baselines, or a screenshot with no baseline; baselines refreshed with the Update screenshots workflow |
+| lighthouse | Lighthouse CI (`npx @lhci/cli`), mobile profile, on the built site | performance or accessibility below 90 |
 | links | `lychee` over the built HTML, also nightly | broken links |
-| security | the existing org-wide PII scan | unchanged |
+| security | the existing org-wide PII scan and `npm audit` | unchanged |
 
 Dependabot stays. Budgets start at the values above and are tuned once the first
 world exists; a budget is never raised to make a PR pass without a note in the PR.
+
+**Changes from the first version of this table (2026-10-17, Plan 2):**
+- *Argos replaced by Playwright's built-in visual comparison (owner's decision).*
+  Argos's free plan targets personal repositories and this one is
+  organisation-owned; reg-suit was also weighed and rejected, since it needs a
+  storage bucket and a GitHub app for a few dozen screenshots. Baselines live in the
+  repo and are only valid from the Playwright container, where fonts are identical.
+- *`size-limit` replaced by a build-output budget test.* It measures what each page
+  actually loads (inline scripts, script files, module preloads, Astro island
+  bundles) with no extra dependency.
+- *Loading states added (owner's request).* A finished-page screenshot says nothing
+  about the first few hundred milliseconds, so in-between states are frozen and
+  checked deterministically.
+- *Lighthouse CI runs through `npx` at a pinned version,* not as a dependency: its
+  own dependencies carry advisories that would fail `npm audit`.
 
 ## Section 7 — Migration and testing
 
