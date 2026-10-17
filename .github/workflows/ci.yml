@@ -49,9 +49,25 @@ jobs:
 
       - run: npm run build
 
-      # Missing baselines are written (and the test fails) so a new page's
-      # screenshot is in the artifact below; changed ones fail with a diff.
+      - name: List existing baselines
+        run: |
+          mkdir -p e2e/__screenshots__
+          find e2e/__screenshots__ -type f | sort > "$RUNNER_TEMP/baselines-before.txt"
+
+      # Changed screenshots fail with a diff. Missing ones are written (Playwright
+      # counts that as a pass), so the next step fails the job instead and the
+      # artifact below carries the new images in the right folders.
       - run: npx playwright test --update-snapshots=missing
+
+      - name: Fail if any screenshot had no baseline
+        run: |
+          find e2e/__screenshots__ -type f | sort > "$RUNNER_TEMP/baselines-after.txt"
+          new=$(comm -13 "$RUNNER_TEMP/baselines-before.txt" "$RUNNER_TEMP/baselines-after.txt")
+          if [ -n "$new" ]; then
+            echo "$new"
+            echo "::error::These screenshots had no baseline. Download the screenshots artifact into e2e/__screenshots__/, check the images, commit and push."
+            exit 1
+          fi
 
       - if: always()
         uses: actions/upload-artifact@v7.0.2
