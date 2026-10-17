@@ -10,7 +10,8 @@
     "typecheck": "astro sync && tsc -b",
     "lint": "oxlint",
     "test": "vitest run",
-    "test:dist": "vitest run --config vitest.dist.config.ts"
+    "test:dist": "vitest run --config vitest.dist.config.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/mdx": "8.1.0",
@@ -20,6 +21,7 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.2",

@@ -11,6 +11,9 @@ node_modules
 /dist
 dist-ssr
 .astro/
+playwright-report/
+test-results/
+.lighthouseci/
 *.local
 
 # Editor directories and files

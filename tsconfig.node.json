@@ -19,5 +19,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["astro.config.ts", "vitest.config.ts", "vitest.dist.config.ts"]
+  "include": ["astro.config.ts", "vitest.config.ts", "vitest.dist.config.ts", "playwright.config.ts"]
 }
