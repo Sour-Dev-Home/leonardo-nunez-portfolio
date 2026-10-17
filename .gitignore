@@ -31,3 +31,6 @@ dist-ssr
 
 # Generated at build/dev time by scripts/generate-case-studies.mjs
 src/content/case-studies/generated/
+
+# Brainstorming companion sessions
+.superpowers/
