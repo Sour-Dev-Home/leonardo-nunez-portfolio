@@ -1,0 +1,37 @@
+name: Update screenshots
+
+# Run from the Actions tab on a branch when a visual change is intended. It
+# re-takes every screenshot in the same container CI uses and uploads them;
+# download the artifact, commit it to the branch and push (a push by a person
+# re-runs CI, a push by this workflow's token would not).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      PW_VISUAL: "1"
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: npx playwright test e2e/visual.spec.ts --update-snapshots=all
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: screenshots
+          path: e2e/__screenshots__/
