@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse, type HTMLElement } from "node-html-parser";
 
-export const SITE = "https://leonardo-nunez-portfolio.pages.dev";
+export const SITE = "https://leonardonunez.dev";
 const DIST = join(process.cwd(), "dist");
 
 export function distFileExists(path: string): boolean {

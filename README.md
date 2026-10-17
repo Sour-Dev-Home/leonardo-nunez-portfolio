@@ -18,7 +18,7 @@ npm run dev
 
 ## Deployment
 
-Live at [leonardo-nunez-portfolio.pages.dev](https://leonardo-nunez-portfolio.pages.dev).
+Live at [leonardonunez.dev](https://leonardonunez.dev).
 
 A Cloudflare Worker serving static assets, built and deployed by Workers Builds on
 every push to `main` (build command `npm run build`, Node version from
