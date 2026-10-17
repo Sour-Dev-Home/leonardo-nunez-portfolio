@@ -15,6 +15,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@astrojs/mdx": "8.1.0",
+    "@astrojs/react": "7.1.0",
+    "astro": "7.4.0",
     "marked": "^18.0.14",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
@@ -27,6 +30,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "jsdom": "^30.1.0",
+    "node-html-parser": "^9.0.4",
     "oxlint": "^1.81.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.0",
