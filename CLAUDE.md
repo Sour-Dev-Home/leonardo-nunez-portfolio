@@ -50,14 +50,25 @@ TypeScript, deployed as a Cloudflare Worker with static assets by Workers Builds
 (build command `npm run build`, Node from `.node-version`; `wrangler.json` serves
 `dist/` with a real 404 page and slashless URLs). Vitest + React
 Testing Library for unit tests; `npm run test:dist` checks the built HTML (meta tags,
-links, media, 404). oxlint for linting. CI (`.github/workflows/ci.yml`) runs
-lint/typecheck/test/build/test:dist on every push and PR.
+links, media sizes, JS budget, 404). Playwright (`e2e/`) checks every page at 360,
+390, 768 and 1280 px: layout, axe, reduced motion, loading states and screenshots.
+oxlint for linting. CI (`.github/workflows/ci.yml`) runs `verify`
+(lint/typecheck/test/build/test:dist), `e2e` (Playwright in its official container,
+screenshots included), `lighthouse` (mobile, ≥ 90) and `links` (lychee; also
+nightly in `links.yml`) on every push and PR.
+
+**Visual changes:** screenshot baselines in `e2e/__screenshots__/` are valid only
+from the Playwright container. Never commit screenshots taken on Windows or macOS;
+when a PR changes the look on purpose, run the **Update screenshots** workflow on
+its branch, check the images in its `screenshots` artifact, and commit them.
 
 ## Commands
 
 - `npm run dev` — dev server; `npm run preview` — serve the built `dist/`
 - `npm run lint` / `npm run typecheck` / `npm run test` / `npm run build`
 - `npm run test:dist` — build-output tests (run after `npm run build`)
+- `npm run test:e2e` — Playwright (needs a build; screenshot tests skip outside CI)
+- `npm run lhci` — Lighthouse CI on the built site, mobile profile
 
 ## The portfolio-updater agent
 

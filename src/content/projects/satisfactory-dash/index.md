@@ -222,5 +222,3 @@ runtime-validated contract package.
 <li><a href="https://satis-manager.com">Live site</a></li>
 <li><a href="https://github.com/Sour-Dev-Home/satisfactory-dash/tree/main/docs-vault/wiki/decisions">Architecture decisions</a></li>
 </ul>
-
-<p><a href="/no-such-target">temporary broken link</a></p>
