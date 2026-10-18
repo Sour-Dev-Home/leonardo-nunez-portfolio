@@ -123,8 +123,13 @@ figcaption {
     display: none;
     margin: var(--space-3) 0;
   }
-  .sidenote-checkbox:checked + .sidenote-note {
+  .sidenote-checkbox:checked ~ .sidenote-note {
     display: block;
+  }
+  /* The checkbox itself is visually hidden; show its keyboard focus on the label. */
+  .sidenote-checkbox:focus-visible + .sidenote-toggle {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
   }
 }
 @media (min-width: 80rem) {

@@ -10,8 +10,9 @@ const { id, lead } = Astro.props;
 ---
 
 <span class="sidenote">
-  <label for={`sn-${id}`} class="sidenote-toggle">psst</label>
+  <!-- The checkbox comes first so CSS can show its keyboard focus on the label. -->
   <input type="checkbox" id={`sn-${id}`} class="sidenote-checkbox visually-hidden" aria-label="Show side note" />
+  <label for={`sn-${id}`} class="sidenote-toggle">psst</label>
   <span class="sidenote-note" role="note">
     {lead && <span class="sidenote-lead">↙ {lead}</span>}
     <slot />

@@ -13,6 +13,20 @@ test("on a wide screen the sidenote sits in the margin, beside its paragraph", a
   expect(box!.x - (prose!.x + prose!.width)).toBeLessThanOrEqual(48); // close to the text
 });
 
+test("on a phone the psst toggle works from the keyboard, with visible focus", async ({ page }, info) => {
+  test.skip(!info.project.name.startsWith("phone"), "toggle is for narrow screens");
+  await page.goto("/kit");
+  for (let i = 0; i < 40; i++) {
+    await page.keyboard.press("Tab");
+    if (await page.evaluate(() => document.activeElement?.classList.contains("sidenote-checkbox"))) break;
+  }
+  expect(await page.evaluate(() => document.activeElement?.classList.contains("sidenote-checkbox"))).toBe(true);
+  const outline = await page.locator(".sidenote-toggle").first().evaluate((el) => getComputedStyle(el).outlineStyle);
+  expect(outline).not.toBe("none");
+  await page.keyboard.press("Space");
+  await expect(page.locator(".sidenote-note").first()).toBeVisible();
+});
+
 test("on a phone the sidenote hides behind a psst toggle that opens it", async ({ page }, info) => {
   test.skip(!info.project.name.startsWith("phone"), "toggle is for narrow screens");
   await page.goto("/kit");

@@ -14,8 +14,9 @@ for (const { name, path } of PAGES) {
     });
   }
 
-  // Checks durations, not opacity: on a fast machine a 500 ms fade can finish
-  // before an opacity check runs, so only the durations say whether motion is off.
+  // Checks durations and delays, not opacity: on a fast machine a 500 ms fade can
+  // finish before an opacity check runs. A zero-length animation with a delay still
+  // makes content pop in late, so delays count as motion too.
   test(`${name} has no animation or transition time with reduced motion`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(path);
@@ -24,7 +25,9 @@ for (const { name, path } of PAGES) {
       return [...document.querySelectorAll("*")]
         .filter((el) => {
           const style = getComputedStyle(el);
-          const animates = style.animationName !== "none" && anyPositive(style.animationDuration);
+          const animates =
+            style.animationName !== "none" &&
+            (anyPositive(style.animationDuration) || anyPositive(style.animationDelay));
           const transitions = style.transitionProperty !== "none" && anyPositive(style.transitionDuration);
           return animates || transitions;
         })

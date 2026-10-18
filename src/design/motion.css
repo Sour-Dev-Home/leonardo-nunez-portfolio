@@ -34,4 +34,8 @@ main > :nth-child(n + 4) {
   @view-transition {
     navigation: none;
   }
+  /* Zero durations aren't enough: the stagger delays would still pop sections in. */
+  .reveal {
+    animation: none;
+  }
 }

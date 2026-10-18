@@ -33,6 +33,27 @@ describe("fonts", () => {
   });
 });
 
+describe("the sidenote font", () => {
+  const preloads = (file: string) =>
+    page(file)
+      .querySelectorAll('link[rel="preload"][as="font"]')
+      .map((l) => l.getAttribute("href"));
+
+  // font-display: optional only uses a font that arrives within ~100 ms, so pages
+  // that can show sidenotes preload it; other pages don't pay for it.
+  it("is preloaded on pages that can show sidenotes", () => {
+    for (const file of ["kit.html", "projects/satisfactory-dash.html"]) {
+      expect(preloads(file), file).toContain("/fonts/gochi-hand-latin-400-normal.woff2");
+    }
+  });
+
+  it("is not preloaded elsewhere", () => {
+    for (const file of ["index.html", "about.html", "404.html"]) {
+      expect(preloads(file), file).not.toContain("/fonts/gochi-hand-latin-400-normal.woff2");
+    }
+  });
+});
+
 describe("the 404 page", () => {
   it("asks search engines not to index it", () => {
     expect(page("404.html").querySelector('meta[name="robots"]')?.getAttribute("content")).toBe("noindex");

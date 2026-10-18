@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type { Page, Route } from "@playwright/test";
 
 /** Holds every image and video request (except the favicon) until released. */
@@ -5,8 +6,15 @@ export async function holdMedia(page: Page) {
   const waiting: Route[] = [];
   let released = false;
   await page.route("**/*", (route) => {
+    const url = new URL(route.request().url());
     const type = route.request().resourceType();
-    const isFavicon = route.request().url().endsWith("/favicon.svg");
+    // Routing turns off the browser cache, so fonts would make a slow round trip
+    // and could miss font-display: optional's ~100 ms window. Serve them from
+    // the build directly so they always arrive in time.
+    if (type === "font") {
+      return route.fulfill({ path: join(process.cwd(), "dist", url.pathname), contentType: "font/woff2" });
+    }
+    const isFavicon = url.pathname === "/favicon.svg";
     if (!released && (type === "image" || type === "media") && !isFavicon) waiting.push(route);
     else return route.continue();
   });
