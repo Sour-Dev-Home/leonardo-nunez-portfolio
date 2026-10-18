@@ -179,6 +179,24 @@ test.describe("cutover figure", () => {
     await expect(page.locator('[data-goal="back"]')).toHaveClass(/done/);
   });
 
+  test("moves the track's highlight the moment Next is pressed, not when the dump lands", async ({ page }) => {
+    test.skip(!!process.env.REDUCED, "the dump is instant under reduced motion");
+    await readyCutover(page);
+    const steps = page.locator(`${CUT} .fig-track .stp`);
+    await page.locator(`${CUT} button[data-next]`).click(); // Freeze
+    await expect(steps.nth(0)).toHaveClass(/now/);
+    await page.locator(`${CUT} button[data-next]`).click(); // Back up: the dump takes 1.3 s
+    await expect(steps.nth(1)).toHaveClass(/now/, { timeout: 300 });
+    await expect(steps.nth(0)).toHaveClass(/done/, { timeout: 300 });
+  });
+
+  test("gives every step in the track the same size, Freeze included", async ({ page }) => {
+    await page.goto("/kit");
+    await page.locator(CUT).scrollIntoViewIfNeeded();
+    const widths = await page.locator(`${CUT} .fig-track .stp`).evaluateAll((els) => els.map((e) => e.getBoundingClientRect().width));
+    expect(Math.max(...widths) - Math.min(...widths), widths.join(", ")).toBeLessThanOrEqual(1);
+  });
+
   test("has no step numbers in its track (cutover)", async ({ page }) => {
     await page.goto("/kit");
     expect(await page.locator(`${CUT} .fig-track`).innerText()).not.toMatch(/\d/);

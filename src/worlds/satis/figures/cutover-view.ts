@@ -74,13 +74,18 @@ export function mount(root: HTMLElement, kept: Partial<CutoverKept> = {}): () =>
     if (reduced) r = to;
     else if (to !== r && rTween?.to !== to) rTween = { from: r, to, t0: t };
     words(s);
-    root.querySelectorAll(".fig-track .stp").forEach((li, i) => (li.className = "stp" + (i + 1 < s ? " done" : i + 1 === s ? " now" : "")));
-    root.querySelectorAll(".fig-track .conn").forEach((c, i) => c.classList.toggle("on", s >= i + 2));
+    track(s);
     // aria-disabled, not disabled: a disabled button drops keyboard focus to <body>; go() ignores the press.
     prev.setAttribute("aria-disabled", String(s === 0));
     next.setAttribute("aria-disabled", String(s === LAST_STEP));
     if (s === LAST_STEP) tickGoal(root, "switch");
     loop.wake();
+  }
+
+  // The step track follows the press at once, even while the dump is still on its way to its step's drawing.
+  function track(s: number) {
+    root.querySelectorAll(".fig-track .stp").forEach((li, i) => (li.className = "stp" + (i + 1 < s ? " done" : i + 1 === s ? " now" : "")));
+    root.querySelectorAll(".fig-track .conn").forEach((c, i) => c.classList.toggle("on", s >= i + 2));
   }
 
   // A step's caption and its rollback always change together, including while the dump is on its way.
@@ -118,6 +123,7 @@ export function mount(root: HTMLElement, kept: Partial<CutoverKept> = {}): () =>
     if (to > from && (to === 2 || to === 3)) {
       render(to - 1);
       words(to);
+      track(to);
       carryAlong(to === 2 ? "pDump" : "pRestore", () => render(to));
       return;
     }
