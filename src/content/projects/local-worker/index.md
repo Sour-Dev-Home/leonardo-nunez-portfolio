@@ -8,5 +8,5 @@ status: shipped
 stack: [TypeScript, Node.js, MCP, Ollama, Vitest]
 repoUrl: https://github.com/Sour-Dev-Home/local-worker
 emphasis: secondary
-order: 3
+order: 4
 ---
