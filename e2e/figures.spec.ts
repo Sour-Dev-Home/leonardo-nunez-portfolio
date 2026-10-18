@@ -151,6 +151,23 @@ test.describe("cutover figure", () => {
     }
   });
 
+  test("Tab reaches Next, and focus stays on it through the last step (Review Focus 5)", async ({ page }) => {
+    await readyCutover(page);
+    await page.locator(`${CUT} .fig-bar button`).first().focus();
+    for (let i = 0; i < 6 && !(await page.evaluate(() => document.activeElement?.hasAttribute("data-next"))); i++) await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => document.activeElement?.hasAttribute("data-next"))).toBe(true);
+    for (let i = 0; i < 5; i++) {
+      await page.keyboard.press("Enter");
+      await page.waitForTimeout(i === 1 || i === 2 ? 1700 : 400);
+    }
+    await expect(page.locator('[data-goal="switch"]')).toHaveClass(/done/);
+    await expect(page.locator(`${CUT} button[data-next]`)).toBeFocused(); // not dropped to <body>
+    await expect(page.locator(`${CUT} button[data-next]`)).toBeDisabled();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Enter"); // Roll back, reached from the keyboard
+    await expect(page.locator('[data-goal="back"]')).toHaveClass(/done/);
+  });
+
   test("has no step numbers in its track (cutover)", async ({ page }) => {
     await page.goto("/kit");
     expect(await page.locator(`${CUT} .fig-track`).innerText()).not.toMatch(/\d/);

@@ -47,7 +47,8 @@ this repo's own verified setup, since it's ahead of `satisfactory-dash` on most 
 
 ## Stack
 
-Astro (static; React components rendered at build time, no client JavaScript yet) +
+Astro (static; React components rendered at build time; client JavaScript only for
+interactive figures, within the per-page budget in `tests/dist/budget.ts`) +
 TypeScript, deployed as a Cloudflare Worker with static assets by Workers Builds
 (build command `npm run build`, Node from `.node-version`; `wrangler.json` serves
 `dist/` with a real 404 page and slashless URLs; `public/_headers` sets browser

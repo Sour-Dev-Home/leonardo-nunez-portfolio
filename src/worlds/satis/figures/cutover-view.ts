@@ -72,8 +72,9 @@ export function mount(root: HTMLElement): () => void {
     rollback.innerHTML = s ? `<b>↶ Rollback:</b> ${COPY[s].rollback}` : "";
     root.querySelectorAll(".fig-track .stp").forEach((li, i) => (li.className = "stp" + (i + 1 < s ? " done" : i + 1 === s ? " now" : "")));
     root.querySelectorAll(".fig-track .conn").forEach((c, i) => c.classList.toggle("on", s >= i + 2));
-    prev.disabled = s === 0;
-    next.disabled = s === LAST_STEP;
+    // aria-disabled, not disabled: a disabled button drops keyboard focus to <body>; go() ignores the press.
+    prev.setAttribute("aria-disabled", String(s === 0));
+    next.setAttribute("aria-disabled", String(s === LAST_STEP));
     if (s === LAST_STEP) tickGoal(root, "switch");
   }
 

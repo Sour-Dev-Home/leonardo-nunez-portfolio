@@ -59,12 +59,14 @@
   width: 18px;
   height: 18px;
 }
-.fig-ibtn:hover:not(:disabled),
-.fig-tbtn:hover:not(:disabled) {
+.fig-ibtn:hover:not(:disabled, [aria-disabled="true"]),
+.fig-tbtn:hover:not(:disabled, [aria-disabled="true"]) {
   background: var(--fig-btn-hover);
 }
+/* aria-disabled keeps the button focusable (a stepper's end), so it looks disabled but holds focus. */
 .fig-ibtn:disabled,
-.fig-tbtn:disabled {
+.fig-tbtn:disabled,
+.fig-tbtn[aria-disabled="true"] {
   opacity: 0.35;
   cursor: default;
 }
@@ -90,7 +92,7 @@
   background: var(--fig-accent);
   color: var(--fig-on-accent);
 }
-.fig-tbtn.primary:hover:not(:disabled) {
+.fig-tbtn.primary:hover:not(:disabled, [aria-disabled="true"]) {
   background: color-mix(in srgb, var(--fig-accent) 85%, white);
 }
 .fig-ibtn:focus-visible,

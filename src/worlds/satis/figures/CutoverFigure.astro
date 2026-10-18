@@ -20,7 +20,7 @@ import "../world.css";
   <CutoverDrawing layout="desktop" />
   <CutoverDrawing layout="phone" />
   <Controls label="Cutover figure controls" speed={false} play={false}>
-    <button class="fig-tbtn" type="button" data-prev disabled>↶ Roll back</button>
+    <button class="fig-tbtn" type="button" data-prev aria-disabled="true">↶ Roll back</button>
     <ol class="fig-track" aria-label="Steps">
       {
         STEP_NAMES.map((n, i) => (
