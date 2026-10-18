@@ -24,8 +24,8 @@ describe("satisfactory-dash case study", () => {
       "See it running",
       "Architecture",
       "Key decisions",
-      "How it's built",
-      "What's next",
+      "How it’s built",
+      "What’s next",
       "Links",
     ]);
   });

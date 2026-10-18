@@ -1,0 +1,30 @@
+/* Self-hosted (public/fonts, OFL; from Fontsource 5.3.0). font-display: optional:
+   a font that misses the first ~100 ms is not swapped in, so text never reflows. */
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/fraunces-latin-full-normal.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: optional;
+}
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans-latin-wght-normal.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: optional;
+}
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans-latin-wght-italic.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: optional;
+}
+@font-face {
+  font-family: "Gochi Hand";
+  src: url("/fonts/gochi-hand-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional;
+}

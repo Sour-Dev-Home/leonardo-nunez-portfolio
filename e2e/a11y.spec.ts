@@ -3,14 +3,16 @@ import { expect, test } from "@playwright/test";
 import { PAGES } from "./pages";
 
 for (const { name, path } of PAGES) {
-  test(`${name} has no serious or critical accessibility violations`, async ({ page }) => {
-    // Reduced motion so the fade-in is finished before axe measures contrast.
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(path, { waitUntil: "networkidle" });
-    const { violations } = await new AxeBuilder({ page }).analyze();
-    const blocking = violations.filter((v) => v.impact === "serious" || v.impact === "critical");
-    expect(blocking.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
-  });
+  for (const colorScheme of ["light", "dark"] as const) {
+    test(`${name} has no serious or critical accessibility violations (${colorScheme})`, async ({ page }) => {
+      // Reduced motion so the fade-in is finished before axe measures contrast.
+      await page.emulateMedia({ reducedMotion: "reduce", colorScheme });
+      await page.goto(path, { waitUntil: "networkidle" });
+      const { violations } = await new AxeBuilder({ page }).analyze();
+      const blocking = violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+      expect(blocking.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+    });
+  }
 
   // Checks durations, not opacity: on a fast machine a 500 ms fade can finish
   // before an opacity check runs, so only the durations say whether motion is off.

@@ -1,5 +1,7 @@
 ---
-import "../index.css";
+import "../design/fonts.css";
+import "../design/tokens.css";
+import "../design/base.css";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { buildMeta } from "../lib/meta";
@@ -10,9 +12,11 @@ interface Props {
   /** Root-relative path of this page, e.g. "/" or "/projects/satisfactory-dash". */
   path: string;
   image?: string;
+  /** Keep this page out of search results (the 404 and kit pages). */
+  noindex?: boolean;
 }
 
-const { title, description, path, image } = Astro.props;
+const { title, description, path, image, noindex } = Astro.props;
 const meta = buildMeta({ title, description, path, image }, Astro.site!);
 ---
 
@@ -21,6 +25,9 @@ const meta = buildMeta({ title, description, path, image }, Astro.site!);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preload" href="/fonts/fraunces-latin-full-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{meta.title}</title>
     <link rel="canonical" href={meta.canonical} />
