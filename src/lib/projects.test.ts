@@ -44,6 +44,13 @@ describe("projectSchema", () => {
     expect(() => projectSchema.parse({ ...valid, ogImage: "og.png" })).toThrow();
     expect(projectSchema.parse({ ...valid, ogImage: "/og.png" }).ogImage).toBe("/og.png");
   });
+
+  it("accepts a cover with a root-relative src and an optional focus point", () => {
+    expect(projectSchema.parse({ ...valid, cover: { src: "/covers/p.webp" } }).cover).toEqual({ src: "/covers/p.webp" });
+    expect(projectSchema.parse({ ...valid, cover: { src: "/c.png", focus: "50% 20%" } }).cover?.focus).toBe("50% 20%");
+    expect(() => projectSchema.parse({ ...valid, cover: { src: "c.png" } })).toThrow();
+    expect(() => projectSchema.parse({ ...valid, cover: { src: "/c.png", focus: "top; color: red" } })).toThrow();
+  });
 });
 
 describe("hasCaseStudy", () => {

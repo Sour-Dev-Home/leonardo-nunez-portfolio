@@ -42,6 +42,8 @@ this repo's own verified setup, since it's ahead of `satisfactory-dash` on most 
    same lint/typecheck/test/build gate on it. Review the preview URL (ideally via a
    Chrome-connected session, same as production verification) before merging. Only
    merge to `main` once the preview looks right and CI is green.
+6. **Design changes follow `docs/STYLE.md`.** Check new visuals against it and the
+   `/kit` page, which shows every shared component.
 
 ## Stack
 

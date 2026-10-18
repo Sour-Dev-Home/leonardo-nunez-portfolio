@@ -1,0 +1,41 @@
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 0.75rem;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+.reveal {
+  animation: reveal var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--reveal-index, 0) * 80ms);
+}
+main > :nth-child(2) {
+  --reveal-index: 1;
+}
+main > :nth-child(3) {
+  --reveal-index: 2;
+}
+main > :nth-child(n + 4) {
+  --reveal-index: 3;
+}
+
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur);
+  animation-timing-function: var(--ease-in-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+  /* Zero durations aren't enough: the stagger delays would still pop sections in. */
+  .reveal {
+    animation: none;
+  }
+}

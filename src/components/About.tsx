@@ -1,7 +1,10 @@
 export function About() {
   return (
-    <section id="about" className="section">
-      <h2>About</h2>
+    <section id="background" className="section page reveal">
+      <div className="section-head">
+        <p className="kicker">Background</p>
+        <h2>Where I come from</h2>
+      </div>
       <div className="about-content">
         <p>
           I graduated from Rice University with a BS in Electrical &amp; Computer

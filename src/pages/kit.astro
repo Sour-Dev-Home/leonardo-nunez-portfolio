@@ -1,0 +1,87 @@
+---
+import Shell from "../layouts/Shell.astro";
+import { ProjectCard } from "../components/ProjectCard";
+import Aside from "../design/components/Aside.astro";
+import Callout from "../design/components/Callout.astro";
+import Figure from "../design/components/Figure.astro";
+import Sidenote from "../design/components/Sidenote.astro";
+
+const sample = {
+  name: "Sample project",
+  summary: "A sample card for the kit page.",
+  description: "Shows how a project card looks with a cover that colours on hover.",
+  status: "in-progress" as const,
+  stack: ["Astro", "TypeScript"],
+  order: 0,
+  world: false,
+  cover: { src: "/demo/satisfactory-dash-walkthrough-poster.png" },
+  slug: "satisfactory-dash",
+};
+// A different image: the same URL twice is one request, which the loading tests count.
+const compact = {
+  ...sample,
+  name: "Compact sample",
+  emphasis: "secondary" as const,
+  slug: undefined,
+  cover: { src: "/og/default.png" },
+};
+const swatches = ["paper", "raised", "ink", "ink-soft", "muted", "accent", "rule-soft", "sticky"];
+---
+
+<Shell title="Kit | Leonardo Nunez" description="Every shared component in one place, for visual checks." path="/kit" noindex noteFont>
+  <main>
+    <header class="hero page reveal">
+      <p class="kicker">Design system</p>
+      <h1>Kit</h1>
+    </header>
+
+    <section class="section page reveal">
+      <div class="section-head"><p class="kicker">Type</p><h2>Scale</h2></div>
+      <div class="kit-type">
+        <p class="kit-display" style="font-size:var(--step-4)">Step 4</p>
+        <p class="kit-display" style="font-size:var(--step-3)">Step 3</p>
+        <p class="kit-display" style="font-size:var(--step-2)">Step 2</p>
+        <p style="font-size:var(--step-1)">Step 1, body large</p>
+        <p>Step 0, body text in Public Sans.</p>
+        <p style="font-size:var(--step--1)">Step −1, small print</p>
+      </div>
+    </section>
+
+    <section class="section page reveal">
+      <div class="section-head"><p class="kicker">Colour</p><h2>Palette</h2></div>
+      <ul class="kit-swatches">
+        {swatches.map((s) => <li><span style={`background:var(--${s})`}></span>{s}</li>)}
+      </ul>
+    </section>
+
+    <section class="section page reveal">
+      <div class="section-head"><p class="kicker">Work</p><h2>Card</h2></div>
+      <div class="work-list"><ProjectCard project={sample} /><ProjectCard project={compact} /></div>
+    </section>
+
+    <!-- Laid out like a case study (prose on the left, margin free for sidenotes),
+         not in the two-column section grid, which leaves the margin no room. -->
+    <section class="kit-writing page reveal">
+      <div class="section-head"><p class="kicker">Writing</p><h2>Prose</h2></div>
+      <div class="prose">
+        <p>
+          The last step moved the API from the tunnel on the home PC to the one on AWS. In
+          Cloudflare's dashboard that means editing one route on one tunnel.
+        </p>
+        <Sidenote id="kit-tunnel" lead="don't do what I did">
+          I deleted the whole production tunnel instead of the route. Read the button twice.
+        </Sidenote>
+        <p>
+          The rollback for every step was written down before the window opened, which is why the
+          next part was only a scare.
+        </p>
+        <Aside title="Aside">An aside holds context that's useful but not essential.</Aside>
+        <Callout>A note callout, for something the reader should know.</Callout>
+        <Callout kind="warning">A warning callout, for something that can go wrong.</Callout>
+        <Figure caption="A figure with its caption.">
+          <img src="/diagrams/satisfactory-dash-deployment.svg" width="5070" height="2454" alt="Deployment diagram" />
+        </Figure>
+      </div>
+    </section>
+  </main>
+</Shell>

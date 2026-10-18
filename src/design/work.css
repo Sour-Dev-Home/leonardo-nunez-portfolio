@@ -1,0 +1,144 @@
+.work-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--rule);
+}
+.work-card {
+  position: relative; /* the stretched case-study link fills this box */
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Card covers: one 16:9 slot for every card (see docs/STYLE.md, "Card covers"). */
+.work-card-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--raised);
+  border: 1px solid var(--rule-soft);
+}
+/* Absolutely placed: the slot alone sets the size, never the picture's own shape
+   (which changes the moment it loads). */
+.work-card-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1);
+  transition:
+    filter var(--dur) var(--ease-out),
+    scale var(--dur) var(--ease-out);
+}
+
+/* The title link covers the whole card, so a click anywhere opens the case study. */
+.work-card-link {
+  color: var(--ink);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.work-card-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.work-card-link::after {
+  content: "→";
+  display: inline-block;
+  margin-left: 0.3em;
+  opacity: 0;
+  translate: -0.3em 0;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    translate var(--dur) var(--ease-out);
+}
+.work-card-link:focus-visible {
+  outline: none; /* the whole card gets the ring instead */
+}
+.work-card:has(.work-card-link:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: var(--space-2);
+}
+
+/* Hover or keyboard focus: the cover colours in, the title points the way. */
+.work-card:hover .work-card-media img,
+.work-card:focus-within .work-card-media img {
+  filter: none;
+}
+.work-card:has(.work-card-link):hover .work-card-media img,
+.work-card:has(.work-card-link:focus-visible) .work-card-media img {
+  scale: 1.03;
+}
+.work-card:hover .work-card-link,
+.work-card-link:focus-visible {
+  color: var(--accent);
+}
+.work-card:hover .work-card-link::after,
+.work-card-link:focus-visible::after {
+  opacity: 1;
+  translate: 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .work-card .work-card-media img {
+    scale: none;
+  }
+}
+/* Touch screens can't hover: show the colour (see the plan's ruling). */
+@media (hover: none) {
+  .work-card-media img {
+    filter: none;
+  }
+}
+
+.project-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.project-card-header h3 {
+  margin: 0;
+  font-size: var(--step-2);
+}
+.work-card-summary {
+  margin: var(--space-2) 0;
+  max-width: 48ch;
+}
+.badge {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid currentColor;
+  padding: 0 var(--space-2);
+}
+.stack-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+.project-links {
+  position: relative; /* above the stretched link, so these stay clickable */
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  font-weight: 600;
+}
+
+/* Secondary projects: smaller title; a cover becomes a thumbnail beside the text. */
+.project-card-compact .project-card-header h3 {
+  font-size: var(--step-1);
+}
+@media (min-width: 48rem) {
+  .project-card-compact:has(.work-card-media) {
+    grid-template-columns: 14rem 1fr;
+    align-items: start;
+    gap: var(--space-5);
+  }
+}

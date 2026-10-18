@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse, type HTMLElement } from "node-html-parser";
 
@@ -22,4 +22,18 @@ export function metaContent(doc: HTMLElement, selector: string): string | undefi
 
 export function hrefs(doc: HTMLElement): string[] {
   return doc.querySelectorAll("a[href]").map((a) => a.getAttribute("href") ?? "");
+}
+
+/** All CSS the build ships: stylesheet files plus <style> blocks inlined into pages. */
+export function builtCss(): string {
+  const astroDir = join(DIST, "_astro");
+  const files = existsSync(astroDir)
+    ? readdirSync(astroDir)
+        .filter((f) => f.endsWith(".css"))
+        .map((f) => readFileSync(join(astroDir, f), "utf-8"))
+    : [];
+  const inline = readdirSync(DIST, { recursive: true, encoding: "utf-8" })
+    .filter((f) => f.endsWith(".html"))
+    .flatMap((f) => page(f.replace(/\\/g, "/")).querySelectorAll("style").map((s) => s.text));
+  return [...files, ...inline].join("\n");
 }

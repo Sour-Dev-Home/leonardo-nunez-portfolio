@@ -3,12 +3,11 @@ import { describe, it, expect } from "vitest";
 import { Header } from "./Header";
 
 describe("Header", () => {
-  it("uses root-relative hrefs so section links still resolve from a non-home page", () => {
+  it("links to the work and contact sections from any page, and to the About page", () => {
     render(<Header />);
-    for (const name of ["About", "Projects", "Skills", "Contact"]) {
-      const link = screen.getByRole("link", { name });
-      expect(link.getAttribute("href")).toMatch(/^\/#/);
-    }
+    expect(screen.getByRole("link", { name: "Work" })).toHaveAttribute("href", "/#work");
+    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
+    expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "/#contact");
   });
 
   it("links the brand back to home, scrolling to top on a same-document navigation", () => {

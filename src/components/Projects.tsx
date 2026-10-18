@@ -7,9 +7,11 @@ interface ProjectsProps {
 
 export function Projects({ projects }: ProjectsProps) {
   return (
-    <section id="projects" className="section">
-      <h2>Projects</h2>
-      <div className="projects-grid">
+    <section id="work" className="section page reveal">
+      <div className="section-head">
+        <h2>Work</h2>
+      </div>
+      <div className="work-list">
         {projects.map((project) => (
           <ProjectCard key={project.name} project={project} />
         ))}
