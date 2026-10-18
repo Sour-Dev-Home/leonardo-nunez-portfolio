@@ -76,6 +76,12 @@ export const CUTOVER: { desktop: CutoverLayout; phone: CutoverLayout } = {
     dump: "M95 52 V44 Q95 40 99 40 H392 Q396 40 396 44 V52",
     restore: "M396 52 V44 Q396 40 400 40 H681 Q685 40 685 44 V52",
     agentWire: "M95 254 H396",
+    // Hand-drawn like the phone's: both leave from behind the tunnel's disc and climb at x 352, well left
+    // of the right-aligned CLOUDFLARE label (CI's fonts set it wider; at x 378 the route touched its "C").
+    routes: {
+      pc: "M396 240 H356 Q352 240 352 236 V180 Q352 176 348 176 H259 Q255 176 255 172 V86 Q255 82 251 82 H239",
+      aws: "M396 240 H356 Q352 240 352 236 V180 Q352 176 356 176 H531 Q535 176 535 172 V86 Q535 82 539 82 H551",
+    },
   },
   // Phones: panels stacked, drawn without a shift. The backends sit on the right of each area so both
   // routes can come up or down the right-hand margin and enter from the side, never crossing a station.
