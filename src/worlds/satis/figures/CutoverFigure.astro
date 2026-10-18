@@ -1,22 +1,13 @@
 ---
 // Figure 2: the move from the PC to AWS, step by reversible step (../model/cutover.ts, from the runbook).
-// The first frame is static markup; cutover-view.ts wires the stepper when the figure scrolls into view.
-import Station from "../Station.astro";
+// The first frame is static markup (a desktop and a phone drawing); cutover-view.ts wires the stepper on
+// whichever drawing is showing, when the figure scrolls into view.
+import CutoverDrawing from "./CutoverDrawing.astro";
 import Goals from "../../../design/figure/Goals.astro";
 import Controls from "../../../design/figure/Controls.astro";
-import { CUTOVER, routePath } from "./layouts";
-import { COPY, STEP_NAMES, viewAt } from "../model/cutover";
+import { COPY, STEP_NAMES } from "../model/cutover";
 import "../../../design/figure/figure.css";
 import "../world.css";
-
-const d = CUTOVER.desktop;
-const v = viewAt(0);
-const ZONES = [
-  ["pc", "GAMING PC"],
-  ["off", "OFF-SITE BACKUPS"],
-  ["cf", "CLOUDFLARE"],
-  ["aws", "AWS"],
-] as const;
 ---
 
 <Goals
@@ -26,39 +17,8 @@ const ZONES = [
   ]}
 />
 <figure class="fig" data-figure="cutover">
-  <svg data-layout="desktop" viewBox={`0 0 ${d.w} ${d.h}`} role="img" aria-label="The cutover from the gaming PC to AWS, step by step.">
-    {ZONES.map(([z]) => <rect class={`zbg zbg-${z}`} x={d.panels[z].x} y={d.panels[z].y} width={d.panels[z].w} height={d.panels[z].h} rx="12" />)}
-    {
-      ZONES.map(([z, name]) => (
-        <text class={`zlabel zlabel-${z}`} x={d.panels[z].label.x} y={d.panels[z].label.y} text-anchor={d.panels[z].anchor}>
-          {name}
-        </text>
-      ))
-    }
-    <g transform={`translate(0 ${d.shift})`}>
-      <path class="wire" id="wPc" d={`M${d.pcDb.x} ${d.pcDb.y} H${d.pcBackend.x}`}></path>
-      <path class="wire idle" id="wAws" d={`M${d.awsBackend.x} ${d.awsBackend.y} H${d.rds.x}`}></path>
-      <path class="wire" id="wAgent" d={`M${d.agent.x} ${d.agent.y} H${d.tunnel.x}`}></path>
-      <path id="pDump" class="path-dump" d={d.dump}></path>
-      <path id="pRestore" class="path-dump" d={d.restore}></path>
-      <path id="routePc" class="route" d={routePath(d, "pc")}></path>
-      <path id="routeAws" class="route" d={routePath(d, "aws")} style="opacity:0"></path>
-      <g data-dots></g>
-      <Station kind="db" id="pcDb" zone="pc" x={d.pcDb.x} y={d.pcDb.y} label="PostgreSQL" sub={v.pcDbNote} />
-      <Station kind="rack" id="pcBackend" zone="pc" x={d.pcBackend.x} y={d.pcBackend.y} label="Backend" sub={v.pcBackendNote} />
-      <Station kind="bucket" id="b2" zone="off" x={d.b2.x} y={d.b2.y} label="Backblaze B2" sub={v.b2Note} />
-      <Station kind="rack" id="awsBackend" zone="aws" mode="idle" x={d.awsBackend.x} y={d.awsBackend.y} label="Backend" sub={v.awsBackendNote} />
-      <Station kind="db" id="rds" zone="aws" mode="idle" x={d.rds.x} y={d.rds.y} label="PostgreSQL" sub={v.rdsNote} />
-      <g transform={`translate(${d.rds.x + 22} ${d.rds.y - 20})`}>
-        <g class="check" data-check>
-          <circle r="8" fill="var(--satis-ok)"></circle>
-          <path d="M-3.5 0 l2.5 2.5 l4.5 -5" stroke="#12301f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-        </g>
-      </g>
-      <Station kind="pc" id="agent" zone="pc" x={d.agent.x} y={d.agent.y} label="Agent" sub={v.agentNote} />
-      <Station kind="tunnel" id="tunnel" zone="cf" x={d.tunnel.x} y={d.tunnel.y} label="Tunnel" sub="api.satis-manager.com" />
-    </g>
-  </svg>
+  <CutoverDrawing layout="desktop" />
+  <CutoverDrawing layout="phone" />
   <Controls label="Cutover figure controls" speed={false} play={false}>
     <button class="fig-tbtn" type="button" data-prev disabled>↶ Roll back</button>
     <ol class="fig-track" aria-label="Steps">
@@ -83,9 +43,10 @@ const ZONES = [
 
 <script>
   import { whenVisible } from "../../../design/figure/lazy";
+  import { mountResponsive } from "../../../design/figure/responsive";
   for (const el of document.querySelectorAll<HTMLElement>('figure[data-figure="cutover"]')) {
     whenVisible(el, () => {
-      void import("./cutover-view").then((m) => m.mount(el));
+      void import("./cutover-view").then((m) => mountResponsive(el, m.mount));
     });
   }
 </script>

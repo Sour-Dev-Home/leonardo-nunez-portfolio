@@ -16,7 +16,7 @@ export function labelCollisions(page: Page, root: string): Promise<string[]> {
       const m = path.getScreenCTM()!;
       for (let d = 0; d <= vis; d += 2) {
         const p = path.getPointAtLength(d).matrixTransform(m);
-        for (const { n, r } of texts) if (p.x > r.left - 2 && p.x < r.right + 2 && p.y > r.top - 2 && p.y < r.bottom + 2) out.add(`${path.id || path.getAttribute("class")} x ${n}`);
+        for (const { n, r } of texts) if (p.x > r.left - 2 && p.x < r.right + 2 && p.y > r.top - 2 && p.y < r.bottom + 2) out.add(`${path.dataset.path || path.getAttribute("class")} x ${n}`);
       }
     }
     return [...out];

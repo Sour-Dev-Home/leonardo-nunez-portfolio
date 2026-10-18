@@ -110,6 +110,9 @@
   font-weight: 500;
   font-size: 10.5px;
 }
+.st .lbl.side {
+  text-anchor: start;
+}
 .st[data-click] {
   cursor: pointer;
 }

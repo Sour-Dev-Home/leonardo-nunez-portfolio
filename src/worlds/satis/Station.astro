@@ -12,8 +12,11 @@ interface Props {
   /** Makes the station a pointer shortcut for a figure action (its value names that action). */
   clickable?: string;
   mode?: "live" | "idle" | "down";
+  /** Labels under the icon, or beside it on the right (stations stacked vertically on phones). */
+  labels?: "below" | "right";
 }
-const { kind, x, y, label, sub, id, zone, clickable, mode = "live" } = Astro.props;
+const { kind, x, y, label, sub, id, zone, clickable, mode = "live", labels = "below" } = Astro.props;
+const side = labels === "right";
 const cls = ["st", zone && `st-${zone}`, mode].filter(Boolean).join(" ");
 ---
 
@@ -74,6 +77,18 @@ const cls = ["st", zone && `st-${zone}`, mode].filter(Boolean).join(" ");
       </>
     )
   }
-  {label && <text class="lbl" y="52">{label}</text>}
-  {sub && <text class="lbl dim" data-sub y="66">{sub}</text>}
+  {
+    label && (
+      <text class:list={["lbl", { side }]} x={side ? 46 : 0} y={side ? -3 : 52}>
+        {label}
+      </text>
+    )
+  }
+  {
+    sub && (
+      <text class:list={["lbl dim", { side }]} data-sub x={side ? 46 : 0} y={side ? 11 : 66}>
+        {sub}
+      </text>
+    )
+  }
 </g>

@@ -12,6 +12,22 @@
   height: auto;
   display: block;
 }
+/* A figure renders a desktop and a phone drawing; this shows the one that fits before any script runs.
+   Below 40rem the phone composition (vertical) replaces a shrunken desktop one. */
+.fig svg[data-layout="phone"] {
+  display: none;
+}
+@media (max-width: 40rem) {
+  .fig svg[data-layout="desktop"] {
+    display: none;
+  }
+  .fig svg[data-layout="phone"] {
+    display: block;
+  }
+}
+.fig svg[hidden] {
+  display: none !important;
+}
 .fig-bar {
   display: flex;
   flex-wrap: wrap;

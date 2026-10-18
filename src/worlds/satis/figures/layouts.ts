@@ -39,6 +39,10 @@ export interface CutoverLayout {
   gutter: number;
   dump: string;
   restore: string;
+  /** The agent's link to the tunnel. */
+  agentWire: string;
+  /** Hand-drawn routes where the computed one would cross a station (phones). */
+  routes?: { pc: string; aws: string };
 }
 
 // Outage: left to right on desktop (prototype v6); top to bottom on phones, the queue a vertical pill.
@@ -71,26 +75,35 @@ export const CUTOVER: { desktop: CutoverLayout; phone: CutoverLayout } = {
     agent: { x: 95, y: 254 }, tunnel: { x: 396, y: 254 }, routeExit: { x: 378, y: 236 }, gutter: 176,
     dump: "M95 52 V44 Q95 40 99 40 H392 Q396 40 396 44 V52",
     restore: "M396 52 V44 Q396 40 400 40 H681 Q685 40 685 44 V52",
+    agentWire: "M95 254 H396",
   },
+  // Phones: panels stacked, drawn without a shift. The backends sit on the right of each area so both
+  // routes can come up or down the right-hand margin and enter from the side, never crossing a station.
   phone: {
-    w: 340, h: 760, shift: 16,
+    w: 340, h: 780, shift: 0,
     panels: {
-      pc: { x: 8, y: 30, w: 324, h: 250, label: { x: 20, y: 47 }, anchor: "start" },
-      cf: { x: 8, y: 296, w: 324, h: 120, label: { x: 320, y: 313 }, anchor: "end" },
-      off: { x: 8, y: 432, w: 324, h: 130, label: { x: 20, y: 449 }, anchor: "start" },
-      aws: { x: 8, y: 578, w: 324, h: 170, label: { x: 20, y: 595 }, anchor: "start" },
+      pc: { x: 8, y: 30, w: 324, h: 262, label: { x: 20, y: 47 }, anchor: "start" },
+      cf: { x: 8, y: 308, w: 324, h: 140, label: { x: 320, y: 325 }, anchor: "end" },
+      off: { x: 8, y: 464, w: 324, h: 140, label: { x: 20, y: 481 }, anchor: "start" },
+      aws: { x: 8, y: 620, w: 324, h: 150, label: { x: 20, y: 637 }, anchor: "start" },
     },
-    pcDb: { x: 95, y: 82 }, pcBackend: { x: 245, y: 82 }, agent: { x: 95, y: 200 }, tunnel: { x: 170, y: 330 },
-    b2: { x: 170, y: 470 }, awsBackend: { x: 95, y: 626 }, rds: { x: 245, y: 626 },
-    routeExit: { x: 152, y: 312 }, gutter: 288,
-    dump: "M24 82 H8 V470 H136",
-    restore: "M204 470 H332 V626 H279",
+    pcDb: { x: 95, y: 100 }, pcBackend: { x: 245, y: 100 }, agent: { x: 95, y: 215 }, tunnel: { x: 170, y: 370 },
+    b2: { x: 170, y: 525 }, rds: { x: 95, y: 680 }, awsBackend: { x: 245, y: 680 },
+    routeExit: { x: 152, y: 352 }, gutter: 300,
+    dump: "M61 100 H18 Q14 100 14 104 V521 Q14 525 18 525 H136",
+    restore: "M136 525 H18 Q14 525 14 529 V676 Q14 680 18 680 H61",
+    agentWire: "M95 215 H166 Q170 215 170 219 V370",
+    routes: {
+      pc: "M152 352 V304 Q152 300 156 300 H281 Q285 300 285 296 V104 Q285 100 281 100 H269",
+      aws: "M188 352 H318 Q322 352 322 356 V676 Q322 680 318 680 H269",
+    },
   },
 };
 
 /** The route from the tunnel to a backend: up to the gutter, across, up beside the backend, in from the
  *  side facing the tunnel. Always clear of labels (e2e collision test). */
 export function routePath(l: CutoverLayout, to: "pc" | "aws"): string {
+  if (l.routes) return l.routes[to];
   const b = to === "pc" ? l.pcBackend : l.awsBackend;
   const side = b.x < l.tunnel.x ? 1 : -1; // enter from the side facing the tunnel
   const bx = b.x + side * 40;

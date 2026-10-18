@@ -10,7 +10,7 @@ test.describe("outage figure", () => {
     await page.goto("/kit");
     const box = await page.locator(OUT).boundingBox();
     expect(box!.height).toBeGreaterThan(200);
-    await expect(page.locator(`${OUT} [data-station="backend"]`).first()).toBeVisible();
+    await expect(page.locator(`${OUT} svg[data-layout]:visible [data-station="backend"]`)).toBeVisible();
   });
 
   test("taking the backend down sends errors back and ticks the goals", async ({ page }) => {
@@ -53,7 +53,8 @@ test.describe("outage figure", () => {
     await page.goto("/kit");
     await page.locator(OUT).scrollIntoViewIfNeeded();
     await expect(page.locator(`${OUT} button[data-playpause]`)).toHaveAttribute("data-ready", "");
-    await page.locator(`${OUT} svg[data-layout]:visible [data-station="backend"]`).click();
+    // The centre of the icon (34, 34 from the disc's corner), not the gap beside it where phones put the labels.
+    await page.locator(`${OUT} svg[data-layout]:visible [data-station="backend"]`).click({ position: { x: 34, y: 34 } });
     await expect(page.locator(`${OUT} button[data-toggle="backend"]`)).toHaveAttribute("aria-pressed", "true");
   });
 
@@ -94,7 +95,8 @@ test.describe("cutover figure", () => {
     await page.waitForTimeout(1300);
     await expect(page.locator('[data-goal="switch"]')).toHaveClass(/done/);
     const offs = await page.evaluate(
-      (sel) => ["routePc", "routeAws"].map((id) => parseFloat(getComputedStyle(document.querySelector(`${sel} svg[data-layout]:not([hidden]) #${id}`)!).strokeDashoffset)),
+      (sel) =>
+        ["routePc", "routeAws"].map((name) => parseFloat(getComputedStyle(document.querySelector(`${sel} svg[data-layout]:not([hidden]) [data-path="${name}"]`)!).strokeDashoffset)),
       CUT,
     );
     expect(offs[1]).toBeCloseTo(0, 0);
@@ -133,9 +135,7 @@ test.describe("cutover figure", () => {
   });
 
   test("no line crosses a label at any step or mid-switch", async ({ page, viewport }) => {
-    // PHONE-LAYOUT-PENDING (plan Task 9): until the vertical composition lands, phones show the desktop
-    // drawing at ~43% scale, where the 2 px margin is too tight. Task 9 removes this line.
-    test.fixme(viewport!.width < 640, "phones get their own composition in Task 9");
+    test.skip(viewport!.width < 640, "phones: covered step by step in 'the cutover on a phone'");
     await readyCutover(page);
     expect(await labelCollisions(page, CUT)).toEqual([]);
     for (let i = 1; i <= 5; i++) {
@@ -151,8 +151,50 @@ test.describe("cutover figure", () => {
     }
   });
 
-  test("has no step numbers in its track", async ({ page }) => {
+  test("has no step numbers in its track (cutover)", async ({ page }) => {
     await page.goto("/kit");
     expect(await page.locator(`${CUT} .fig-track`).innerText()).not.toMatch(/\d/);
+  });
+});
+
+test.describe("figures on phones", () => {
+  test("use their vertical composition below 40rem, with readable labels and no collisions", async ({ page, viewport }) => {
+    test.skip(viewport!.width > 640, "phones only");
+    await page.goto("/kit");
+    for (const sel of [OUT, CUT]) {
+      await page.locator(sel).scrollIntoViewIfNeeded();
+      await expect(page.locator(`${sel} svg[data-layout="phone"]`)).toBeVisible();
+      await expect(page.locator(`${sel} svg[data-layout="desktop"]`)).toBeHidden();
+      const smallest = await page
+        .locator(`${sel} svg[data-layout="phone"] text`)
+        .evaluateAll((ts) => Math.min(...ts.filter((t) => t.textContent).map((t) => t.getBoundingClientRect().height)));
+      expect(smallest).toBeGreaterThanOrEqual(9); // rendered px: not a shrunken desktop drawing
+      expect(await labelCollisions(page, sel)).toEqual([]);
+    }
+  });
+
+  test("the cutover on a phone: no line crosses a label at any step", async ({ page, viewport }) => {
+    test.skip(viewport!.width > 640, "phones only");
+    await readyCutover(page);
+    for (let i = 1; i <= 5; i++) {
+      await page.locator(`${CUT} button[data-next]`).click();
+      await page.waitForTimeout(i === 2 || i === 3 ? 1700 : 1300);
+      expect(await labelCollisions(page, CUT)).toEqual([]);
+    }
+  });
+
+  test("resizing across the breakpoint remounts once, without leftovers (Review Focus 4)", async ({ page, viewport }) => {
+    test.skip(viewport!.width !== 1280, "one run is enough");
+    await page.goto("/kit");
+    await page.locator(OUT).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(1500);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.waitForTimeout(800);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.waitForTimeout(1500);
+    expect(await page.locator(`${OUT} svg[data-layout="phone"] [data-dots] *`).count()).toBe(0);
+    expect(await page.locator(`${OUT} svg[data-layout="desktop"] [data-dots] circle`).count()).toBeLessThanOrEqual(13);
+    await page.locator(`${OUT} button[data-toggle="backend"]`).click();
+    await expect(page.locator(`${OUT} button[data-toggle="backend"]`)).toHaveAttribute("aria-pressed", "true"); // one toggle, not two that cancel out
   });
 });

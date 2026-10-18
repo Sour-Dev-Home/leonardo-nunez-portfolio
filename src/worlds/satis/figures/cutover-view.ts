@@ -21,7 +21,9 @@ export function mount(root: HTMLElement): () => void {
   const reduced = prefersReducedMotion();
   const $ = <T extends Element = Element>(sel: string) => svg.querySelector<T>(sel)!;
   const dots = $<SVGGElement>("[data-dots]");
-  const routes = { pc: $<SVGPathElement>("#routePc"), aws: $<SVGPathElement>("#routeAws") };
+  const path = (name: string) => $<SVGPathElement>(`[data-path="${name}"]`);
+  const routes = { pc: path("routePc"), aws: path("routeAws") };
+  const agentWire = path("wAgent");
   const LEN = { pc: routes.pc.getTotalLength(), aws: routes.aws.getTotalLength() };
   for (const k of ["pc", "aws"] as const) {
     routes[k].style.strokeDasharray = `${LEN[k]} ${LEN[k]}`;
@@ -60,9 +62,9 @@ export function mount(root: HTMLElement): () => void {
     $(`[data-station="b2"] [data-fill]`).setAttribute("opacity", v.b2HasDump ? "1" : "0");
     $(`[data-station="rds"] [data-fill]`).setAttribute("opacity", v.countsMatch ? "0.9" : "0");
     $("[data-check]").classList.toggle("on", v.countsMatch);
-    $("#wPc").classList.toggle("idle", v.pcBackend !== "live");
-    $("#wAws").classList.toggle("idle", v.awsBackend !== "live");
-    $("#wAgent").classList.toggle("idle", v.agent !== "live");
+    path("wPc").classList.toggle("idle", v.pcBackend !== "live");
+    path("wAws").classList.toggle("idle", v.awsBackend !== "live");
+    agentWire.classList.toggle("idle", v.agent !== "live");
     const to = v.route === "aws" ? 1 : 0;
     if (reduced) r = to;
     else if (to !== r && rTween?.to !== to) rTween = { from: r, to, t0: t };
@@ -76,20 +78,20 @@ export function mount(root: HTMLElement): () => void {
   }
 
   // The final dump (and then the restore) travels along its arc; Next and Roll back wait for it to land.
-  function carryAlong(pathSel: string, done: () => void) {
-    const path = $<SVGPathElement>(pathSel);
+  function carryAlong(name: string, done: () => void) {
+    const arc = path(name);
     if (reduced) return done();
-    path.classList.add("on");
+    arc.classList.add("on");
     const el = document.createElementNS(NS, "rect");
     for (const [k, val] of [["x", "-6"], ["y", "-5"], ["width", "12"], ["height", "10"], ["rx", "2"], ["fill", "var(--satis-backup)"]]) el.setAttribute(k, val);
     dots.appendChild(el);
     carry = {
-      path,
+      path: arc,
       el,
       t0: t,
       done: () => {
         el.remove();
-        path.classList.remove("on");
+        arc.classList.remove("on");
         carry = null;
         done();
       },
@@ -104,31 +106,33 @@ export function mount(root: HTMLElement): () => void {
     if (to > from && (to === 2 || to === 3)) {
       render(to - 1);
       caption.textContent = COPY[to].caption;
-      carryAlong(to === 2 ? "#pDump" : "#pRestore", () => render(to));
+      carryAlong(to === 2 ? "pDump" : "pRestore", () => render(to));
       return;
     }
     render(to);
   }
 
-  // Agent → tunnel → route → the live backend → its database (the backend stores every snapshot).
-  const snapshotPath = (): P[] => {
+  // Agent → tunnel (the drawn wire) → the live route (the drawn path) → that backend → its database.
+  // Following the drawn paths keeps snapshots on the lines in both layouts, with no geometry repeated.
+  const snapshotAt = (u: number): P => {
     const aws = r >= 1;
+    const route = aws ? routes.aws : routes.pc;
     const b = aws ? L.awsBackend : L.pcBackend;
     const db = aws ? L.rds : L.pcDb;
-    const bx = b.x + (b.x < L.tunnel.x ? 40 : -40);
-    return [[L.agent.x, L.agent.y], [L.routeExit.x, L.agent.y], [L.routeExit.x, L.gutter], [bx, L.gutter], [bx, b.y], [b.x, b.y], [db.x, db.y]];
-  };
-  const along = (pts: P[], u: number): P => {
-    const segs = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
-    let d = u * segs.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < segs.length; i++) {
-      if (d <= segs[i]) {
-        const k = segs[i] ? d / segs[i] : 0;
-        return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * k, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * k];
-      }
-      d -= segs[i];
+    const legs = [agentWire.getTotalLength(), route.getTotalLength(), Math.abs(b.x - db.x)];
+    let d = u * (legs[0] + legs[1] + legs[2]);
+    if (d <= legs[0]) {
+      const p = agentWire.getPointAtLength(d);
+      return [p.x, p.y];
     }
-    return pts[pts.length - 1];
+    d -= legs[0];
+    if (d <= legs[1]) {
+      const p = route.getPointAtLength(d);
+      return [p.x, p.y];
+    }
+    d -= legs[1];
+    const k = legs[2] ? d / legs[2] : 1;
+    return [b.x + (db.x - b.x) * k, b.y];
   };
 
   function frame(dt: number) {
@@ -161,7 +165,7 @@ export function mount(root: HTMLElement): () => void {
     }
     flows = flows.filter((f) => {
       const p = Math.min(1, (t - f.t0) / SNAP_S);
-      const [x, y] = along(snapshotPath(), ease.inOutCubic(p));
+      const [x, y] = snapshotAt(ease.inOutCubic(p));
       f.el.setAttribute("transform", `translate(${x} ${y})`);
       if (p >= 1 || (!sending && p < 0.05)) {
         f.el.remove();
