@@ -97,8 +97,7 @@
 }
 .fig-ibtn:focus-visible,
 .fig-tbtn:focus-visible,
-.fig-range:focus-visible,
-.fig [data-station]:focus-visible {
+.fig-range:focus-visible {
   outline: 2px solid var(--fig-accent);
   outline-offset: 2px;
 }

@@ -3,7 +3,7 @@
 // agent runs. Under reduced motion every move is instant; the stepper still steps.
 import { COPY, LAST_STEP, viewAt, type CutoverView } from "../model/cutover";
 import { ease } from "../../../design/figure/ease";
-import { prefersReducedMotion, startLoop } from "../../../design/figure/loop";
+import { prefersReducedMotion, startLoop, whileOnScreen } from "../../../design/figure/loop";
 import { tickGoal } from "../../../design/figure/controls";
 import { visibleSvg } from "./outage-view";
 import { CUTOVER, type CutoverLayout } from "./layouts";
@@ -15,7 +15,12 @@ const SWITCH_S = 1.1;
 const CARRY_S = 1.3;
 const SNAP_S = 2.0;
 
-export function mount(root: HTMLElement): () => void {
+/** What survives a remount (rotating a phone): the step the reader is on. */
+export interface CutoverKept {
+  step: number;
+}
+
+export function mount(root: HTMLElement, kept: Partial<CutoverKept> = {}): () => void {
   const svg = visibleSvg(root);
   const L: CutoverLayout = svg.dataset.layout === "phone" ? CUTOVER.phone : CUTOVER.desktop;
   const reduced = prefersReducedMotion();
@@ -35,9 +40,9 @@ export function mount(root: HTMLElement): () => void {
   const caption = root.querySelector<HTMLElement>(".fig-caption")!;
   const rollback = root.querySelector<HTMLElement>(".fig-rollback")!;
 
-  let step = 0;
+  let step = kept.step ?? 0;
   let t = 0;
-  let r = 0; // 0: the route goes to the PC backend; 1: to the AWS backend
+  let r = viewAt(step).route === "aws" ? 1 : 0; // 0: the route goes to the PC backend; 1: to the AWS backend
   let rTween: { from: number; to: number; t0: number } | null = null;
   let carry: { path: SVGPathElement; el: SVGRectElement; t0: number; done: () => void } | null = null;
   let flows: { el: SVGCircleElement; t0: number }[] = [];
@@ -68,14 +73,25 @@ export function mount(root: HTMLElement): () => void {
     const to = v.route === "aws" ? 1 : 0;
     if (reduced) r = to;
     else if (to !== r && rTween?.to !== to) rTween = { from: r, to, t0: t };
-    caption.textContent = COPY[s].caption;
-    rollback.innerHTML = s ? `<b>↶ Rollback:</b> ${COPY[s].rollback}` : "";
-    root.querySelectorAll(".fig-track .stp").forEach((li, i) => (li.className = "stp" + (i + 1 < s ? " done" : i + 1 === s ? " now" : "")));
-    root.querySelectorAll(".fig-track .conn").forEach((c, i) => c.classList.toggle("on", s >= i + 2));
+    words(s);
+    track(s);
     // aria-disabled, not disabled: a disabled button drops keyboard focus to <body>; go() ignores the press.
     prev.setAttribute("aria-disabled", String(s === 0));
     next.setAttribute("aria-disabled", String(s === LAST_STEP));
     if (s === LAST_STEP) tickGoal(root, "switch");
+    loop.wake();
+  }
+
+  // The step track follows the press at once, even while the dump is still on its way to its step's drawing.
+  function track(s: number) {
+    root.querySelectorAll(".fig-track .stp").forEach((li, i) => (li.className = "stp" + (i + 1 < s ? " done" : i + 1 === s ? " now" : "")));
+    root.querySelectorAll(".fig-track .conn").forEach((c, i) => c.classList.toggle("on", s >= i + 2));
+  }
+
+  // A step's caption and its rollback always change together, including while the dump is on its way.
+  function words(s: number) {
+    caption.textContent = COPY[s].caption;
+    rollback.innerHTML = s ? `<b>↶ Rollback:</b> ${COPY[s].rollback}` : "";
   }
 
   // The final dump (and then the restore) travels along its arc; Next and Roll back wait for it to land.
@@ -102,11 +118,12 @@ export function mount(root: HTMLElement): () => void {
   function go(to: number) {
     if (carry || to < 0 || to > LAST_STEP) return; // busy: a press during the dump is ignored (Review Focus 3)
     const from = step;
-    step = to;
+    step = kept.step = to;
     if (to < from) tickGoal(root, "back");
     if (to > from && (to === 2 || to === 3)) {
       render(to - 1);
-      caption.textContent = COPY[to].caption;
+      words(to);
+      track(to);
       carryAlong(to === 2 ? "pDump" : "pRestore", () => render(to));
       return;
     }
@@ -174,24 +191,31 @@ export function mount(root: HTMLElement): () => void {
       }
       return true;
     });
+    // Nothing left to move: the loop sleeps until the next render wakes it.
+    return !!(rTween || carry || flows.length || (sending && !reduced));
   }
 
   // The stepper always runs (the route and the dump animate); under reduced motion every move is instant.
   const loop = startLoop(frame, { autoplay: true });
+  const offScreen = whileOnScreen(root, loop);
   const onNext = () => go(step + 1);
   const onPrev = () => go(step - 1);
   const onReset = () => {
     if (carry) return;
-    step = 0;
+    step = kept.step = 0;
     render(0);
   };
   next.addEventListener("click", onNext);
   prev.addEventListener("click", onPrev);
   reset.addEventListener("click", onReset);
-  render(0);
+  render(step);
   frame(0);
   next.setAttribute("data-ready", "");
   return () => {
+    // Unmounted mid-dump (a rotation): the step has already moved on, so the next mount draws it landed.
+    if (carry) carry.path.classList.remove("on");
+    carry = null;
+    offScreen();
     loop.destroy();
     next.removeEventListener("click", onNext);
     prev.removeEventListener("click", onPrev);

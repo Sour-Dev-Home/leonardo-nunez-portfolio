@@ -62,6 +62,11 @@ describe("satisfactory-dash case study", () => {
     expect(links).toContain("https://satis-manager.com");
   });
 
+  it("links an issue number to that issue, not to a file", () => {
+    const a = doc.querySelectorAll(".case-study-body a").find((l) => l.text.trim() === "#425");
+    expect(a?.getAttribute("href")).toBe("https://github.com/Sour-Dev-Home/satisfactory-dash/issues/425");
+  });
+
   it("tells how it was built in a sidenote: three agents first, then lanes", () => {
     const notes = doc.querySelectorAll(".case-study-body .sidenote-note").map((n) => n.text);
     expect(notes.some((t) => /architect/.test(t) && /lanes/i.test(t))).toBe(true);

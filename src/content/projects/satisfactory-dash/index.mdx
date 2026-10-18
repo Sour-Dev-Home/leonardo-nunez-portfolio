@@ -46,7 +46,7 @@ Anything the agent can't deliver yet waits in its <span class="tok">queue</span>
 
 When the link breaks, something has to give. The system picks availability: the dashboard keeps answering with the last snapshot it has, [marked stale](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/frontend/src/components/DataAge.tsx), rather than going blank, and the agent keeps collecting. The cost is consistency: history arrives late, and if the outage outlasts the queue (about ten minutes of snapshots, [agentRunner.ts](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/agent/src/agentRunner.ts)), the oldest readings are <span class="tok tok-dropped"><i>○</i>dropped</span> for good ([queue.ts](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/agent/src/queue.ts)). For a live dashboard, the newest data matters most.
 
-The figure's database toggle shows one more split: with the database down, the backend stays up and says so, and nothing restarts it. AWS only checks that the backend's process is alive; an outside monitor watches the database ([#425](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/infra/aws/ecs.tf#L22)).
+The figure's database toggle shows one more split: with the database down, the backend stays up and says so, and nothing restarts it. AWS only checks that the backend's process is alive; an outside monitor watches the database ([#425](https://github.com/Sour-Dev-Home/satisfactory-dash/issues/425)).
 
 ## The move to AWS
 
