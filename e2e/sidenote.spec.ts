@@ -27,6 +27,12 @@ test("on a phone the psst toggle works from the keyboard, with visible focus", a
   await expect(page.locator(".sidenote-note").first()).toBeVisible();
 });
 
+test("the toggle's accessible name includes what it shows", async ({ page }, info) => {
+  test.skip(info.project.name === "desktop-1280", "wide screens show the note in the margin, with no toggle");
+  await page.goto("/kit");
+  await expect(page.locator(".sidenote-checkbox").first()).toHaveAccessibleName(/psst/i);
+});
+
 test("on a phone the sidenote hides behind a psst toggle that opens it", async ({ page }, info) => {
   test.skip(!info.project.name.startsWith("phone"), "toggle is for narrow screens");
   await page.goto("/kit");

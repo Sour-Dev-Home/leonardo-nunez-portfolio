@@ -1,0 +1,261 @@
+<style>
+  .w { --steel:#1f2327; --steel2:#2c3237; --steel3:#3a4046; --line:#4a525a; --ink:#e9e5dc; --dim:#9aa1a8; --orange:#ff6a13; --ok:#5fd38d; --bad:#e5534b; }
+  .prose { max-width: 66ch; font: 16px/1.6 system-ui, sans-serif; color: #2a2a2a; }
+  .prose p { margin: 0 0 12px; }
+  .tok { font-weight: 700; white-space: nowrap; }
+  .tok i { font-style: normal; margin-right: 3px; }
+  .tok.route { color: #d4500a; } .tok.dump { color: #6a5acd; } .tok.rb { color: #c0392b; }
+  .goals { border-left: 3px solid #2a2a2a; padding: 4px 0 4px 14px; margin: 14px 0; font: 15px/1.7 system-ui; color: #2a2a2a; max-width: 66ch; }
+  .goals b { font: 700 13px ui-monospace, monospace; }
+  .goals ul { list-style: none; padding: 0; margin: 4px 0 0; }
+  .goals li::before { content: "☐"; margin-right: 8px; color: #888; }
+  .goals li.done { color: #2f8a57; } .goals li.done::before { content: "☑"; color: #2f8a57; }
+  .fig { background: var(--steel); color: var(--ink); border: 1px dashed #5a636b; border-radius: 12px; overflow: hidden; max-width: 760px; font-family: system-ui, sans-serif; }
+  .fig svg { width: 100%; display: block; }
+  .halo { fill: var(--steel); }
+  .body { fill: var(--steel2); stroke: var(--line); stroke-width: 1.5; transition: stroke .4s, fill .4s, opacity .4s; }
+  .dark { fill: #121416; }
+  /* Dim the icon and its labels, never the disc behind them: the disc keeps hiding the wires. */
+  .st > * { transition: opacity .45s ease; }
+  .st.idle > :not(.halo) { opacity: .4; }
+  .st.down .body { stroke: var(--bad); stroke-dasharray: 4 3; }
+  .st.live .frame { stroke: var(--ok); }
+  .led { transition: fill .4s; }
+  .lbl { fill: var(--ink); font: 600 12px system-ui, sans-serif; text-anchor: middle; }
+  .lbl.dim { fill: var(--dim); font-weight: 500; font-size: 10.5px; }
+  .zone { fill: var(--dim); font: 700 10px system-ui; letter-spacing: .14em; }
+  .wire { stroke: var(--line); stroke-width: 2; fill: none; stroke-dasharray: 2 5; stroke-linecap: round; transition: opacity .45s ease; }
+  .wire.idle { opacity: .3; } /* a link with nothing running on it dims as a whole */
+  .route { stroke: var(--orange); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .path-dump { stroke: #6a5acd; stroke-width: 1.5; fill: none; stroke-dasharray: 3 4; opacity: 0; transition: opacity .3s; }
+  .path-dump.on { opacity: .8; }
+  .fill { fill: #6a5acd; transition: opacity .5s ease; }
+  .check { transform-box: fill-box; transform-origin: center; transition: opacity .3s, transform .35s cubic-bezier(.34,1.56,.64,1); opacity: 0; transform: scale(.5); }
+  .check.on { opacity: 1; transform: scale(1); }
+  /* Areas: a tinted panel each (placeholder tints until the article's palette is set). A station's disc
+     takes its panel's tint so it still hides the wires behind it. */
+  .zbg { stroke-width: 1; }
+  .zpc { --z: #272a2e; --zs: #4f565e; --zl: #c3c9cf; } /* graphite: just a home machine */
+  .zoff { --z: #24223a; --zs: #48426e; --zl: #a99de0; }
+  .zcf { --z: #2c241d; --zs: #5c4430; --zl: #f0a36a; }
+  .zaws { --z: #1d2630; --zs: #36495c; --zl: #8fb3d6; }
+  .zbg.zpc, .zbg.zoff, .zbg.zcf, .zbg.zaws { fill: var(--z); stroke: var(--zs); }
+  .st.zpc .halo, .st.zoff .halo, .st.zcf .halo, .st.zaws .halo { fill: var(--z); }
+  .zlabel { font: 700 10px system-ui; letter-spacing: .14em; }
+  .zlabel.zpc, .zlabel.zoff, .zlabel.zcf, .zlabel.zaws { fill: var(--zl); }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px dotted #5a636b; background: #262a2e; flex-wrap: wrap; }
+  .ibtn { width: 36px; height: 36px; border-radius: 8px; border: 0; background: var(--steel3); color: var(--ink); display: grid; place-items: center; cursor: pointer; flex: none; }
+  .ibtn:hover:not(:disabled) { background: #4a5158; }
+  .ibtn:disabled, .tbtn:disabled { opacity: .35; cursor: default; }
+  .ibtn:focus-visible, .tbtn:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+  .ibtn svg { width: 18px; height: 18px; }
+  .tbtn { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 8px; border: 0; background: var(--steel3); color: var(--ink); font: 600 12px system-ui; cursor: pointer; }
+  .tbtn.primary { background: var(--orange); color: #1b1b1b; }
+  /* The steps as a track: names joined by arrows that fill as each step completes. */
+  .track { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 300px; }
+  .stp { flex: 1; text-align: center; font: 600 12px system-ui; padding: 9px 10px; border-radius: 7px; background: var(--steel2); color: var(--dim); white-space: nowrap; transition: background .3s, color .3s; }
+  .stp.done { color: var(--ok); }
+  .stp.now { background: #4a3324; color: var(--orange); }
+  .conn { flex: none; width: 14px; height: 1.5px; border-radius: 1px; background: #4a5158; position: relative; }
+  .conn i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 1px; background: var(--orange); transition: width .45s cubic-bezier(.65, 0, .35, 1); }
+  .conn::after { content: ""; position: absolute; right: -1px; top: -2.5px; border-left: 4px solid #4a5158; border-top: 3px solid transparent; border-bottom: 3px solid transparent; transition: border-left-color .2s ease .25s; }
+  .conn.on i { width: 100%; }
+  .conn.on::after { border-left-color: var(--orange); }
+  .caption { font: 13px/1.5 system-ui; color: var(--ink); padding: 2px 14px 4px; background: #262a2e; min-height: 2.6em; }  .rbline { font: 13px/1.5 system-ui; color: var(--dim); padding: 0 14px 12px; background: #262a2e; min-height: 1.5em; }
+  .rbline b { color: #ff8a5c; }
+</style>
+
+<h2>Figure 2, v5 — roomier panels; the PC in graphite</h2>
+<p class="subtitle">Step forward and back. Every step and rollback is the runbook's.</p>
+
+<div class="w">
+<div class="prose">
+  <p>Moving a live service is mostly about never being stuck. The runbook breaks the move into five steps, and no step starts until the one before it checks out. Each has a <span class="tok rb"><i>↶</i>rollback</span>, and until the last one, the PC still has every byte.</p>
+  <p>The <span class="tok dump"><i>■</i>final backup</span> is the bridge: taken after writes stop, restored into RDS, and checked table by table before anything points at AWS. Only then does the <span class="tok route"><i>━</i>route</span> for <code>api.satis-manager.com</code> move.</p>
+</div>
+<div class="goals"><b>Goals</b>
+  <ul id="goals">
+    <li data-g="switch">Step all the way to the switch.</li>
+    <li data-g="back">Roll a step back and read what it undoes.</li>
+  </ul>
+</div>
+
+<div class="fig">
+  <svg viewBox="0 0 764 360" role="img" aria-label="The cutover from the gaming PC to AWS, step by step.">
+    <rect class="zbg zpc" x="12" y="30" width="280" height="320" rx="12"/>
+    <rect class="zbg zoff" x="318" y="30" width="156" height="154" rx="12"/>
+    <rect class="zbg zcf" x="318" y="208" width="156" height="142" rx="12"/>
+    <rect class="zbg zaws" x="500" y="30" width="252" height="154" rx="12"/>
+    <text class="zlabel zpc" x="24" y="47">GAMING PC</text>
+    <text class="zlabel zoff" x="330" y="47">OFF-SITE BACKUPS</text>
+    <!-- Right-aligned: the route rises from the tunnel's left shoulder, clear of this label. -->
+    <text class="zlabel zcf" x="462" y="225" text-anchor="end">CLOUDFLARE</text>
+    <text class="zlabel zaws" x="512" y="47">AWS</text>
+    <g transform="translate(0 16)">
+
+    <path class="wire" id="wPc" d="M95 82 H215"/><path class="wire idle" id="wAws" d="M575 82 H685"/>
+    <path class="wire" id="wAgent" d="M95 254 H396"/>
+    <!-- Backup and restore arcs run between the area labels and the icons, crossing the area borders. -->
+    <path id="pDump" class="path-dump" d="M95 52 V44 Q95 40 99 40 H392 Q396 40 396 44 V52"/>
+    <path id="pRestore" class="path-dump" d="M396 52 V44 Q396 40 400 40 H681 Q685 40 685 44 V52"/>
+    <!-- One route to each backend; the switch retracts one and draws the other (stroke-dashoffset). -->
+    <path id="routePc" class="route" d=""/><path id="routeAws" class="route" d=""/>
+    <g id="dots"></g>
+
+    <!-- PC database -->
+    <g class="st" id="pcdb" transform="translate(95 82)"><circle class="halo" r="34"/>
+      <path class="body frame" d="M-22 -14 V16 A22 6 0 0 0 22 16 V-14"/><ellipse class="body frame" cx="0" cy="-14" rx="22" ry="6"/>
+      <path d="M-22 -3 A22 6 0 0 0 22 -3 M-22 7 A22 6 0 0 0 22 7" stroke="#4a525a" stroke-width="1.5" fill="none"/>
+      <text class="lbl" y="52">PostgreSQL</text><text class="lbl dim" id="pcdbs" y="66">source of truth</text></g>
+    <!-- PC backend -->
+    <g class="st" id="pcbe" transform="translate(215 82)"><circle class="halo" r="34"/>
+      <rect class="body frame" x="-24" y="-24" width="48" height="44" rx="4"/>
+      <rect class="dark" x="-18" y="-18" width="36" height="9" rx="2"/><rect class="dark" x="-18" y="-5" width="36" height="9" rx="2"/><rect class="dark" x="-18" y="8" width="36" height="9" rx="2"/>
+      <circle class="led" cx="11" cy="-13.5" r="2.2"/><circle class="led" cx="11" cy="-0.5" r="2.2"/><circle class="led" cx="11" cy="12.5" r="2.2"/>
+      <text class="lbl" y="52">Backend</text><text class="lbl dim" id="pcbes" y="66">serving</text></g>
+    <!-- B2 bucket -->
+    <g class="st" id="b2" transform="translate(396 82)"><circle class="halo" r="34"/>
+      <path class="body frame" d="M-22 -16 L-17 18 Q-16 22 -12 22 H12 Q16 22 17 18 L22 -16 Z"/>
+      <ellipse class="body frame" cx="0" cy="-16" rx="22" ry="5"/>
+      <rect class="fill" id="b2fill" x="-9" y="2" width="18" height="12" rx="2" style="opacity:0"/>
+      <text class="lbl" y="52">Backblaze B2</text><text class="lbl dim" id="b2s" y="66">nightly backups</text></g>
+    <!-- AWS backend -->
+    <g class="st idle" id="awsbe" transform="translate(575 82)"><circle class="halo" r="34"/>
+      <rect class="body frame" x="-24" y="-24" width="48" height="44" rx="4"/>
+      <rect class="dark" x="-18" y="-18" width="36" height="9" rx="2"/><rect class="dark" x="-18" y="-5" width="36" height="9" rx="2"/><rect class="dark" x="-18" y="8" width="36" height="9" rx="2"/>
+      <circle class="led" cx="11" cy="-13.5" r="2.2"/><circle class="led" cx="11" cy="-0.5" r="2.2"/><circle class="led" cx="11" cy="12.5" r="2.2"/>
+      <text class="lbl" y="52">Backend</text><text class="lbl dim" id="awsbes" y="66">Fargate · scaled to 0</text></g>
+    <!-- RDS -->
+    <g class="st idle" id="rds" transform="translate(685 82)"><circle class="halo" r="34"/>
+      <path class="body frame" d="M-22 -14 V16 A22 6 0 0 0 22 16 V-14"/><ellipse class="body frame" cx="0" cy="-14" rx="22" ry="6"/>
+      <path d="M-22 -3 A22 6 0 0 0 22 -3 M-22 7 A22 6 0 0 0 22 7" stroke="#4a525a" stroke-width="1.5" fill="none"/>
+      <rect class="fill" id="rdsfill" x="-14" y="0" width="28" height="12" rx="2" style="opacity:0"/>
+      <text class="lbl" y="52">PostgreSQL</text><text class="lbl dim" id="rdss" y="66">RDS · empty</text></g>
+    <g transform="translate(707 62)"><g class="check" id="check"><circle r="8" fill="#5fd38d"/><path d="M-3.5 0 l2.5 2.5 l4.5 -5" stroke="#12301f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <!-- Agent -->
+    <g class="st zpc" id="agent" transform="translate(95 254)"><circle class="halo" r="34"/>
+      <rect class="body" x="-30" y="-22" width="40" height="28" rx="3"/><rect class="dark" x="-26" y="-18" width="32" height="20" rx="1.5"/>
+      <rect class="body" x="-14" y="6" width="8" height="8"/><rect class="body" x="-20" y="14" width="20" height="4" rx="1"/>
+      <rect class="body" x="14" y="-24" width="16" height="42" rx="2"/><circle id="agentled" class="led" cx="22" cy="10" r="2.2" fill="#ff6a13"/>
+      <text class="lbl" y="50">Agent</text><text class="lbl dim" id="agents" y="64">sending</text></g>
+    <!-- Tunnel with the hostname -->
+    <g class="st zcf" transform="translate(396 254)"><circle class="halo" r="34"/>
+      <path class="body" d="M-30 18 V-2 A30 28 0 0 1 30 -2 V18 Z"/><path class="dark" d="M-16 18 V2 A16 15 0 0 1 16 2 V18 Z"/>
+      <path d="M-30 18 H30" stroke="#4a525a" stroke-width="2"/>
+      <text class="lbl" y="50">Tunnel</text><text class="lbl dim" y="64">api.satis-manager.com</text></g>
+    </g>
+  </svg>
+
+  <div class="bar">
+    <button class="ibtn" id="reset" aria-label="Start over"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></button>
+    <button class="tbtn" id="prev">↶ Roll back</button>
+    <div class="track" id="track"><span class="stp">Freeze</span><span class="conn"><i></i></span><span class="stp">Back up</span><span class="conn"><i></i></span><span class="stp">Restore</span><span class="conn"><i></i></span><span class="stp">Start</span><span class="conn"><i></i></span><span class="stp">Switch</span></div>
+    <button class="tbtn primary" id="next">Next step →</button>
+  </div>
+  <div class="caption" id="cap"></div>
+  <div class="rbline" id="rb"></div>
+</div>
+</div>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg", $ = (id) => document.getElementById(id);
+  const ease = { inOutCubic: (p) => p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2, outBack: (p) => { const c = 1.4; return 1 + (c + 1) * (p - 1) ** 3 + c * (p - 1) ** 2; } };
+  const STEPS = [
+    { cap: "Before: the PC serves everything. AWS is built and waiting, scaled to 0, with an empty database.", rb: "" },
+    { cap: "Freeze. Stop the agent's task and the PC backend, so nothing writes.", rb: "Start the PC backend and the agent again; nothing has moved yet." },
+    { cap: "Final backup. Back up the PC database by hand to B2 and note every table's row count.", rb: "Re-enable the nightly backup, then undo the freeze." },
+    { cap: "Restore into RDS, migrate, and compare the row counts. Any mismatch stops the cutover.", rb: "The PC data is untouched: undo the backup step. RDS is reset before another try." },
+    { cap: "Start on AWS. Scale to one task; the readiness check answers 200 on a staging hostname.", rb: "Scale to 0, then undo the backup step." },
+    { cap: "Switch the route. api.satis-manager.com moves to the AWS tunnel; the agent starts again and its snapshots arrive.", rb: "Put the hostname back on the PC tunnel, scale AWS to 0, then undo the backup step, all within the window." },
+  ];
+  // What each step leaves behind; every element renders from this, so rolling back is the same code.
+  const state = (s) => ({
+    // Stopped on purpose is dimmed ("idle"); red stays reserved for failures, as in figure 1.
+    pcbe: s >= 1 ? "idle" : "live", pcbes: s >= 1 ? "stopped" : "serving",
+    pcdb: s >= 5 ? "idle" : "live", pcdbs: s >= 5 ? "stopped · kept two weeks" : s >= 1 ? "frozen" : "source of truth",
+    agent: s >= 1 && s < 5 ? "idle" : "live", agents: s >= 1 && s < 5 ? "paused" : "sending",
+    b2: "", b2s: s >= 2 ? "final dump + row counts" : "nightly backups", b2fill: s >= 2,
+    rds: s >= 3 ? "live" : "idle", rdss: s >= 3 ? "RDS · counts match" : "RDS · empty", rdsfill: s >= 3, check: s >= 3,
+    awsbe: s >= 4 ? "live" : "idle", awsbes: s >= 4 ? "Fargate · ready" : "Fargate · scaled to 0",
+    routeTo: s >= 5 ? 575 : 215, sending: !(s >= 1 && s < 5),
+  });
+  // r: 0 = the route goes to the PC backend, 1 = to the AWS backend. The switch retracts one route into the
+  // tunnel and then draws the other out, so a line never sweeps across the stations in between.
+  let step = 0, t = 0, last = performance.now(), r = 0, routeTw = null, flows = [], nextFlow = 0, busy = false;
+  const goals = new Set(); const done = (g) => { if (goals.has(g)) return; goals.add(g); document.querySelector(`[data-g="${g}"]`).classList.add("done"); };
+  // A route runs between the rows (y 176) and enters its backend from the side facing the tunnel, 40 px
+  // out from the backend's centre; x is that backend's centre (215 PC, 575 AWS).
+  const riser = (x) => { const k = (x - 215) / 360; return { bx: 255 + (535 - 255) * k, end: 239 + (551 - 239) * k }; };
+  const RX = 378; // the route leaves the tunnel from its left shoulder
+  const routeD = (x) => { const { bx, end } = riser(x), s = Math.sign(end - bx) || 1, h = Math.sign(bx - RX) || 1;
+    return `M${RX} 236 V180 Q${RX} 176 ${RX + h * 4} 176 H${bx - h * 4} Q${bx} 176 ${bx} 172 V86 Q${bx} 82 ${bx + s * 4} 82 H${end}`; };
+  function render(s) {
+    const st = state(s);
+    const ZONE = { pcbe: "zpc", pcdb: "zpc", agent: "zpc", b2: "zoff", awsbe: "zaws", rds: "zaws" };
+    for (const id of Object.keys(ZONE)) $(id).setAttribute("class", `st ${ZONE[id]} ${st[id]}`);
+    for (const id of ["pcbes", "pcdbs", "agents", "b2s", "rdss", "awsbes"]) $(id).textContent = st[id];
+    for (const g of ["pcbe", "awsbe"]) $(g).querySelectorAll(".led").forEach((l) => l.setAttribute("fill", st[g] === "live" ? "#5fd38d" : st[g] === "down" ? "#e5534b" : "#3a3f44"));
+    $("agentled").setAttribute("fill", st.sending ? "#ff6a13" : "#3a3f44");
+    $("b2fill").style.opacity = st.b2fill ? 1 : 0; $("rdsfill").style.opacity = st.rdsfill ? 0.9 : 0; $("check").classList.toggle("on", st.check);
+    const rTo = st.routeTo === 575 ? 1 : 0;
+    if (rTo !== r && (!routeTw || routeTw.to !== rTo)) routeTw = { from: r, to: rTo, t0: t, dur: 1.1 };
+    $("cap").textContent = STEPS[s].cap;
+    $("rb").innerHTML = s ? `<b>↶ Rollback:</b> ${STEPS[s].rb}` : "";
+    $("track").querySelectorAll(".stp").forEach((c, i) => c.className = "stp" + (i + 1 < s ? " done" : i + 1 === s ? " now" : ""));
+    $("track").querySelectorAll(".conn").forEach((c, i) => c.classList.toggle("on", s >= i + 2)); // fills on the way into the next step
+    $("wPc").classList.toggle("idle", st.pcbe !== "live"); $("wAws").classList.toggle("idle", st.awsbe !== "live"); $("wAgent").classList.toggle("idle", st.agent !== "live");
+    $("prev").disabled = s === 0; $("next").disabled = s === STEPS.length - 1;
+    if (s === 5) done("switch");
+  }
+  // A one-off "dump" moving along a path: slow in, slow out, a slight stretch at speed.
+  function carry(pathId, onDone) {
+    busy = true; const p = $(pathId); p.classList.add("on"); const len = p.getTotalLength();
+    const el = document.createElementNS(NS, "rect"); el.setAttribute("x", -6); el.setAttribute("y", -5); el.setAttribute("width", 12); el.setAttribute("height", 10); el.setAttribute("rx", 2); el.setAttribute("fill", "#6a5acd"); $("dots").appendChild(el);
+    flows.push({ kind: "carry", el, path: p, len, t0: t, dur: 1.3, onDone: () => { el.remove(); p.classList.remove("on"); busy = false; onDone(); } });
+  }
+  function go(to) {
+    if (busy) return;
+    const from = step; step = to;
+    if (to > from && to === 2) { render(1); $("cap").textContent = STEPS[2].cap; carry("pDump", () => render(2)); return; }
+    if (to > from && to === 3) { render(2); $("cap").textContent = STEPS[3].cap; carry("pRestore", () => render(3)); return; }
+    if (to < from) done("back");
+    render(to);
+  }
+  $("next").onclick = () => go(step + 1); $("prev").onclick = () => go(step - 1); $("reset").onclick = () => { if (!busy) { step = 0; render(0); } };
+
+  // Snapshots from the agent, through the tunnel, along the route to whichever backend is live.
+  // Agent → tunnel → route → backend, then on into that backend's database (the backend stores every snapshot).
+  function snapshotPath() { const aws = r >= 1, { bx } = riser(aws ? 575 : 215); return [[95, 254], [378, 254], [378, 176], [bx, 176], [bx, 82], [aws ? 575 : 215, 82], [aws ? 685 : 95, 82]]; }
+  function along(pts, d) { for (let i = 1; i < pts.length; i++) { const L = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); if (d <= L) { const k = d / L; return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * k, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * k]; } d -= L; } return pts.at(-1); }
+  const plen = (pts) => pts.slice(1).reduce((a, p, i) => a + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0);
+  function tick(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt;
+    if (routeTw) { const p = Math.min(1, (t - routeTw.t0) / routeTw.dur); r = routeTw.from + (routeTw.to - routeTw.from) * p; if (p >= 1) routeTw = null; }
+    // First half: the PC route retracts into the tunnel; second half: the AWS route draws out. Each eased.
+    const u1 = Math.min(1, r / 0.5), u2 = Math.max(0, (r - 0.5) / 0.5);
+    $("routePc").style.strokeDashoffset = LEN.pc * ease.inOutCubic(u1);
+    $("routeAws").style.strokeDashoffset = LEN.aws * (1 - ease.inOutCubic(u2));
+    if (state(step).sending && t >= nextFlow && !routeTw) { nextFlow = t + 1.4; const el = document.createElementNS(NS, "circle"); el.setAttribute("r", 5); el.setAttribute("fill", "#ff6a13"); $("dots").appendChild(el); flows.push({ kind: "snap", el, t0: t, dur: 1.6 }); }
+    flows = flows.filter((f) => {
+      const p = Math.min(1, (t - f.t0) / f.dur), e = ease.inOutCubic(p);
+      if (f.kind === "snap") {
+        const pts = snapshotPath(); const [x, y] = along(pts, e * plen(pts)); f.el.setAttribute("transform", `translate(${x} ${y})`);
+        if (p >= 1 || !state(step).sending && p < 0.05) { f.el.remove(); return false; }
+      } else {
+        const pt = f.path.getPointAtLength(e * f.len); const sp = Math.sin(Math.PI * p) * 0.25;
+        f.el.setAttribute("transform", `translate(${pt.x} ${pt.y}) scale(${1 + sp} ${1 / (1 + sp)})`);
+        if (p >= 1) { f.onDone(); return false; }
+      }
+      return true;
+    });
+    requestAnimationFrame(tick);
+  }
+  // Both routes are fixed shapes; only how much of each is drawn changes.
+  const LEN = {};
+  for (const [id, x, key] of [["routePc", 215, "pc"], ["routeAws", 575, "aws"]]) {
+    const el = $(id); el.setAttribute("d", routeD(x)); LEN[key] = el.getTotalLength(); el.style.strokeDasharray = `${LEN[key]} ${LEN[key]}`;
+  }
+  render(0); requestAnimationFrame(tick);
+})();
+</script>

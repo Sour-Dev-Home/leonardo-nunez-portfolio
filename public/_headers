@@ -19,6 +19,8 @@
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /diagrams/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/covers/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /og/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /favicon.svg

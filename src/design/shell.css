@@ -144,7 +144,8 @@
   .brand {
     font-size: var(--step-1);
   }
-  .section-head {
+  /* Sticky only beside the grid's content column; in a single-column section it would pin over the content. */
+  .section > .section-head {
     position: sticky;
     top: calc(var(--header-h) + var(--space-5));
     align-self: start;

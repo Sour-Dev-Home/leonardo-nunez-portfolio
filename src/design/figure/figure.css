@@ -1,0 +1,184 @@
+/* Shared by every interactive figure. Colours come from the world's tokens (--fig-*). */
+.fig {
+  background: var(--fig-bg);
+  color: var(--fig-ink);
+  border: 1px dashed var(--fig-rule);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: var(--space-5) 0;
+}
+.fig svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+/* A figure renders a desktop and a phone drawing; this shows the one that fits before any script runs.
+   Below 40rem the phone composition (vertical) replaces a shrunken desktop one. */
+.fig svg[data-layout="phone"] {
+  display: none;
+}
+@media (max-width: 40rem) {
+  .fig svg[data-layout="desktop"] {
+    display: none;
+  }
+  .fig svg[data-layout="phone"] {
+    display: block;
+  }
+}
+.fig svg[hidden] {
+  display: none !important;
+}
+.fig-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top: 1px dotted var(--fig-rule);
+  background: var(--fig-bar);
+}
+.fig-ibtn,
+.fig-tbtn {
+  height: 36px;
+  min-width: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--fig-btn);
+  color: var(--fig-ink);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  font: 600 12px var(--font-text);
+  padding: 0 12px;
+}
+.fig-ibtn {
+  width: 36px;
+  padding: 0;
+}
+.fig-ibtn svg {
+  width: 18px;
+  height: 18px;
+}
+.fig-ibtn:hover:not(:disabled, [aria-disabled="true"]),
+.fig-tbtn:hover:not(:disabled, [aria-disabled="true"]) {
+  background: var(--fig-btn-hover);
+}
+/* aria-disabled keeps the button focusable (a stepper's end), so it looks disabled but holds focus. */
+.fig-ibtn:disabled,
+.fig-tbtn:disabled,
+.fig-tbtn[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: default;
+}
+/* A toggle (aria-pressed) shows its state: a green dot while up, red on a dark red ground when down. */
+.fig-tbtn[aria-pressed] {
+  display: inline-flex;
+  gap: 8px;
+}
+.fig-tbtn[aria-pressed]::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--fig-on);
+}
+.fig-tbtn[aria-pressed="true"] {
+  background: var(--fig-off-bg);
+}
+.fig-tbtn[aria-pressed="true"]::before {
+  background: var(--fig-off);
+}
+.fig-tbtn.primary {
+  background: var(--fig-accent);
+  color: var(--fig-on-accent);
+}
+.fig-tbtn.primary:hover:not(:disabled, [aria-disabled="true"]) {
+  background: color-mix(in srgb, var(--fig-accent) 85%, white);
+}
+.fig-ibtn:focus-visible,
+.fig-tbtn:focus-visible,
+.fig-range:focus-visible,
+.fig [data-station]:focus-visible {
+  outline: 2px solid var(--fig-accent);
+  outline-offset: 2px;
+}
+.fig-speed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 180px;
+}
+.fig-speed > svg {
+  width: 22px;
+  height: 22px;
+  color: var(--fig-dim);
+  flex: none;
+}
+/* The speed slider: a filled track left of a round thumb that grows while you hold it. */
+.fig-range {
+  --p: 23%;
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  background: linear-gradient(to right, var(--fig-accent) 0 var(--p), var(--fig-btn-hover) var(--p) 100%);
+}
+.fig-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--fig-accent);
+  border: 3px solid var(--fig-bar);
+  box-shadow: 0 0 0 1px var(--fig-accent);
+  transition: transform var(--dur-fast) ease;
+}
+.fig-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fig-accent);
+  border: 3px solid var(--fig-bar);
+  box-shadow: 0 0 0 1px var(--fig-accent);
+}
+.fig-range:hover::-webkit-slider-thumb,
+.fig-range:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+.fig-caption {
+  font: 13px/1.5 var(--font-text);
+  color: var(--fig-ink);
+  padding: 4px 14px 12px;
+  background: var(--fig-bar);
+  min-height: 2.6em;
+  margin: 0;
+}
+.fig-goals {
+  border-left: 3px solid var(--ink);
+  padding: 2px 0 2px var(--space-4);
+  margin: var(--space-4) 0;
+}
+.fig-goals-title {
+  font: 700 var(--step--1) ui-monospace, monospace;
+  margin: 0;
+}
+.fig-goals ul {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-1) 0 0;
+}
+.fig-goals li::before {
+  content: "☐";
+  margin-right: var(--space-2);
+  color: var(--muted);
+}
+.fig-goals li.done {
+  color: var(--fig-done);
+}
+.fig-goals li.done::before {
+  content: "☑";
+  color: var(--fig-done);
+}

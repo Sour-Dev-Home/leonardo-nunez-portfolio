@@ -1,0 +1,60 @@
+---
+// Figure 1's drawing for one layout: left to right on desktop, top to bottom on phones (layouts.ts).
+// Both are rendered; CSS shows the one that fits before any script runs.
+import Station from "../Station.astro";
+import { OUTAGE } from "./layouts";
+
+interface Props {
+  layout: "desktop" | "phone";
+}
+const { layout } = Astro.props;
+const d = OUTAGE[layout];
+const across = d.axis === "x";
+const labels = across ? "below" : "right";
+const qx = across ? d.pill.x + d.pill.w / 2 : d.pill.x + d.pill.w + 14;
+const qy = across ? d.pc.y + 52 : d.pill.y + d.pill.h / 2;
+---
+
+<svg
+  data-layout={layout}
+  viewBox={`0 0 ${d.w} ${d.h}`}
+  role="img"
+  aria-label="The agent on the game PC queues snapshots and sends them through the Cloudflare tunnel to the backend and its database; errors come back when the backend or the database is down."
+>
+  <path class="wire" d={across ? `M${d.pc.x} ${d.pc.y} H${d.db.x}` : `M${d.pc.x} ${d.pc.y} V${d.db.y}`}></path>
+  <rect class="pill" x={d.pill.x} y={d.pill.y} width={d.pill.w} height={d.pill.h} rx={Math.min(d.pill.w, d.pill.h) / 2}></rect>
+  <circle data-ghost r="5.5" cx={across ? d.headX : d.pc.x} cy={across ? d.pc.y : d.headX} opacity="0"></circle>
+  <g data-dots></g>
+  <Station kind="pc" x={d.pc.x} y={d.pc.y} label="Agent" sub="game PC" labels={labels} />
+  <text class:list={["q-lbl", { side: !across }]} x={qx} y={qy}>Queue</text>
+  <text class:list={["q-lbl dim", { side: !across }]} x={qx} y={qy + 14}>on the PC</text>
+  <Station kind="tunnel" x={d.tunnel.x} y={d.tunnel.y} label="Tunnel" sub="Cloudflare" labels={labels} />
+  <Station kind="rack" id="backend" x={d.backend.x} y={d.backend.y} label="Backend" sub="ECS Fargate" clickable="Take the backend down" labels={labels} />
+  <Station kind="db" id="db" x={d.db.x} y={d.db.y} label="PostgreSQL" sub="RDS" clickable="Take the database down" labels={labels} />
+</svg>
+
+<style>
+  .pill {
+    fill: #2a2f34;
+    stroke: var(--satis-line);
+    stroke-width: 1.5;
+  }
+  [data-ghost] {
+    fill: none;
+    stroke: var(--satis-snapshot);
+    stroke-dasharray: 2 2;
+  }
+  .q-lbl {
+    fill: var(--satis-ink);
+    font: 600 12px var(--font-text);
+    text-anchor: middle;
+  }
+  .q-lbl.dim {
+    fill: var(--satis-dim);
+    font-weight: 500;
+    font-size: 10.5px;
+  }
+  .q-lbl.side {
+    text-anchor: start;
+  }
+</style>

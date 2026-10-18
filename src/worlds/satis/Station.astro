@@ -1,0 +1,94 @@
+---
+// One station: an opaque disc (hides the wires behind it), a flat icon, a label and a sub-label.
+// Icons are the approved prototypes' (docs/superpowers/specs/2026-10-18-satis-world/).
+interface Props {
+  kind: "pc" | "tunnel" | "rack" | "db" | "bucket";
+  x: number;
+  y: number;
+  label: string;
+  sub: string;
+  id?: string;
+  zone?: "pc" | "off" | "cf" | "aws";
+  /** Makes the station a pointer shortcut for a figure action (its value names that action). */
+  clickable?: string;
+  mode?: "live" | "idle" | "down";
+  /** Labels under the icon, or beside it on the right (stations stacked vertically on phones). */
+  labels?: "below" | "right";
+}
+const { kind, x, y, label, sub, id, zone, clickable, mode = "live", labels = "below" } = Astro.props;
+const side = labels === "right";
+const cls = ["st", zone && `st-${zone}`, mode].filter(Boolean).join(" ");
+---
+
+<!-- A clickable station is a pointer shortcut only: the figure's labelled toggle buttons are the
+     keyboard and screen-reader way to do the same (focusable items inside role="img" aren't allowed). -->
+<g class={cls} data-station={id} data-click={clickable ? "" : undefined} transform={`translate(${x} ${y})`}>
+  <circle class="halo" r="34"></circle>
+  {
+    kind === "pc" && (
+      <>
+        <rect class="body" x="-30" y="-22" width="40" height="28" rx="3" />
+        <rect class="dark" x="-26" y="-18" width="32" height="20" rx="1.5" />
+        <rect class="body" x="-14" y="6" width="8" height="8" />
+        <rect class="body" x="-20" y="14" width="20" height="4" rx="1" />
+        <rect class="body" x="14" y="-24" width="16" height="42" rx="2" />
+        <circle class="led" data-power cx="22" cy="10" r="2.2" fill="var(--satis-snapshot)" />
+      </>
+    )
+  }
+  {
+    kind === "tunnel" && (
+      <>
+        <path class="body" d="M-30 18 V-2 A30 28 0 0 1 30 -2 V18 Z" />
+        <path class="dark" d="M-16 18 V2 A16 15 0 0 1 16 2 V18 Z" />
+        <path d="M-30 18 H30" stroke="var(--satis-line)" stroke-width="2" />
+      </>
+    )
+  }
+  {
+    kind === "rack" && (
+      <>
+        <rect class="body frame" x="-24" y="-24" width="48" height="44" rx="4" />
+        <rect class="dark" x="-18" y="-18" width="36" height="9" rx="2" />
+        <rect class="dark" x="-18" y="-5" width="36" height="9" rx="2" />
+        <rect class="dark" x="-18" y="8" width="36" height="9" rx="2" />
+        <circle class="led" cx="11" cy="-13.5" r="2.2" fill="var(--satis-ok)" />
+        <circle class="led" cx="11" cy="-0.5" r="2.2" fill="var(--satis-ok)" />
+        <circle class="led" cx="11" cy="12.5" r="2.2" fill="var(--satis-ok)" />
+      </>
+    )
+  }
+  {
+    kind === "db" && (
+      <>
+        <path class="body frame" d="M-22 -14 V16 A22 6 0 0 0 22 16 V-14" />
+        <ellipse class="body frame" cx="0" cy="-14" rx="22" ry="6" />
+        <path d="M-22 -3 A22 6 0 0 0 22 -3 M-22 7 A22 6 0 0 0 22 7" stroke="var(--satis-line)" stroke-width="1.5" fill="none" />
+        <rect class="fill" data-fill x="-14" y="0" width="28" height="12" rx="2" fill="var(--satis-backup)" opacity="0" />
+      </>
+    )
+  }
+  {
+    kind === "bucket" && (
+      <>
+        <path class="body frame" d="M-22 -16 L-17 18 Q-16 22 -12 22 H12 Q16 22 17 18 L22 -16 Z" />
+        <ellipse class="body frame" cx="0" cy="-16" rx="22" ry="5" />
+        <rect class="fill" data-fill x="-9" y="2" width="18" height="12" rx="2" fill="var(--satis-backup)" opacity="0" />
+      </>
+    )
+  }
+  {
+    label && (
+      <text class:list={["lbl", { side }]} x={side ? 46 : 0} y={side ? -3 : 52}>
+        {label}
+      </text>
+    )
+  }
+  {
+    sub && (
+      <text class:list={["lbl dim", { side }]} data-sub x={side ? 46 : 0} y={side ? 11 : 66}>
+        {sub}
+      </text>
+    )
+  }
+</g>

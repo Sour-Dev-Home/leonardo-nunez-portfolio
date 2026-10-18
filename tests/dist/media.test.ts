@@ -1,5 +1,6 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import sharp from "sharp";
 import { describe, it, expect } from "vitest";
 import { page } from "./helpers";
 
@@ -16,5 +17,11 @@ describe("media reserves its space before it loads", () => {
         .map((el) => `${file}: <${el.tagName.toLowerCase()} ${el.getAttribute("src") ?? el.getAttribute("poster")}>`),
     );
     expect(missing).toEqual([]);
+  });
+
+  it("ships the satis cover stills at their sizes", async () => {
+    const card = await sharp(join(process.cwd(), "dist/covers/satisfactory-dash.png")).metadata();
+    const og = await sharp(join(process.cwd(), "dist/og/satisfactory-dash.png")).metadata();
+    expect([card.width, card.height, og.width, og.height]).toEqual([1600, 900, 1200, 630]);
   });
 });

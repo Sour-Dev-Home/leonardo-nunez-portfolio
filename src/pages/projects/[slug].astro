@@ -17,4 +17,6 @@ const { Content } = await render(entry);
 const project = { ...entry.data, slug: entry.id };
 ---
 
-<CaseStudy project={project} slug={entry.id}><Content /></CaseStudy>
+<CaseStudy project={project} slug={entry.id} world={entry.data.world ? "satis" : undefined}>
+  <Content />
+</CaseStudy>

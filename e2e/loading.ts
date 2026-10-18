@@ -71,13 +71,15 @@ export function overlaps(page: Page) {
   }, CONTENT);
 }
 
-/** Pauses every running animation at `progress` (0 to 1) of its duration. */
+/** Pauses every running animation at `progress` (0 to 1) of its duration (of one cycle, for a looping one). */
 export function scrubAnimations(page: Page, progress: number) {
   return page.evaluate((p) => {
     const animations = document.getAnimations();
     for (const animation of animations) {
       animation.pause();
-      const end = Number(animation.effect?.getComputedTiming().endTime ?? 0);
+      const timing = animation.effect?.getComputedTiming();
+      const endTime = Number(timing?.endTime ?? 0);
+      const end = Number.isFinite(endTime) ? endTime : Number(timing?.delay ?? 0) + Number(timing?.duration ?? 0);
       animation.currentTime = end * p;
     }
     return animations.length;

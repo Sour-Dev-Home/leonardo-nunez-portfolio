@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { SITE, page, metaContent, hrefs, distFileExists } from "./helpers";
 import { RUNNABLE_SCRIPTS } from "./budget";
 
+const GH = "https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/";
+
 describe("satisfactory-dash case study", () => {
   const doc = page("projects/satisfactory-dash.html");
 
@@ -11,9 +13,6 @@ describe("satisfactory-dash case study", () => {
       `${SITE}/projects/satisfactory-dash`,
     );
     expect(metaContent(doc, 'meta[property="og:type"]')).toBe("article");
-    expect(metaContent(doc, 'meta[property="og:image"]')).toBe(
-      `${SITE}/demo/satisfactory-dash-walkthrough-poster.png`,
-    );
     expect(metaContent(doc, 'meta[name="description"]')).toMatch(/^A dashboard and backend/);
   });
 
@@ -22,27 +21,50 @@ describe("satisfactory-dash case study", () => {
     expect(doc.querySelectorAll(".stack-list li").map((li) => li.text)).toContain("PostgreSQL");
     expect(doc.querySelectorAll(".case-study-body h2").map((h) => h.text.trim())).toEqual([
       "The problem",
-      "See it running",
-      "Architecture",
-      "Key decisions",
-      "How it’s built",
-      "What’s next",
-      "Links",
+      "How data gets in",
+      "The move to AWS",
+      "What I’d do differently",
+      "How it was built",
     ]);
   });
 
-  it("links back home and to every source the old page linked", () => {
+  // The cover repeated the page's own heading, so it only makes the card and preview stills.
+  it("places both figures in the article, with no cover above the heading", () => {
+    expect(doc.querySelector(".satis-cover")).toBeNull();
+    expect(doc.querySelector('.world-satis figure[data-figure="outage"]')).not.toBeNull();
+    expect(doc.querySelector('figure[data-figure="cutover"]')).not.toBeNull();
+  });
+
+  it("keeps the deeper material in closed 'More detail' sections", () => {
+    const details = doc.querySelectorAll(".case-study-body details");
+    expect(details.filter((d) => /More detail/.test(d.querySelector("summary")?.text ?? "")).length).toBeGreaterThanOrEqual(2);
+    for (const d of details) expect(d.hasAttribute("open")).toBe(false);
+  });
+
+  it("links every claim's source in the public repo", () => {
     const links = hrefs(doc);
     expect(links).toContain("/");
-    for (const href of [
-      "https://demo.satis-manager.com",
-      "https://satis-manager.com",
-      "https://github.com/Sour-Dev-Home/satisfactory-dash",
-      "https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/workspace.dsl",
-      "https://github.com/Sour-Dev-Home/satisfactory-dash/tree/main/docs-vault/wiki/decisions",
+    for (const path of [
+      "agent/src/queue.ts",
+      "agent/src/pusher.ts",
+      "agent/src/backoff.ts",
+      "agent/src/agentRunner.ts",
+      "frontend/src/components/DataAge.tsx",
+      "infra/aws/ecs.tf",
+      "docs-vault/wiki/runbooks/aws.md",
+      "docs-vault/wiki/decisions/0031-edge-agent.md",
+      "docs-vault/wiki/decisions/0034-backend-on-aws.md",
+      "docs-vault/wiki/decisions/0035-backups-off-aws.md",
     ]) {
-      expect(links).toContain(href);
+      expect(links.some((h) => h.startsWith(GH + path)), path).toBe(true);
     }
+    expect(links).toContain("https://demo.satis-manager.com");
+    expect(links).toContain("https://satis-manager.com");
+  });
+
+  it("tells how it was built in a sidenote: three agents first, then lanes", () => {
+    const notes = doc.querySelectorAll(".case-study-body .sidenote-note").map((n) => n.text);
+    expect(notes.some((t) => /architect/.test(t) && /lanes/i.test(t))).toBe(true);
   });
 
   it("references media that is actually in the build", () => {
@@ -51,14 +73,22 @@ describe("satisfactory-dash case study", () => {
       ...doc.querySelectorAll(".case-study-body img").map((i) => i.getAttribute("src") ?? ""),
     ];
     expect(media).toContain("/demo/satisfactory-dash-walkthrough.mp4");
-    expect(media).toContain("/diagrams/satisfactory-dash-deployment.svg");
     for (const src of media) {
       expect(distFileExists(src.slice(1)), src).toBe(true);
     }
   });
 
-  it("ships no JavaScript", () => {
-    expect(doc.querySelectorAll(RUNNABLE_SCRIPTS)).toHaveLength(0);
+  // Replaces "ships no JavaScript": the figures run here, within the page's budget (budget.ts).
+  it("runs only its own module scripts, from the build", () => {
+    const scripts = doc.querySelectorAll(RUNNABLE_SCRIPTS);
+    expect(scripts.length).toBeGreaterThan(0);
+    for (const s of scripts) expect(s.getAttribute("type")).toBe("module");
+  });
+
+  it("uses a link-preview image made from its cover", () => {
+    expect(metaContent(doc, 'meta[property="og:image"]')).toBe(`${SITE}/og/satisfactory-dash.png`);
+    expect(distFileExists("og/satisfactory-dash.png")).toBe(true);
+    expect(distFileExists("covers/satisfactory-dash.png")).toBe(true);
   });
 });
 

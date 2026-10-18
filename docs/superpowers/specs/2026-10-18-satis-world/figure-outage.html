@@ -1,0 +1,239 @@
+<style>
+  .w { --steel:#1f2327; --steel2:#2c3237; --steel3:#3a4046; --line:#4a525a; --ink:#e9e5dc; --dim:#9aa1a8; --orange:#ff6a13; --ok:#5fd38d; --bad:#e5534b; }
+  .prose { max-width: 66ch; font: 16px/1.6 system-ui, sans-serif; color: #2a2a2a; }
+  .prose p { margin: 0 0 12px; }
+  .tok { font-weight: 700; white-space: nowrap; }
+  .tok i { font-style: normal; margin-right: 3px; }
+  .tok.snap { color: #d4500a; } .tok.err { color: #c0392b; } .tok.drop { color: #8a6a4a; } .tok.q { color: #555; }
+  .goals { border-left: 3px solid #2a2a2a; padding: 4px 0 4px 14px; margin: 14px 0; font: 15px/1.7 system-ui; color: #2a2a2a; max-width: 66ch; }
+  .goals b { font: 700 13px ui-monospace, monospace; letter-spacing: .02em; }
+  .goals ul { list-style: none; padding: 0; margin: 4px 0 0; }
+  .goals li::before { content: "☐"; margin-right: 8px; color: #888; }
+  .goals li.done { color: #2f8a57; }
+  .goals li.done::before { content: "☑"; color: #2f8a57; }
+  .fig { background: var(--steel); color: var(--ink); border: 1px dashed #5a636b; border-radius: 12px; overflow: hidden; max-width: 760px; font-family: system-ui, sans-serif; }
+  .fig svg { width: 100%; display: block; }
+  .station.click { cursor: pointer; }
+  .station.click:hover .halo { stroke: #ff6a1399; }
+  .halo { fill: var(--steel); stroke: transparent; stroke-width: 1; transition: stroke .2s; }
+  .body { fill: var(--steel2); stroke: var(--line); stroke-width: 1.5; transition: stroke .3s; }
+  .body.down { stroke: var(--bad); stroke-dasharray: 4 3; }
+  .dark { fill: #121416; }
+  .lbl { fill: var(--ink); font: 600 12px system-ui, sans-serif; text-anchor: middle; }
+  .lbl.dim { fill: var(--dim); font-weight: 500; font-size: 10.5px; }
+  .wire { stroke: var(--line); stroke-width: 2; fill: none; stroke-dasharray: 2 5; stroke-linecap: round; }
+  .pill { fill: #2a2f34; stroke: #4a525a; stroke-width: 1.5; }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px dotted #5a636b; background: #262a2e; flex-wrap: wrap; }
+  .ibtn { width: 36px; height: 36px; border-radius: 8px; border: 0; background: var(--steel3); color: var(--ink); display: grid; place-items: center; cursor: pointer; flex: none; }
+  .ibtn:hover { background: #4a5158; }
+  .ibtn:focus-visible, .power:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+  .ibtn svg { width: 18px; height: 18px; }
+  .speed { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 180px; }
+  .speed > svg { width: 22px; height: 22px; color: var(--dim); flex: none; }
+  .range { --p: 25%; flex: 1; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; cursor: pointer; background: linear-gradient(to right, var(--orange) 0 var(--p), #4a5158 var(--p) 100%); }
+  .range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--orange); border: 3px solid #262a2e; box-shadow: 0 0 0 1px var(--orange); transition: transform .15s ease; }
+  .range::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--orange); border: 3px solid #262a2e; box-shadow: 0 0 0 1px var(--orange); }
+  .range:hover::-webkit-slider-thumb, .range:active::-webkit-slider-thumb { transform: scale(1.15); }
+  .range:focus-visible { outline: 2px solid var(--orange); outline-offset: 6px; }
+  .power { display: flex; align-items: center; gap: 8px; font: 600 12px system-ui; color: var(--dim); background: var(--steel3); border: 0; border-radius: 8px; height: 36px; padding: 0 12px; cursor: pointer; }
+  .power .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); }
+  .power[aria-pressed="true"] { color: var(--ink); background: #4a2a26; }
+  .power[aria-pressed="true"] .dot { background: var(--bad); }
+  .caption { font: 13px/1.5 system-ui; color: var(--dim); padding: 0 14px 12px; min-height: 2.6em; background: #262a2e; }
+</style>
+
+<h2>Figure 1, v6 — eased motion (slow in/out, anticipation, squash &amp; stretch, overlap)</h2>
+<p class="subtitle">Same model as v5. Watch a snapshot arrive, the line ripple forward, and the head pull back before it leaves.</p>
+
+<div class="w">
+<div class="prose">
+  <p>The agent on the game PC sends <span class="tok snap"><i>●</i>snapshots</span> to the backend one at a time, oldest first. Anything it can't deliver yet waits in its <span class="tok q"><i>⬬</i>queue</span>. If something along the way is down, an <span class="tok err"><i>●</i>error</span> comes back; the agent keeps that snapshot and tries again later, waiting a little longer each time.</p>
+  <p>When the link breaks, something has to give. The system picks <b>availability</b>: the dashboard keeps answering with the last snapshot it has, marked stale, rather than going blank, and the agent keeps collecting. The cost is <b>consistency</b>: history arrives late, and if the outage outlasts the queue, the oldest readings are <span class="tok drop"><i>○</i>dropped</span> for good. For a live dashboard, the newest data matters most.</p>
+</div>
+<div class="goals"><b>Goals</b>
+  <ul id="goals">
+    <li data-g="wait">Take the backend down and watch snapshots wait in the queue.</li>
+    <li data-g="drop">Keep it down until a snapshot is dropped.</li>
+    <li data-g="drain">Bring it back and watch the backlog drain.</li>
+    <li data-g="db">Take only the database down: the error comes back from further away.</li>
+  </ul>
+</div>
+
+<div class="fig">
+  <svg viewBox="0 0 720 160" role="img" aria-label="The agent on the game PC queues snapshots and sends them through the Cloudflare tunnel to the backend and its database. Errors come back when the backend or database is down.">
+    <path class="wire" d="M60 70 H660"/>
+    <rect class="pill" x="140" y="54" width="208" height="32" rx="16"/>
+    <g id="dots"></g>
+
+    <g class="station" transform="translate(60 70)">
+      <circle class="halo" r="36"/>
+      <rect class="body" x="-30" y="-22" width="40" height="28" rx="3"/><rect class="dark" x="-26" y="-18" width="32" height="20" rx="1.5"/>
+      <rect class="body" x="-14" y="6" width="8" height="8"/><rect class="body" x="-20" y="14" width="20" height="4" rx="1"/>
+      <rect class="body" x="14" y="-24" width="16" height="42" rx="2"/><circle cx="22" cy="10" r="2.2" fill="#ff6a13"/><rect x="17" y="-19" width="10" height="2" fill="#4a525a"/><rect x="17" y="-14" width="10" height="2" fill="#4a525a"/>
+      <text class="lbl" y="56">Agent</text><text class="lbl dim" y="70">game PC</text>
+    </g>
+    <text class="lbl" x="244" y="126">Queue</text><text class="lbl dim" x="244" y="140">on the PC</text>
+
+    <g class="station" transform="translate(420 70)">
+      <circle class="halo" r="36"/>
+      <path class="body" d="M-32 20 V-2 A32 30 0 0 1 32 -2 V20 Z"/>
+      <path class="dark" d="M-18 20 V2 A18 17 0 0 1 18 2 V20 Z"/>
+      <path d="M-32 20 H32" stroke="#4a525a" stroke-width="2"/>
+      <path d="M-26 -8 l6 4 M26 -8 l-6 4 M0 -24 v6" stroke="#5a636b" stroke-width="2"/>
+      <text class="lbl" y="56">Tunnel</text><text class="lbl dim" y="70">Cloudflare</text>
+    </g>
+
+    <g class="station click" id="rack" transform="translate(540 70)">
+      <circle class="halo" r="36"/>
+      <rect class="body" id="rackbody" x="-26" y="-26" width="52" height="48" rx="4"/>
+      <rect class="dark" x="-20" y="-20" width="40" height="10" rx="2"/><rect class="dark" x="-20" y="-6" width="40" height="10" rx="2"/><rect class="dark" x="-20" y="8" width="40" height="10" rx="2"/>
+      <circle class="led" cx="13" cy="-15" r="2.4" fill="#5fd38d"/><circle class="led" cx="13" cy="-1" r="2.4" fill="#5fd38d"/><circle class="led" cx="13" cy="13" r="2.4" fill="#5fd38d"/>
+      <text class="lbl" y="56">Backend</text><text class="lbl dim" id="bestate" y="70">ECS Fargate</text>
+    </g>
+
+    <g class="station click" id="db" transform="translate(660 70)">
+      <circle class="halo" r="36"/>
+      <path class="body" id="dbbody" d="M-24 -16 V18 A24 7 0 0 0 24 18 V-16"/>
+      <ellipse class="body" id="dbtop" cx="0" cy="-16" rx="24" ry="7"/>
+      <path d="M-24 -4 A24 7 0 0 0 24 -4 M-24 7 A24 7 0 0 0 24 7" stroke="#4a525a" stroke-width="1.5" fill="none"/>
+      <text class="lbl" y="56">PostgreSQL</text><text class="lbl dim" id="dbstate" y="70">RDS</text>
+    </g>
+  </svg>
+
+  <div class="bar">
+    <button class="ibtn" id="rs" aria-label="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></button>
+    <div class="speed">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 16c0-4 3-7 7-7s7 3 7 7z"/><path d="M18 14h2.5a1.5 1.5 0 0 0 0-3H18"/><path d="M7 16v2M15 16v2"/><path d="M8 12l2 2 2-2 2 2"/></svg>
+      <input class="range" id="spd" type="range" min="0.4" max="3" step="any" value="1" aria-label="Speed">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 17c2-5 6-7 11-6l3-5 1 6c1 1 2 3 1 5z"/><path d="M8 17v2M16 17v2"/><circle cx="17" cy="13" r=".8" fill="currentColor"/></svg>
+    </div>
+    <button class="power" id="tBe" aria-pressed="false"><span class="dot"></span>Backend</button>
+    <button class="power" id="tDb" aria-pressed="false"><span class="dot"></span>Database</button>
+    <button class="ibtn" id="pp" aria-label="Pause"><svg id="ppicon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+  </div>
+  <div class="caption" id="cap1"></div>
+</div>
+</div>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg", $ = (id) => document.getElementById(id);
+  const dotsG = $("dots"), CAP = 12, Y = 70, R = 5.5;
+  // The model follows the agent's code (queue.ts, pusher.ts, backoff.ts); only time is scaled for watching.
+  const HEAD_X = 330, GAP = 16, slotX = (i) => HEAD_X - i * GAP;
+  const X = { pc: 60, out: 348, tunnel: 420, backend: 540, db: 660 };
+  const SAMPLE_EVERY = 1.6, MIN_DWELL = 0.2, BACKOFF_BASE = 0.6, BACKOFF_MAX = 6;
+  const ease = {
+    inOutCubic: (p) => p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2, // slow in, slow out
+    inOutSine: (p) => -(Math.cos(Math.PI * p) - 1) / 2,
+    outQuad: (p) => 1 - (1 - p) * (1 - p),
+    inCubic: (p) => p * p * p,
+  };
+  let beUp = true, dbUp = true, playing = true, speed = 1, target = 1, t = 0, nextSample = 0.3, nextTry = 0, failures = 0;
+  let queue = [], flight = null, falling = [], last = performance.now(), sawBacklog = false;
+  const goals = new Set(); const done = (g) => { if (goals.has(g)) return; goals.add(g); document.querySelector(`[data-g="${g}"]`).classList.add("done"); };
+  const ghost = document.createElementNS(NS, "circle"); ghost.setAttribute("r", R); ghost.setAttribute("fill", "none"); ghost.setAttribute("stroke", "#ff6a13"); ghost.setAttribute("stroke-dasharray", "2 2"); ghost.setAttribute("cx", HEAD_X); ghost.setAttribute("cy", Y); ghost.style.opacity = 0; dotsG.appendChild(ghost);
+
+  // A dot is drawn at the origin and placed with a transform, so it can squash and stretch.
+  const mk = () => { const c = document.createElementNS(NS, "circle"); c.setAttribute("r", R); c.setAttribute("fill", "#ff6a13"); dotsG.appendChild(c);
+    return { el: c, x: X.pc, y: Y, px: X.pc, vx: 0, tw: null, seatedAt: null, wobbleAt: -9, slot: null }; };
+  // Tweens: time-based, so the speed slider scales them; `onDone` chains the next beat.
+  const tween = (d, to, dur, fn, onDone, delay = 0) => { d.tw = { from: d.x, to, t0: t + delay, dur, fn, onDone }; };
+  const wobble = (d) => { d.wobbleAt = t; }; // follow-through: a quick damped squash on landing or impact
+  const fallAway = (d) => { d.tw = null; d.el.setAttribute("fill", "none"); d.el.setAttribute("stroke", "#ffb07a"); d.el.setAttribute("stroke-width", "1.5"); d.vy = -40; d.life = 1; falling.push(d); };
+  const backoff = (n) => { const ceil = Math.min(BACKOFF_MAX, BACKOFF_BASE * 2 ** n); return ceil / 2 + Math.random() * ceil / 2; };
+
+  function place(i, d, stagger) { // move a waiting snapshot to slot i, rippling: each starts a beat after the one ahead
+    if (d === flight || d.slot === i) return;
+    d.slot = i;
+    if (d.seatedAt === null) { if (d.tw) d.tw.to = slotX(i); return; } // still arriving: just retarget
+    tween(d, slotX(i), 0.38, ease.inOutCubic, () => wobble(d), stagger);
+  }
+  function relayout() { let k = 0; queue.forEach((d, i) => { if (d !== flight && d.slot !== i) place(i, d, 0.035 * k++); }); }
+
+  function send(d) { // anticipation: a small pull back, then away with slow-in/slow-out
+    flight = d; d.away = true; d.stop = !beUp ? X.tunnel : !dbUp ? X.backend : X.db; d.ok = beUp && dbUp; d.dropped = false;
+    const fast = d.ok && queue.length > 1, dist = d.stop - d.x;
+    tween(d, d.x - (fast ? 2 : 4), fast ? 0.05 : 0.09, ease.outQuad, () => {
+      tween(d, d.stop, Math.max(0.35, dist / (fast ? 900 : 380)), ease.inOutSine, () => {
+        if (d.ok) { if (queue[0] === d) queue.shift(); d.el.remove(); flight = null; failures = 0; nextTry = t; relayout(); return; }
+        if (d.stop === X.backend) done("db");
+        d.el.setAttribute("fill", "#e5534b"); wobble(d); // impact
+        tween(d, X.out, Math.max(0.35, (d.stop - X.out) / 380), ease.inOutCubic, () => {
+          flight = null; nextTry = t + backoff(failures++);
+          if (d.dropped) { fallAway(d); relayout(); return; }
+          d.el.setAttribute("fill", "#ff6a13"); d.slot = null; d.seatedAt = t; // still the head: it never left the queue
+          tween(d, HEAD_X, 0.25, ease.inOutCubic, () => { d.away = false; wobble(d); }); d.slot = 0;
+        }, 0.06);
+      });
+    });
+  }
+
+  function step(dt) {
+    t += dt;
+    if (t >= nextSample) { nextSample = t + SAMPLE_EVERY;
+      const d = mk(); queue.push(d); d.slot = queue.length - 1;
+      tween(d, slotX(d.slot), Math.max(0.45, (slotX(d.slot) - X.pc) / 300), ease.inOutCubic, () => { d.seatedAt = t; wobble(d); });
+      if (queue.length > CAP) { // full: the OLDEST goes (queue.ts)
+        const old = queue.shift();
+        if (old === flight) old.dropped = true; else fallAway(old);
+        if (!beUp || !dbUp) done("drop");
+        relayout();
+      }
+    }
+    if (!beUp && queue.length >= 3) done("wait");
+    if (queue.length >= 3) sawBacklog = true;
+    const head = queue[0];
+    // Like pusher.ts, the next send follows a success at once: the head may leave while it's still settling.
+    if (!flight && head && head.seatedAt !== null && t - head.seatedAt >= MIN_DWELL && t >= nextTry) send(head);
+    for (const d of [...queue, ...(flight && !queue.includes(flight) ? [flight] : [])]) {
+      const tw = d.tw; if (!tw) continue;
+      const p = Math.min(1, Math.max(0, (t - tw.t0) / tw.dur));
+      d.x = tw.from + (tw.to - tw.from) * tw.fn(p);
+      if (p >= 1 && t >= tw.t0) { d.tw = null; tw.onDone && tw.onDone(); }
+    }
+    for (const d of falling) { d.vy += dt * 260; d.y += d.vy * dt; d.life -= dt * 0.9; } // gravity: ease-in by nature
+    falling = falling.filter((d) => { if (d.life <= 0) { d.el.remove(); return false; } return true; });
+    if (beUp && dbUp && sawBacklog && queue.length <= 1 && goals.has("wait")) done("drain");
+  }
+  function draw(dt) {
+    // The head's held place: fully shown until its snapshot is home again and sits on top of it.
+    const h = queue[0];
+    ghost.style.opacity = h && h.away ? 0.7 : 0;
+    for (const d of [...queue, ...falling, ...(flight && !queue.includes(flight) ? [flight] : [])]) {
+      // stretch along the motion, by speed; squash with a damped wobble after landing or impact
+      d.vx = dt > 0 ? (d.x - d.px) / dt : 0; d.px = d.x;
+      const stretch = Math.min(0.25, Math.abs(d.vx) / 1800);
+      const tau = t - d.wobbleAt, s = tau < 0.5 ? 0.22 * Math.exp(-tau * 9) * Math.cos(tau * 28) : 0;
+      const sx = (1 + stretch) * (1 - s), sy = (1 / (1 + stretch)) * (1 + s);
+      d.el.setAttribute("transform", `translate(${d.x} ${d.y}) scale(${sx} ${sy})`);
+      if (d.life !== undefined) d.el.setAttribute("opacity", Math.max(0, d.life));
+    }
+    const m = beUp && dbUp ? "ok" : !beUp ? "be" : "db";
+    $("cap1").textContent = {
+      ok: "The agent sends each snapshot as it's taken; the backend stores it in PostgreSQL.",
+      be: "The backend is unreachable, so Cloudflare answers with an error. The snapshot keeps its place at the front of the queue; each retry waits longer, with jitter. When the queue is full, the oldest is dropped.",
+      db: "The database is down. The backend is alive, so ECS leaves it running (it only checks liveness), but it can't store anything and answers with an error.",
+    }[m];
+  }
+  function tick(now) {
+    const real = Math.min(0.05, (now - last) / 1000); last = now;
+    speed += (target - speed) * Math.min(1, real * 6);
+    if (playing) { step(real * speed); draw(real * speed); }
+    requestAnimationFrame(tick);
+  }
+  const setDown = (which, down) => {
+    if (which === "be") { beUp = !down; $("tBe").setAttribute("aria-pressed", String(down)); $("rackbody").classList.toggle("down", down); document.querySelectorAll("#rack .led").forEach((l) => l.setAttribute("fill", down ? "#e5534b" : "#5fd38d")); $("bestate").textContent = down ? "unreachable" : "ECS Fargate"; }
+    else { dbUp = !down; $("tDb").setAttribute("aria-pressed", String(down)); $("dbbody").classList.toggle("down", down); $("dbtop").classList.toggle("down", down); $("dbstate").textContent = down ? "not answering" : "RDS"; }
+    if (!down) nextTry = Math.min(nextTry, t + 0.3);
+  };
+  $("tBe").onclick = $("rack").onclick = () => setDown("be", beUp);
+  $("tDb").onclick = $("db").onclick = () => setDown("db", dbUp);
+  $("pp").onclick = () => { playing = !playing; $("pp").setAttribute("aria-label", playing ? "Pause" : "Play");
+    $("ppicon").innerHTML = playing ? '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>' : '<path d="M7 5l12 7-12 7z"/>'; };
+  const spd = $("spd"), fill = () => spd.style.setProperty("--p", ((spd.value - spd.min) / (spd.max - spd.min)) * 100 + "%");
+  spd.oninput = () => { target = +spd.value; fill(); }; fill();
+  $("rs").onclick = () => { [...queue, ...falling].forEach((q) => q.el.remove()); if (flight) flight.el.remove(); queue = []; falling = []; flight = null; failures = 0; nextTry = t; sawBacklog = false; setDown("be", false); setDown("db", false); };
+  requestAnimationFrame(tick);
+})();
+</script>

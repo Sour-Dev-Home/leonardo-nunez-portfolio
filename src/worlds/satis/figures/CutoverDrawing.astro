@@ -1,0 +1,54 @@
+---
+// Figure 2's drawing for one layout: areas side by side on desktop, stacked on phones (layouts.ts).
+// Paths are named with data-path, not id: both drawings are in the page at once.
+import Station from "../Station.astro";
+import { CUTOVER, routePath } from "./layouts";
+import { viewAt } from "../model/cutover";
+
+interface Props {
+  layout: "desktop" | "phone";
+}
+const { layout } = Astro.props;
+const d = CUTOVER[layout];
+const v = viewAt(0);
+const ZONES = [
+  ["pc", "GAMING PC"],
+  ["off", "OFF-SITE BACKUPS"],
+  ["cf", "CLOUDFLARE"],
+  ["aws", "AWS"],
+] as const;
+---
+
+<svg data-layout={layout} viewBox={`0 0 ${d.w} ${d.h}`} role="img" aria-label="The cutover from the gaming PC to AWS, step by step.">
+  {ZONES.map(([z]) => <rect class={`zbg zbg-${z}`} x={d.panels[z].x} y={d.panels[z].y} width={d.panels[z].w} height={d.panels[z].h} rx="12" />)}
+  {
+    ZONES.map(([z, name]) => (
+      <text class={`zlabel zlabel-${z}`} x={d.panels[z].label.x} y={d.panels[z].label.y} text-anchor={d.panels[z].anchor}>
+        {name}
+      </text>
+    ))
+  }
+  <g transform={`translate(0 ${d.shift})`}>
+    <path class="wire" data-path="wPc" d={`M${d.pcDb.x} ${d.pcDb.y} H${d.pcBackend.x}`}></path>
+    <path class="wire idle" data-path="wAws" d={`M${d.awsBackend.x} ${d.awsBackend.y} H${d.rds.x}`}></path>
+    <path class="wire" data-path="wAgent" d={d.agentWire}></path>
+    <path class="path-dump" data-path="pDump" d={d.dump}></path>
+    <path class="path-dump" data-path="pRestore" d={d.restore}></path>
+    <path class="route" data-path="routePc" d={routePath(d, "pc")}></path>
+    <path class="route" data-path="routeAws" d={routePath(d, "aws")} style="opacity:0"></path>
+    <g data-dots></g>
+    <Station kind="db" id="pcDb" zone="pc" x={d.pcDb.x} y={d.pcDb.y} label="PostgreSQL" sub={v.pcDbNote} />
+    <Station kind="rack" id="pcBackend" zone="pc" x={d.pcBackend.x} y={d.pcBackend.y} label="Backend" sub={v.pcBackendNote} />
+    <Station kind="bucket" id="b2" zone="off" x={d.b2.x} y={d.b2.y} label="Backblaze B2" sub={v.b2Note} />
+    <Station kind="rack" id="awsBackend" zone="aws" mode="idle" x={d.awsBackend.x} y={d.awsBackend.y} label="Backend" sub={v.awsBackendNote} />
+    <Station kind="db" id="rds" zone="aws" mode="idle" x={d.rds.x} y={d.rds.y} label="PostgreSQL" sub={v.rdsNote} />
+    <g transform={`translate(${d.rds.x + 22} ${d.rds.y - 20})`}>
+      <g class="check" data-check>
+        <circle r="8" fill="var(--satis-ok)"></circle>
+        <path d="M-3.5 0 l2.5 2.5 l4.5 -5" stroke="#12301f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+      </g>
+    </g>
+    <Station kind="pc" id="agent" zone="pc" x={d.agent.x} y={d.agent.y} label="Agent" sub={v.agentNote} />
+    <Station kind="tunnel" id="tunnel" zone="cf" x={d.tunnel.x} y={d.tunnel.y} label="Tunnel" sub="api.satis-manager.com" />
+  </g>
+</svg>

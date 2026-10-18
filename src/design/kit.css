@@ -2,6 +2,11 @@
   padding-top: var(--space-7);
   border-top: 1px solid var(--rule);
 }
+/* The cover still is a fixed 800 × 450; narrow screens see its left part. */
+.kit-still {
+  overflow: hidden;
+  margin-bottom: var(--space-6);
+}
 .kit-type p {
   margin: 0 0 var(--space-3);
   color: var(--ink);

@@ -14,4 +14,10 @@ describe("Header", () => {
     render(<Header />);
     expect(screen.getByRole("link", { name: "Leonardo Nunez" })).toHaveAttribute("href", "/#top");
   });
+
+  it("marks the current page in the nav", () => {
+    render(<Header current="/about" />);
+    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Work" })).not.toHaveAttribute("aria-current");
+  });
 });

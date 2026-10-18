@@ -1,0 +1,52 @@
+---
+// Figure 2: the move from the PC to AWS, step by reversible step (../model/cutover.ts, from the runbook).
+// The first frame is static markup (a desktop and a phone drawing); cutover-view.ts wires the stepper on
+// whichever drawing is showing, when the figure scrolls into view.
+import CutoverDrawing from "./CutoverDrawing.astro";
+import Goals from "../../../design/figure/Goals.astro";
+import Controls from "../../../design/figure/Controls.astro";
+import { COPY, STEP_NAMES } from "../model/cutover";
+import "../../../design/figure/figure.css";
+import "../world.css";
+---
+
+<Goals
+  goals={[
+    { id: "switch", text: "Step all the way to the switch." },
+    { id: "back", text: "Roll a step back and read what it undoes." },
+  ]}
+/>
+<figure class="fig" data-figure="cutover">
+  <CutoverDrawing layout="desktop" />
+  <CutoverDrawing layout="phone" />
+  <Controls label="Cutover figure controls" speed={false} play={false}>
+    <button class="fig-tbtn" type="button" data-prev aria-disabled="true">↶ Roll back</button>
+    <ol class="fig-track" aria-label="Steps">
+      {
+        STEP_NAMES.map((n, i) => (
+          <li>
+            {i > 0 && (
+              <span class="conn" aria-hidden="true">
+                <i />
+              </span>
+            )}
+            <span class="stp">{n}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <button class="fig-tbtn primary" type="button" data-next>Next step →</button>
+  </Controls>
+  <p class="fig-caption" aria-live="polite">{COPY[0].caption}</p>
+  <p class="fig-rollback"></p>
+</figure>
+
+<script>
+  import { whenVisible } from "../../../design/figure/lazy";
+  import { mountResponsive } from "../../../design/figure/responsive";
+  for (const el of document.querySelectorAll<HTMLElement>('figure[data-figure="cutover"]')) {
+    whenVisible(el, () => {
+      void import("./cutover-view").then((m) => mountResponsive(el, m.mount));
+    });
+  }
+</script>

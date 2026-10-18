@@ -1,0 +1,12 @@
+---
+// What to try, ticked by the figure's script as the reader does it. Goes right before its figure.
+interface Props {
+  goals: { id: string; text: string }[];
+}
+const { goals } = Astro.props;
+---
+
+<div class="fig-goals">
+  <p class="fig-goals-title">Goals</p>
+  <ul>{goals.map((g) => <li data-goal={g.id}>{g.text}<span class="visually-hidden" data-done></span></li>)}</ul>
+</div>

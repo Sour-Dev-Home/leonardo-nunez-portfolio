@@ -1,0 +1,32 @@
+---
+// The bar under a figure. Figure actions (toggles, steppers) go in the slot.
+interface Props {
+  speed?: boolean;
+  play?: boolean;
+  label: string;
+}
+const { speed = true, play = true, label } = Astro.props;
+---
+
+<div class="fig-bar" role="group" aria-label={label}>
+  <button class="fig-ibtn" type="button" data-reset aria-label="Reset">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"></path><path d="M20 4v5h-5"></path></svg>
+  </button>
+  {
+    speed && (
+      <div class="fig-speed">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 16c0-4 3-7 7-7s7 3 7 7z" /><path d="M18 14h2.5a1.5 1.5 0 0 0 0-3H18" /><path d="M7 16v2M15 16v2" /><path d="M8 12l2 2 2-2 2 2" /></svg>
+        <input class="fig-range" data-speed type="range" min="0.4" max="3" step="any" value="1" aria-label="Speed" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 17c2-5 6-7 11-6l3-5 1 6c1 1 2 3 1 5z" /><path d="M8 17v2M16 17v2" /><circle cx="17" cy="13" r=".8" fill="currentColor" /></svg>
+      </div>
+    )
+  }
+  <slot />
+  {
+    play && (
+      <button class="fig-ibtn" type="button" data-playpause aria-label="Pause">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+      </button>
+    )
+  }
+</div>

@@ -7,8 +7,10 @@ import type { Project } from "../lib/projects";
 interface Props {
   project: Project;
   slug: string;
+  /** The project's world (src/worlds/), which scopes its tokens to the article. */
+  world?: string;
 }
-const { project, slug } = Astro.props;
+const { project, slug, world } = Astro.props;
 ---
 
 <Shell
@@ -19,7 +21,7 @@ const { project, slug } = Astro.props;
   noteFont
 >
   <main>
-    <article class="case-study page">
+    <article class:list={["case-study page", world && `world-${world}`]}>
       <header class="case-study-head reveal">
         <p class="case-study-back"><a href="/">← Back to all projects</a></p>
         <p class="kicker">Case study</p>
@@ -27,7 +29,8 @@ const { project, slug } = Astro.props;
         <StackList stack={project.stack} />
         <ProjectLinks project={project} />
       </header>
-      <div class="case-study-body prose reveal"><slot /></div>
+      <!-- No .reveal here: the body's first blocks stagger in on their own (motion.css). -->
+      <div class="case-study-body prose"><slot /></div>
     </article>
   </main>
 </Shell>

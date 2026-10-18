@@ -47,6 +47,13 @@ describe("the sidenote font", () => {
     }
   });
 
+  // Sidenote pages also set italics (the note's lead, emphasis in long prose).
+  it("comes with the italic face preloaded on those pages", () => {
+    for (const file of ["kit.html", "projects/satisfactory-dash.html"]) {
+      expect(preloads(file), file).toContain("/fonts/public-sans-latin-wght-italic.woff2");
+    }
+  });
+
   it("is not preloaded elsewhere", () => {
     for (const file of ["index.html", "about.html", "404.html"]) {
       expect(preloads(file), file).not.toContain("/fonts/gochi-hand-latin-400-normal.woff2");

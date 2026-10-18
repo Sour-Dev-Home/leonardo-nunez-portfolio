@@ -1,0 +1,38 @@
+---
+// Figure 1: what the agent does when the backend or the database is down. The first frame is static
+// markup (a desktop and a phone drawing); outage-view.ts starts the model (../model/outage.ts) on
+// whichever drawing is showing, when the figure scrolls into view.
+import OutageDrawing from "./OutageDrawing.astro";
+import Goals from "../../../design/figure/Goals.astro";
+import Controls from "../../../design/figure/Controls.astro";
+import "../../../design/figure/figure.css";
+import "../world.css";
+---
+
+<Goals
+  goals={[
+    { id: "wait", text: "Take the backend down and watch snapshots wait in the queue." },
+    { id: "drop", text: "Keep it down until a snapshot is dropped." },
+    { id: "drain", text: "Bring it back and watch the backlog drain." },
+    { id: "db", text: "Take only the database down: the error comes back from further away." },
+  ]}
+/>
+<figure class="fig" data-figure="outage">
+  <OutageDrawing layout="desktop" />
+  <OutageDrawing layout="phone" />
+  <Controls label="Outage figure controls">
+    <button class="fig-tbtn" type="button" data-toggle="backend" aria-pressed="false">Backend</button>
+    <button class="fig-tbtn" type="button" data-toggle="db" aria-pressed="false">Database</button>
+  </Controls>
+  <p class="fig-caption" aria-live="polite">The agent sends each snapshot as it's taken; the backend stores it in PostgreSQL.</p>
+</figure>
+
+<script>
+  import { whenVisible } from "../../../design/figure/lazy";
+  import { mountResponsive } from "../../../design/figure/responsive";
+  for (const el of document.querySelectorAll<HTMLElement>('figure[data-figure="outage"]')) {
+    whenVisible(el, () => {
+      void import("./outage-view").then((m) => mountResponsive(el, m.mount));
+    });
+  }
+</script>
