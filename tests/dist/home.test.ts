@@ -18,7 +18,7 @@ describe("home page", () => {
 
   it("lists every project in order", () => {
     const names = doc.querySelectorAll(".project-card h3").map((h) => h.text.trim());
-    expect(names).toEqual(["satisfactory-dash", "lanes", "local-worker", "Home Lab"]);
+    expect(names).toEqual(["satisfactory-dash", "lanes", "leonardonunez.dev", "local-worker", "Home Lab"]);
   });
 
   it("keeps every external link the old site had", () => {

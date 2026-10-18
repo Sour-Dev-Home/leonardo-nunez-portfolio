@@ -33,6 +33,15 @@ test("keyboard focus colours the cover and outlines the whole card", async ({ pa
   expect(outline).not.toBe("none");
 });
 
+test("a card's summary runs the width of its column, as wide as the cover", async ({ page }) => {
+  await page.goto("/");
+  const [text, column] = await page
+    .locator(`${card} .work-card-summary`)
+    .first()
+    .evaluate((p) => [p.getBoundingClientRect().width, p.parentElement!.getBoundingClientRect().width]);
+  expect(text / column).toBeGreaterThan(0.9);
+});
+
 test("clicking anywhere on a case-study card opens the case study", async ({ page }) => {
   await page.goto("/");
   // A real pointer click on the cover: the stretched link sits on top of it, and

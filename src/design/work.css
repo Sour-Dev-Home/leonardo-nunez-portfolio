@@ -102,9 +102,10 @@
   margin: 0;
   font-size: var(--step-2);
 }
+/* No reading-width cap: a summary is at most 125 characters (the schema), so it
+   runs the column's full width, as wide as the cover above it. */
 .work-card-summary {
   margin: var(--space-2) 0;
-  max-width: 48ch;
 }
 .badge {
   font-size: var(--step--1);
