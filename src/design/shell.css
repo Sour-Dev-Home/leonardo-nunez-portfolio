@@ -48,10 +48,14 @@
 }
 
 .hero {
-  display: grid;
-  gap: var(--space-5);
   padding-top: var(--space-8);
   padding-bottom: var(--space-7);
+}
+/* Only the home hero has a portrait; the plain page titles (/about, /kit) keep
+   the kicker stacked above the h1. */
+.hero:has(.hero-portrait) {
+  display: grid;
+  gap: var(--space-5);
 }
 /* Phones: a small portrait above the name. From 48rem: beside it, top-aligned. */
 .hero-portrait {
@@ -64,7 +68,7 @@
   background: var(--raised);
 }
 @media (min-width: 48rem) {
-  .hero {
+  .hero:has(.hero-portrait) {
     grid-template-columns: 1fr 13rem;
     gap: var(--space-6);
     align-items: start;
@@ -76,7 +80,7 @@
   }
 }
 @media (min-width: 64rem) {
-  .hero {
+  .hero:has(.hero-portrait) {
     grid-template-columns: 1fr 18rem;
   }
 }
