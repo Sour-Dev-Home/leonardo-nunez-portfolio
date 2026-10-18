@@ -14,6 +14,11 @@ to `main` unattended, without breaking it.**
 The pipeline leads the page. The trial lessons are supporting evidence: what failed, and what changed because of it.
 The page pairs with the satisfactory-dash case study, as "the system that built that".
 
+The page is equally clear that lanes is not a perfect tool (owner, 2026-10-18: "employers like seeing you consider
+it"). Its limits and design trade-offs get their own section, with Conway's law as the central example. That
+section is written as engineering judgment: what each cost, what was measured, what changed, and when not to use
+lanes at all.
+
 Length and form follow the satis world: a short main read, with deeper material in closed "More detail" sections.
 Every claim links to its source in the public lanes repository
 (`https://github.com/Sour-Dev-Home/lanes/blob/main/<path>`) or in satisfactory-dash.
@@ -31,9 +36,33 @@ Headings (the dist test pins them):
    - The honest limit, stated plainly: the gate stops honest mistakes and strangers, not a lane that turns hostile
      (`docs/SECURITY.md`, "What lanes does not protect against").
 4. **Results.** The numbers listed under "Claims and their sources".
-5. **What I'd do differently.** Draft from the history notes: the issue-size decision, and the dependence on the
-   owner's machine. The owner reviews it.
-6. **How it was built.** lanes was built with lanes: its own PRs went through its own gate.
+5. **Limits and trade-offs.** A main section, not a footnote. Each point names the cost, the evidence, and what
+   changed or stayed:
+   - **Conway's law.** Lanes communicate only through issues, and each sees only its own files. So the system was
+     built in file-sized slices: holistic changes were split, then queued in series by the overlap check anyway, and
+     the owner had to merge issues back together by hand. The tool's own structure shaped the structure of the work.
+     - Measured: one ~200-line change became four serial lanes (#525–#528), at about 15M tokens and three merge
+       waits, against about 6–8M for a single lane.
+     - The response: split issues by size, not by module. A floor of about 100 changed lines, a ceiling of 300.
+       Contracts are still split out when other work consumes them.
+     - The same pattern came back when a planned restructure added machinery instead of removing it. That phase was
+       deferred.
+   - **Fixed start-up cost.** Every lane pays to read its own context and run its own reviewers. A lane under 50
+     changed lines costs four to five times more per line than one of 150 or more. Small or tightly coupled work is
+     cheaper in one session.
+   - **Guards are a patch chain.** A text filter guarding a shell can always be dodged, so each fix (#308, #378, #404,
+     #424, #441) closed the gap the previous review found, and the chain has no natural end. That is why the real
+     gatekeeper is the required checks on GitHub, which judge results, not intent.
+   - **It depends on one machine.** The queue and every lane run on the owner's computer. When it sleeps, nothing
+     launches or gets fixed, though GitHub's side keeps moving. This was recorded and deliberately deferred.
+   - **Not hands-off.** Approvals, launches and upgrades stay with the owner by design. An early "solo" mode that let
+     lanes act as the owner was retired because it introduced bugs (ADR 0025).
+   - **Security limits, stated.** It does not protect against a compromised owner, vulnerabilities in the code lanes
+     write, prompt injection outside the gates, or personal data the scan isn't told about.
+   - **When not to use it.** This portfolio: one person, a small static site, a few PRs a week. The owner decided on
+     2026-10-18 that lanes isn't worth adopting here, and this site's own CI and review are enough.
+6. **How it was built.** lanes was built with lanes: its own PRs went through its own gate. The section ends on
+   what's next. The owner reviews the draft.
 
 ### Claims and their sources
 
@@ -49,6 +78,14 @@ Each claim is checked against its source before the article is committed. Any cl
 | The merge queue re-decides from live inputs, never from a status already on the head | `gate.mjs` (comment on `decideForPr`, R3) |
 | A trial lane stopped because the issue's Scope didn't name every file | satisfactory-dash lane #386 (confirm the link) |
 | 34 decision records | `docs/adr/` (re-count) |
+| Conway's law: file-sized slices, split then serialized, issues merged back by hand | `docs/history/2026-09-29-lanes-v0.1.0-snapshot.md`; `docs/history/2026-09-30-phase-2-deferred.md` |
+| #525–#528: ~15M tokens and three merge waits, against ~6–8M as one lane; split by size with a floor of ~100 and a ceiling of 300 lines | `docs/history/2026-09-30-lane-size-and-cost.md` ("What the numbers say", "Decision") |
+| Lanes under 50 lines cost four to five times more per line | the same note |
+| Guards as a patch chain (#308, #378, #404, #424, #441) | `docs/history/2026-09-29-lanes-v0.1.0-snapshot.md` |
+| The queue stops when the owner's machine sleeps; deferred | `docs/history/2026-10-02-lanes-depends-on-the-owners-machine.md` |
+| Solo profile retired because it introduced bugs | `docs/history/2026-10-01-retire-solo-profile.md`, ADR 0025 |
+| What lanes does not protect against | `docs/SECURITY.md` |
+| Not adopted in this portfolio | the owner's decision, 2026-10-18; closed PR #41 in this repository |
 
 ### Sidenotes
 
@@ -129,6 +166,7 @@ simplifies (one reviewer failing at a time, no blockers, no handover stage), a c
 - **Unit:** the model, one test per gate rule it mirrors.
 - **Dist:**
   - headings, links to sources and closed "More detail" sections;
+  - "Limits and trade-offs" sits in the main read, not inside a closed section, and names Conway's law;
   - the budget and module-only scripts;
   - the stills at their sizes;
   - the og image.
