@@ -1,3 +1,6 @@
+import { statSync } from "node:fs";
+import { join } from "node:path";
+import sharp from "sharp";
 import { describe, it, expect } from "vitest";
 import { SITE, page, metaContent, hrefs, distFileExists } from "./helpers";
 
@@ -42,6 +45,20 @@ describe("home page", () => {
     for (const id of ["top", "work", "contact"]) {
       expect(doc.querySelector(`#${id}`)).not.toBeNull();
     }
+  });
+
+  it("shows a small, described portrait in the hero, with no metadata in the file", async () => {
+    const img = doc.querySelector(".hero img.hero-portrait");
+    expect(img?.getAttribute("alt")).toMatch(/Leonardo Nunez/);
+    expect(img?.getAttribute("width")).toBe("720");
+    expect(img?.getAttribute("height")).toBe("900");
+    const src = img!.getAttribute("src")!;
+    expect(src).toMatch(/\.webp$/);
+    const file = join(process.cwd(), "dist", src);
+    expect(statSync(file).size).toBeLessThan(150_000);
+    // Phone photos carry GPS and camera details in EXIF/XMP; none of it may ship.
+    const meta = await sharp(file).metadata();
+    expect([meta.exif, meta.xmp, meta.iptc]).toEqual([undefined, undefined, undefined]);
   });
 
   it("ships no JavaScript", () => {
