@@ -10,8 +10,10 @@ test.skip(!process.env.PW_VISUAL, "visual comparisons run in the Playwright cont
 // the first screen only: the geometry tests in loading.spec.ts already check the
 // whole page, and full-page copies would triple the size of every baseline refresh.
 // An absolute pixel budget, not a ratio: 0.2% of an 8,000 px-tall page is ~21k
-// pixels, enough to hide a missing badge or icon.
-const loaded = { fullPage: true, maxDiffPixels: 200 } as const;
+// pixels, enough to hide a missing badge or icon. Full pages get more room than
+// first screens: Chrome rasterises a 12,000 px page in tiles and text edges vary by
+// up to ~900 scattered pixels between identical runs; a missing badge is ~3,400.
+const loaded = { fullPage: true, maxDiffPixels: 1500 } as const;
 const firstScreen = { fullPage: false, maxDiffPixels: 200 } as const;
 
 // font-display: optional can skip a font that misses its first ~100 ms; a first
