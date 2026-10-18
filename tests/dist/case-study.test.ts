@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { SITE, page, metaContent, hrefs, distFileExists } from "./helpers";
+import { RUNNABLE_SCRIPTS } from "./budget";
 
 describe("satisfactory-dash case study", () => {
   const doc = page("projects/satisfactory-dash.html");
@@ -57,7 +58,7 @@ describe("satisfactory-dash case study", () => {
   });
 
   it("ships no JavaScript", () => {
-    expect(doc.querySelectorAll("script")).toHaveLength(0);
+    expect(doc.querySelectorAll(RUNNABLE_SCRIPTS)).toHaveLength(0);
   });
 });
 

@@ -24,6 +24,18 @@ export function hrefs(doc: HTMLElement): string[] {
   return doc.querySelectorAll("a[href]").map((a) => a.getAttribute("href") ?? "");
 }
 
+/** Every file in the build, as slash-separated paths relative to dist/. */
+export function builtFiles(): string[] {
+  return readdirSync(DIST, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => join(entry.parentPath, entry.name).slice(DIST.length + 1).replace(/\\/g, "/"));
+}
+
+/** Every HTML page in the build, relative to dist/. */
+export function builtPages(): string[] {
+  return builtFiles().filter((f) => f.endsWith(".html"));
+}
+
 /** All CSS the build ships: stylesheet files plus <style> blocks inlined into pages. */
 export function builtCss(): string {
   const astroDir = join(DIST, "_astro");

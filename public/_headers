@@ -1,0 +1,27 @@
+# Browser caching for the static assets (Cloudflare Workers reads this file; it
+# isn't served). Pages are left out on purpose: they keep Cloudflare's default
+# "max-age=0, must-revalidate", so a deploy shows up on the next page view.
+# Each file must match at most one Cache-Control rule (tests/dist/headers.test.ts).
+
+# Astro's build output: the file name changes whenever the content does.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Fonts keep fixed names, so they can't be immutable. Give a changed font a new
+# file name, or returning visitors may see the old one for up to 30 days.
+/fonts/*
+  Cache-Control: public, max-age=2592000
+
+# Pictures and icons: fresh for a day, then refreshed in the background.
+/images/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/demo/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/diagrams/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/og/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/favicon.svg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/icons.svg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800

@@ -35,10 +35,14 @@ function withImports(url: string, distDir: string, seen: Set<string>): void {
   }
 }
 
+/** Script tags the browser executes. Others (speculation rules, JSON-LD) are data. */
+export const RUNNABLE_SCRIPTS = 'script:not([type]), script[type="module"], script[type="text/javascript"]';
+
 /** Gzipped bytes of JavaScript a page loads: inline scripts plus local script files and their imports. */
 export function pageScriptBytes(html: string, distDir: string): number {
   const inline = parse(html)
-    .querySelectorAll("script:not([src])")
+    .querySelectorAll(RUNNABLE_SCRIPTS)
+    .filter((s) => !s.getAttribute("src"))
     .reduce((sum, s) => sum + (s.text.trim() ? gzipSync(s.text).length : 0), 0);
   const seen = new Set<string>();
   for (const url of pageScriptUrls(html)) {
