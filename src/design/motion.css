@@ -21,6 +21,29 @@ main > :nth-child(3) {
 main > :nth-child(n + 4) {
   --reveal-index: 3;
 }
+/* A case study's opening blocks follow its header in, one after another; the rest are below the fold. */
+.case-study-body > :nth-child(-n + 6) {
+  animation: reveal var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--reveal-index, 0) * 60ms);
+}
+.case-study-body > :nth-child(1) {
+  --reveal-index: 1;
+}
+.case-study-body > :nth-child(2) {
+  --reveal-index: 2;
+}
+.case-study-body > :nth-child(3) {
+  --reveal-index: 3;
+}
+.case-study-body > :nth-child(4) {
+  --reveal-index: 4;
+}
+.case-study-body > :nth-child(5) {
+  --reveal-index: 5;
+}
+.case-study-body > :nth-child(6) {
+  --reveal-index: 6;
+}
 
 @view-transition {
   navigation: auto;
@@ -35,7 +58,8 @@ main > :nth-child(n + 4) {
     navigation: none;
   }
   /* Zero durations aren't enough: the stagger delays would still pop sections in. */
-  .reveal {
+  .reveal,
+  .case-study-body > :nth-child(-n + 6) {
     animation: none;
   }
 }

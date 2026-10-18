@@ -30,7 +30,8 @@ const { project, slug, world } = Astro.props;
         <StackList stack={project.stack} />
         <ProjectLinks project={project} />
       </header>
-      <div class="case-study-body prose reveal"><slot /></div>
+      <!-- No .reveal here: the body's first blocks stagger in on their own (motion.css). -->
+      <div class="case-study-body prose"><slot /></div>
     </article>
   </main>
 </Shell>

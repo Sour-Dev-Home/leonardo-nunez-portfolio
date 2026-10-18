@@ -4,7 +4,8 @@ const NAV = [
   { label: "Contact", href: "/#contact" },
 ];
 
-export function Header() {
+/** `current` is the page's path; the nav link to that page is marked as the current one. */
+export function Header({ current }: { current?: string }) {
   return (
     <header className="site-header page">
       <a className="brand" href="/#top">
@@ -12,7 +13,7 @@ export function Header() {
       </a>
       <nav className="site-nav" aria-label="Main">
         {NAV.map(({ label, href }) => (
-          <a key={label} href={href}>
+          <a key={label} href={href} aria-current={href === current ? "page" : undefined}>
             {label}
           </a>
         ))}

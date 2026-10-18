@@ -13,14 +13,20 @@ for (const { name, path } of PAGES.filter((p) => p.status === 200)) {
     // Before the first paint Chrome may still be waiting on preloaded fonts, and a
     // font arriving then changes nothing anyone saw.
     await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
-    const before = await page.evaluate(() => document.querySelector("main")!.getBoundingClientRect().height);
+    const box = () =>
+      page.evaluate(() => {
+        const r = document.querySelector("main")!.getBoundingClientRect();
+        return { width: r.width, height: r.height };
+      });
+    const before = await box();
     // "Late" means after optional's ~100 ms block period; a font released inside
     // that window is on time and may legitimately be used.
     await page.waitForTimeout(500);
     released = true;
     await Promise.all(held.splice(0).map((r) => r.continue()));
     await page.waitForLoadState("networkidle");
-    const after = await page.evaluate(() => document.querySelector("main")!.getBoundingClientRect().height);
-    expect(after).toBeCloseTo(before, 0);
+    const after = await box();
+    expect(after.height).toBeCloseTo(before.height, 0);
+    expect(after.width).toBeCloseTo(before.width, 0);
   });
 }
