@@ -74,6 +74,9 @@
   background: var(--fig-accent);
   color: var(--fig-on-accent);
 }
+.fig-tbtn.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--fig-accent) 85%, white);
+}
 .fig-ibtn:focus-visible,
 .fig-tbtn:focus-visible,
 .fig-range:focus-visible,

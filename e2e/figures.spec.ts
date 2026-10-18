@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { labelCollisions } from "./figures";
+import { viewAt } from "../src/worlds/satis/model/cutover";
 
 const OUT = 'figure[data-figure="outage"]';
 
@@ -72,5 +73,86 @@ test.describe("outage figure", () => {
     await page.locator(`${OUT} button[data-toggle="backend"]`).click();
     await page.waitForTimeout(800);
     expect(await labelCollisions(page, OUT)).toEqual([]);
+  });
+});
+
+const CUT = 'figure[data-figure="cutover"]';
+
+async function readyCutover(page: import("@playwright/test").Page) {
+  await page.goto("/kit");
+  await page.locator(CUT).scrollIntoViewIfNeeded();
+  await expect(page.locator(`${CUT} button[data-next]`)).toHaveAttribute("data-ready", "");
+}
+
+test.describe("cutover figure", () => {
+  test("steps to the switch: the route moves to AWS and the goal ticks", async ({ page }) => {
+    await readyCutover(page);
+    for (let i = 0; i < 5; i++) {
+      await page.locator(`${CUT} button[data-next]`).click();
+      await page.waitForTimeout(i === 1 || i === 2 ? 1700 : 400);
+    }
+    await page.waitForTimeout(1300);
+    await expect(page.locator('[data-goal="switch"]')).toHaveClass(/done/);
+    const offs = await page.evaluate(
+      (sel) => ["routePc", "routeAws"].map((id) => parseFloat(getComputedStyle(document.querySelector(`${sel} svg[data-layout]:not([hidden]) #${id}`)!).strokeDashoffset)),
+      CUT,
+    );
+    expect(offs[1]).toBeCloseTo(0, 0);
+    expect(offs[0]).toBeGreaterThan(10);
+  });
+
+  test("rolling back shows that step's rollback and restores the previous view", async ({ page }) => {
+    await readyCutover(page);
+    await page.locator(`${CUT} button[data-next]`).click();
+    await expect(page.locator(`${CUT} .fig-rollback`)).toContainText("nothing has moved yet");
+    await page.locator(`${CUT} button[data-prev]`).click();
+    await expect(page.locator('[data-goal="back"]')).toHaveClass(/done/);
+    await expect(page.locator(`${CUT} svg[data-layout]:visible [data-station="pcBackend"]`)).toHaveClass(/live/);
+  });
+
+  test("ignores Next while the dump is still moving (Review Focus 3)", async ({ page }) => {
+    test.skip(!!process.env.REDUCED, "the dump is instant under reduced motion");
+    await readyCutover(page);
+    await page.locator(`${CUT} button[data-next]`).click(); // freeze
+    await page.locator(`${CUT} button[data-next]`).click(); // backup: the dump starts
+    await page.locator(`${CUT} button[data-next]`).click(); // pressed mid-animation
+    await page.waitForTimeout(1800);
+    const v = viewAt(2);
+    await expect(page.locator(`${CUT} svg[data-layout]:visible [data-station="b2"] [data-sub]`)).toHaveText(v.b2Note);
+    await expect(page.locator(`${CUT} svg[data-layout]:visible [data-station="rds"] [data-sub]`)).toHaveText(v.rdsNote);
+  });
+
+  test("keyboard only: Next, Roll back (Review Focus 5)", async ({ page }) => {
+    await readyCutover(page);
+    await page.locator(`${CUT} button[data-next]`).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator(`${CUT} .fig-track .stp`).first()).toHaveClass(/now/);
+    await page.locator(`${CUT} button[data-prev]`).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator(`${CUT} button[data-prev]`)).toBeDisabled();
+  });
+
+  test("no line crosses a label at any step or mid-switch", async ({ page, viewport }) => {
+    // PHONE-LAYOUT-PENDING (plan Task 9): until the vertical composition lands, phones show the desktop
+    // drawing at ~43% scale, where the 2 px margin is too tight. Task 9 removes this line.
+    test.fixme(viewport!.width < 640, "phones get their own composition in Task 9");
+    await readyCutover(page);
+    expect(await labelCollisions(page, CUT)).toEqual([]);
+    for (let i = 1; i <= 5; i++) {
+      await page.locator(`${CUT} button[data-next]`).click();
+      if (i === 5) {
+        for (const ms of [250, 300, 300]) {
+          await page.waitForTimeout(ms);
+          expect(await labelCollisions(page, CUT)).toEqual([]);
+        }
+      }
+      await page.waitForTimeout(i === 2 || i === 3 ? 1700 : 1200);
+      expect(await labelCollisions(page, CUT)).toEqual([]);
+    }
+  });
+
+  test("has no step numbers in its track", async ({ page }) => {
+    await page.goto("/kit");
+    expect(await page.locator(`${CUT} .fig-track`).innerText()).not.toMatch(/\d/);
   });
 });
