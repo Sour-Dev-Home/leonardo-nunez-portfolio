@@ -9,7 +9,6 @@ export function Projects({ projects }: ProjectsProps) {
   return (
     <section id="work" className="section page reveal">
       <div className="section-head">
-        <p className="kicker">Selected work</p>
         <h2>Work</h2>
       </div>
       <div className="work-list">

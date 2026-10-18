@@ -16,6 +16,18 @@ export const projectSchema = z.object({
   order: z.number().int(),
   world: z.boolean().default(false),
   ogImage: z.string().startsWith("/").optional(),
+  // The work card's picture: shown in a 16:9 slot, cropped to fit (see docs/STYLE.md,
+  // "Card covers"). `focus` is a CSS object-position, e.g. "50% 20%", for crops
+  // that must keep a particular part in view.
+  cover: z
+    .object({
+      src: z.string().startsWith("/"),
+      focus: z
+        .string()
+        .regex(/^[\w%. -]+$/)
+        .optional(),
+    })
+    .optional(),
 });
 
 export type ProjectData = z.infer<typeof projectSchema>;

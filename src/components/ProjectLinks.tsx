@@ -2,19 +2,15 @@ import type { Project } from "../lib/projects";
 
 interface ProjectLinksProps {
   project: Project;
-  showCaseStudyLink?: boolean;
 }
 
-export function ProjectLinks({ project, showCaseStudyLink = false }: ProjectLinksProps) {
-  const hasCaseStudyLink = showCaseStudyLink && !!project.slug;
-
-  if (!project.repoUrl && !project.liveUrl && !hasCaseStudyLink) {
+export function ProjectLinks({ project }: ProjectLinksProps) {
+  if (!project.repoUrl && !project.liveUrl) {
     return null;
   }
 
   return (
     <div className="project-links">
-      {hasCaseStudyLink && <a href={`/projects/${project.slug}`}>Read case study →</a>}
       {project.repoUrl && (
         <a href={project.repoUrl} target="_blank" rel="noreferrer">
           Repo

@@ -6,7 +6,7 @@ import type { Project } from "../lib/projects";
 const baseProject: Project = {
   name: "Test Project",
   summary: "A test project.",
-  description: "A project for testing.",
+  description: "A much longer project description that belongs in the case study.",
   status: "shipped",
   stack: ["React", "TypeScript"],
   repoUrl: "https://github.com/example/test-project",
@@ -19,20 +19,26 @@ function renderCard(project: Project) {
 }
 
 describe("ProjectCard", () => {
-  it("renders the name, description, and stack chips", () => {
+  it("renders the name, the short summary and the stack, not the long description", () => {
     renderCard(baseProject);
     expect(screen.getByRole("heading", { name: "Test Project" })).toBeInTheDocument();
-    expect(screen.getByText("A project for testing.")).toBeInTheDocument();
+    expect(screen.getByText("A test project.")).toBeInTheDocument();
+    expect(screen.queryByText(/much longer/)).not.toBeInTheDocument();
     expect(screen.getByText("React")).toBeInTheDocument();
   });
 
-  it("shows a case-study link only when a slug is present", () => {
-    renderCard(baseProject);
-    expect(screen.queryByText(/read case study/i)).not.toBeInTheDocument();
-
+  it("makes the title the case-study link when there is one, with no separate 'Read' link", () => {
     renderCard({ ...baseProject, slug: "test-project" });
-    const link = screen.getByRole("link", { name: /read case study/i });
+    const link = screen.getByRole("link", { name: /test project/i });
     expect(link).toHaveAttribute("href", "/projects/test-project");
+    expect(link).toHaveClass("work-card-link");
+    expect(screen.queryByText(/read case study/i)).not.toBeInTheDocument();
+  });
+
+  it("leaves the title plain without a case study", () => {
+    renderCard(baseProject);
+    expect(screen.queryByRole("link", { name: /test project/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Repo" })).toBeInTheDocument();
   });
 
   it("applies a compact class when emphasis is secondary", () => {
@@ -40,21 +46,23 @@ describe("ProjectCard", () => {
     expect(container.querySelector(".project-card-compact")).toBeInTheDocument();
   });
 
-  it("shows the project's still when it has one, with empty alt text (decorative)", () => {
-    const { container } = renderCard({ ...baseProject, ogImage: "/demo/poster.png" });
-    const img = container.querySelector(".work-card-still img");
-    expect(img).toHaveAttribute("src", "/demo/poster.png");
-    expect(img).toHaveAttribute("alt", "");
-    expect(img).toHaveAttribute("width");
-  });
-
-  it("falls back to a typographic still without an image", () => {
-    const { container } = renderCard(baseProject);
-    expect(container.querySelector(".work-card-type")?.textContent).toBe("Test Project");
-  });
-
   it("does not apply the compact class by default", () => {
     const { container } = renderCard(baseProject);
     expect(container.querySelector(".project-card-compact")).not.toBeInTheDocument();
+  });
+
+  it("shows the cover in the 16:9 media slot, decorative, at its focus point", () => {
+    const { container } = renderCard({ ...baseProject, cover: { src: "/covers/p.webp", focus: "50% 20%" } });
+    const img = container.querySelector(".work-card-media img");
+    expect(img).toHaveAttribute("src", "/covers/p.webp");
+    expect(img).toHaveAttribute("alt", "");
+    expect(img).toHaveAttribute("width", "1600");
+    expect(img).toHaveAttribute("height", "900");
+    expect(img).toHaveStyle({ objectPosition: "50% 20%" });
+  });
+
+  it("renders no media slot at all without a cover", () => {
+    const { container } = renderCard({ ...baseProject, ogImage: "/og/p.png" });
+    expect(container.querySelector(".work-card-media")).not.toBeInTheDocument();
   });
 });

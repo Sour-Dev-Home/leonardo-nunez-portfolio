@@ -72,10 +72,36 @@ world", and anything that could describe anyone.
   may overlap mid-load or at 0, 50 or 100% of an animation, and media must reserve
   its space (`width` and `height` on every image and video).
 
+## Card covers
+
+A project's picture on the home page. Add it to the project's frontmatter and the
+card shows it; leave it out and the card is text only (no placeholder).
+
+```yaml
+cover:
+  src: /covers/<slug>.webp   # in public/covers/
+  focus: 50% 30%             # optional CSS object-position, for tight crops
+```
+
+- **Shape:** always shown 16:9, cropped to fill (`object-fit: cover`). Make it
+  1600 × 900 px; a different shape is cropped around `focus` (default: the centre).
+- **File:** WebP (or PNG for flat UI screenshots), under 250 KB.
+- **Content:** something real from the project (a screen, a diagram, a frame of
+  a demo), not decoration. Keep the subject inside the middle 80%: the card zooms
+  3% on hover, and the compact thumbnail is small.
+- **Colour:** full colour in the file. The card shows it grayscale until hover or
+  focus (always in colour on touch screens), so it must still read in grayscale.
+- **Where it shows:** full width on main projects; a 14rem thumbnail beside the
+  text on compact (secondary) cards from 48rem up.
+- **Not the link preview:** `ogImage` (1200 × 630) is the social card; it can be
+  the same picture, but the two fields are separate.
+
 ## Components
 
-- `ProjectCard` (`src/components`): `project`. A grayscale still that colours on
-  hover or focus; a typographic still without an image; compact for secondary
+- `ProjectCard` (`src/components`): `project`. Title, the one-line `summary`
+  (never the long `description`), stack, repo/demo links. With a case study the
+  whole card is the link: hover or focus colours the cover, zooms it 3%, turns the
+  title accent and slides in an arrow. No "Read more" link. Compact for secondary
   projects.
 - `Aside` (`src/design/components`): optional `title`. Context worth knowing.
 - `Callout`: `kind` `"note"` or `"warning"`.

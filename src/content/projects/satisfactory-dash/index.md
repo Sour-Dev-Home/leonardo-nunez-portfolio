@@ -10,6 +10,8 @@ repoUrl: https://github.com/Sour-Dev-Home/satisfactory-dash
 liveUrl: https://demo.satis-manager.com
 order: 1
 ogImage: /demo/satisfactory-dash-walkthrough-poster.png
+cover:
+  src: /demo/satisfactory-dash-walkthrough-poster.png
 ---
 
 ## The problem

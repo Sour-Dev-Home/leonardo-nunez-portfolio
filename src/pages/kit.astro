@@ -9,12 +9,21 @@ import Sidenote from "../design/components/Sidenote.astro";
 const sample = {
   name: "Sample project",
   summary: "A sample card for the kit page.",
-  description: "Shows how a project card looks with a still that colours on hover.",
+  description: "Shows how a project card looks with a cover that colours on hover.",
   status: "in-progress" as const,
   stack: ["Astro", "TypeScript"],
   order: 0,
   world: false,
-  ogImage: "/demo/satisfactory-dash-walkthrough-poster.png",
+  cover: { src: "/demo/satisfactory-dash-walkthrough-poster.png" },
+  slug: "satisfactory-dash",
+};
+// A different image: the same URL twice is one request, which the loading tests count.
+const compact = {
+  ...sample,
+  name: "Compact sample",
+  emphasis: "secondary" as const,
+  slug: undefined,
+  cover: { src: "/og/default.png" },
 };
 const swatches = ["paper", "raised", "ink", "ink-soft", "muted", "accent", "rule-soft", "sticky"];
 ---
@@ -47,7 +56,7 @@ const swatches = ["paper", "raised", "ink", "ink-soft", "muted", "accent", "rule
 
     <section class="section page reveal">
       <div class="section-head"><p class="kicker">Work</p><h2>Card</h2></div>
-      <div class="work-list"><ProjectCard project={sample} /></div>
+      <div class="work-list"><ProjectCard project={sample} /><ProjectCard project={compact} /></div>
     </section>
 
     <!-- Laid out like a case study (prose on the left, margin free for sidenotes),
