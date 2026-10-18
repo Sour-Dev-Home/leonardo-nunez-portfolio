@@ -1,0 +1,119 @@
+---
+// The world's cover: the real system, quietly running. CSS only, no script.
+// `still` renders the fixed-size version that scripts/render-covers.mjs photographs.
+import "./world.css";
+import Station from "./Station.astro";
+
+interface Props {
+  still?: boolean;
+}
+const { still = false } = Astro.props;
+---
+
+<header class:list={["satis-cover", "world-satis", { still }]} id={still ? "satis-cover-still" : undefined}>
+  <div class="satis-cover-text">
+    <p class="satis-kick">Case study · in production</p>
+    <p class="satis-title">satisfactory-dash</p>
+    <p class="satis-sub">A live dashboard for Satisfactory servers, moved from a home PC to AWS.</p>
+  </div>
+  <!-- The approved prototype's v2 (docs/superpowers/specs/2026-10-18-satis-world/cover.html) with the
+       stations' icons: the wire turns in the gap, well clear of both discs. -->
+  <svg viewBox="0 0 520 190" aria-hidden="true">
+    <path class="wire" d="M60 50 H352 Q360 50 360 58 V102 Q360 110 368 110 H460"></path>
+    <!-- Drawn before the stations, so each orb slides out from behind one and into the next. -->
+    <circle class="satis-orb" r="4"></circle>
+    <circle class="satis-orb b" r="4"></circle>
+    <Station kind="pc" x={60} y={50} label="Game server" sub="agent on the PC" />
+    <Station kind="rack" x={260} y={50} label="API" sub="ECS Fargate" />
+    <Station kind="db" x={460} y={110} label="PostgreSQL" sub="nightly backups" />
+  </svg>
+  <div class="satis-hazard" aria-hidden="true"></div>
+</header>
+
+<style>
+  .satis-cover {
+    position: relative;
+    overflow: hidden;
+    background: var(--satis-steel);
+    color: var(--satis-ink);
+    border-radius: 12px;
+    padding: var(--space-6) var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .satis-kick {
+    font: 700 var(--step--1) var(--font-text);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--satis-route);
+    margin: 0;
+  }
+  .satis-title {
+    font-family: var(--font-display);
+    font-variation-settings: var(--display-axes);
+    font-size: var(--step-3);
+    line-height: 1.05;
+    margin: 0;
+    overflow-wrap: normal;
+  }
+  .satis-sub {
+    color: var(--satis-dim);
+    max-width: 34ch;
+    margin: 0;
+  }
+  .satis-cover svg {
+    width: 100%;
+    max-width: 640px;
+  }
+  .wire {
+    stroke: var(--satis-line);
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 2 5;
+    stroke-linecap: round;
+  }
+  .satis-orb {
+    fill: var(--satis-snapshot);
+    offset-path: path("M60 50 H352 Q360 50 360 58 V102 Q360 110 368 110 H460");
+    animation: satis-run 3.6s linear infinite;
+  }
+  .satis-orb.b {
+    animation-delay: -1.8s;
+  }
+  @keyframes satis-run {
+    from {
+      offset-distance: 0%;
+    }
+    to {
+      offset-distance: 100%;
+    }
+  }
+  .satis-hazard {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 8px;
+    background: repeating-linear-gradient(-45deg, var(--satis-route) 0 10px, var(--satis-steel) 10px 20px);
+  }
+  .still {
+    width: 800px;
+    height: 450px;
+    margin: 0;
+    padding: 36px 44px 28px;
+    gap: 14px;
+    align-content: center;
+    border-radius: 0;
+  }
+  .still svg {
+    max-width: 560px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .satis-orb {
+      animation: none;
+      offset-distance: 40%;
+    }
+    .satis-orb.b {
+      offset-distance: 80%;
+    }
+  }
+</style>

@@ -2,6 +2,7 @@
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import CaseStudy from "../../layouts/CaseStudy.astro";
 import { hasCaseStudy } from "../../lib/projects";
+import { covers } from "../../worlds";
 
 export async function getStaticPaths() {
   const entries = await getCollection("projects");
@@ -15,6 +16,10 @@ interface Props {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const project = { ...entry.data, slug: entry.id };
+const Cover = covers[entry.id];
 ---
 
-<CaseStudy project={project} slug={entry.id}><Content /></CaseStudy>
+<CaseStudy project={project} slug={entry.id} world={entry.data.world ? "satis" : undefined}>
+  {Cover && <Cover slot="cover" />}
+  <Content />
+</CaseStudy>

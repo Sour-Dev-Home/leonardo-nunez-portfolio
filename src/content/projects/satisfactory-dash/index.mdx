@@ -1,0 +1,87 @@
+---
+name: satisfactory-dash
+summary: >-
+  A dashboard and backend for a live Satisfactory server: production, overflow and power monitoring, with a public demo.
+description: >-
+  A dashboard and backend for a live Satisfactory dedicated server: production rate, overflow, and power-outage monitoring, with a public offline demo. Full-stack TypeScript in an npm workspaces monorepo (Vite/React frontend, Express backend) around a schema-first Zod contract shared by both sides. Data lives in PostgreSQL 18 with hand-written parameterized SQL, forward-only migrations, and separate migrator, app and read-only backup roles, plus an audit trail the app role cannot rewrite. Google sign-in (OpenID Connect with PKCE) is implemented and security-reviewed but not yet public, and encrypted database backups leave AWS nightly for Backblaze B2 through a key that can write but not delete, with a restore rehearsal passed. The backend runs on AWS (ECS Fargate and RDS PostgreSQL) behind an outbound-only Cloudflare tunnel, moved there from a home PC through a five-step runbook with a rollback for each step. Servers are stored in Postgres with their API tokens encrypted at rest (AES-256-GCM) and an SSRF guard on the addresses the backend will call, and production history is recorded with retention and rollups. Design decisions are recorded in 31 architecture decision records, and changes merge through a GitHub merge queue with a fail-closed review gate, plus CI lint/typecheck/test/build, a PII-leak and npm audit check, CodeQL, and an architecture drift check.
+status: in-progress
+stack: [React, TypeScript, Express, Vite, Zod, PostgreSQL, AWS ECS, AWS RDS, Cloudflare Tunnel, Docker]
+repoUrl: https://github.com/Sour-Dev-Home/satisfactory-dash
+liveUrl: https://demo.satis-manager.com
+order: 1
+world: true
+ogImage: /og/satisfactory-dash.png
+cover:
+  src: /covers/satisfactory-dash.png
+---
+
+import OutageFigure from "../../../worlds/satis/figures/OutageFigure.astro";
+import CutoverFigure from "../../../worlds/satis/figures/CutoverFigure.astro";
+import Sidenote from "../../../design/components/Sidenote.astro";
+import Aside from "../../../design/components/Aside.astro";
+import Figure from "../../../design/components/Figure.astro";
+
+## The problem
+
+Satisfactory players who run a dedicated server can't see how their factory is doing without joining the game. satisfactory-dash is a dashboard for that: production, overflow and power, live, with a [public demo](https://demo.satis-manager.com).
+
+For its first months the backend and its database ran on my gaming PC, beside the game itself. That PC was already short of memory and was never meant to be a server. This is the story of moving the service off it, without losing data and without a way in to my home network.
+
+<Figure caption="The dashboard, running on the demo's sample data. A 64-second recording with no audio.">
+  <video width="1920" height="1080" style="aspect-ratio: 1920 / 1080" controls playsinline preload="none" poster="/demo/satisfactory-dash-walkthrough-poster.png" aria-describedby="demo-video-description"><source src="/demo/satisfactory-dash-walkthrough.mp4" type="video/mp4" /></video>
+</Figure>
+
+<details>
+<summary>Text description of this video</summary>
+<p id="demo-video-description">The recording starts on the demo's entry screen, which explains that the factory is made up and needs no sign-in, and clicks Enter demo. The Overview page shows all systems operational: a server with 3 of 4 players connected, two power circuits drawing 4,232.5 MW of 6,150 MW capacity, and 9 factory machines with 1 backed up. The Power tab shows each circuit's production, consumption, capacity, peak demand and battery state, with a chart of the last five minutes. The Factory tab lists every machine with its recipe and output rate, and marks a Rotor assembler as backed up. The Settings tab ticks the auto-pause option, and the page shows the change as pending until the server applies it. The tour ends back on the Overview page. A banner across the top of every screen says the data is not live.</p>
+</details>
+
+## How data gets in
+
+The game only answers on the PC itself, so a small agent runs there. It reads the game and pushes what it sees out to the backend, one <span class="tok tok-snapshot"><i>●</i>snapshot</span> at a time, oldest first. The cloud never connects in to the PC, and the game's credentials never leave it ([ADR-0031](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0031-edge-agent.md)).
+
+Anything the agent can't deliver yet waits in its <span class="tok">queue</span>. If something along the way is down, an <span class="tok tok-error"><i>●</i>error</span> comes back; the agent keeps that snapshot and tries again later, waiting a little longer each time, with some randomness so that many agents don't all retry at once ([pusher.ts](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/agent/src/pusher.ts), [backoff.ts](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/agent/src/backoff.ts)).
+
+<OutageFigure />
+
+When the link breaks, something has to give. The system picks availability: the dashboard keeps answering with the last snapshot it has, [marked stale](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/frontend/src/components/DataAge.tsx), rather than going blank, and the agent keeps collecting. The cost is consistency: history arrives late, and if the outage outlasts the queue (about ten minutes of snapshots, [agentRunner.ts](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/agent/src/agentRunner.ts)), the oldest readings are <span class="tok tok-dropped"><i>○</i>dropped</span> for good ([queue.ts](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/agent/src/queue.ts)). For a live dashboard, the newest data matters most.
+
+<Sidenote id="liveness" lead="psst">The first health check I gave the backend on AWS asked "is the database answering?". During RDS's weekly maintenance that would have made AWS replace a perfectly healthy backend after about 90 seconds. It now asks "is the process alive?", and an outside monitor watches the database ([#425](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/infra/aws/ecs.tf#L22)).</Sidenote>
+
+The figure's database toggle shows that split: with the database down, the backend stays up and says so, and nothing restarts it.
+
+## The move to AWS
+
+AWS's Free plan came with credits, so the backend moved to ECS Fargate (one small ARM task, with Cloudflare's tunnel beside it) and the database to RDS PostgreSQL ([ADR-0034](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0034-backend-on-aws.md)). The estimate was about $33 a month; a budget alarm fires at $40 ([variables.tf](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/infra/aws/variables.tf)). Two rules shaped it: nothing in the app may depend on AWS, so leaving is as boring as arriving, and backups leave AWS entirely, to Backblaze B2 with a key that can write but not delete ([ADR-0035](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0035-backups-off-aws.md)).
+
+Moving a live service is mostly about never being stuck. The [runbook](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/runbooks/aws.md) breaks the move into five steps, and no step starts until the one before it checks out. Each has a rollback, and until the last one, the PC still has every byte. The <span class="tok tok-backup"><i>■</i>final backup</span> is the bridge: taken after writes stop, restored into RDS, and checked table by table before anything points at AWS. Only then does the <span class="tok tok-route"><i>━</i>route</span> for `api.satis-manager.com` move.
+
+<CutoverFigure />
+
+<details>
+<summary>More detail: the AWS setup</summary>
+<Aside>
+- No load balancer, no NAT gateway and no inbound rules: the task only connects out, through the tunnel ([ADR-0034](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0034-backend-on-aws.md)).
+- Secrets come from SSM Parameter Store, injected when the task starts; the app holds no AWS credentials, and no access key exists.
+- One multi-architecture image runs on Fargate, on any VM, or on the PC, and a `compose.yaml` runs the whole stack on one machine, tested in CI.
+- ECS checks liveness only; readiness, which includes the database, is for an external monitor ([ecs.tf](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/infra/aws/ecs.tf)).
+</Aside>
+</details>
+
+## What I’d do differently
+
+The credits run out in a few months, and the exit is already written: the same image and `compose.yaml` on a cheap VM, with the data moving by `pg_dump` and `pg_restore`, the path the restore rehearsals use. If I did it again I'd build that exit first and treat AWS as the second home, not the first.
+
+<details>
+<summary>More detail: security and data</summary>
+<Aside>
+- Google sign-in (OpenID Connect with PKCE) is implemented and security-reviewed.
+- Each server's API token is encrypted at rest (AES-256-GCM), and the backend refuses to call addresses it shouldn't (an SSRF guard).
+- Hand-written, parameterised SQL with forward-only migrations, separate database roles, and an audit trail the app can't rewrite.
+- Design decisions are recorded as [architecture decision records](https://github.com/Sour-Dev-Home/satisfactory-dash/tree/main/docs-vault/wiki/decisions).
+</Aside>
+</details>
+
+## How it was built
+
+I built satisfactory-dash with Claude Code, through [lanes](https://github.com/Sour-Dev-Home/lanes): one fresh session per GitHub issue, gated by required checks and reviewer agents, with every change reviewed by me before it merged. The [repository](https://github.com/Sour-Dev-Home/satisfactory-dash) is public.

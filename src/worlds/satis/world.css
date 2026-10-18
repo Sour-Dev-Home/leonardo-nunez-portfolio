@@ -48,18 +48,34 @@
   font-style: normal;
   margin-right: 3px;
 }
+/* On the page's paper, not the figure's steel: each pair keeps 4.5:1 against --paper in its theme. */
 .world-satis .tok-snapshot,
 .world-satis .tok-route {
-  color: #c24a0a;
+  color: #a33a08;
 }
 .world-satis .tok-error {
   color: #b0342a;
 }
 .world-satis .tok-dropped {
-  color: #8a6a4a;
+  color: #7a5a3a;
 }
 .world-satis .tok-backup {
   color: #5a4bb8;
+}
+@media (prefers-color-scheme: dark) {
+  .world-satis .tok-snapshot,
+  .world-satis .tok-route {
+    color: #ff8a4c;
+  }
+  .world-satis .tok-error {
+    color: #ff7b72;
+  }
+  .world-satis .tok-dropped {
+    color: #e0b48a;
+  }
+  .world-satis .tok-backup {
+    color: #a99de0;
+  }
 }
 
 /* Stations: an opaque disc in the panel's colour hides the wires behind; dimming never touches the disc. */

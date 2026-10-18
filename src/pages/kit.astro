@@ -7,6 +7,7 @@ import Figure from "../design/components/Figure.astro";
 import Sidenote from "../design/components/Sidenote.astro";
 import OutageFigure from "../worlds/satis/figures/OutageFigure.astro";
 import CutoverFigure from "../worlds/satis/figures/CutoverFigure.astro";
+import Cover from "../worlds/satis/Cover.astro";
 
 const sample = {
   name: "Sample project",
@@ -64,6 +65,9 @@ const swatches = ["paper", "raised", "ink", "ink-soft", "muted", "accent", "rule
     <!-- A world's figures, full width like they sit in a case study. -->
     <section class="kit-writing page reveal world-satis">
       <div class="section-head"><p class="kicker">World · satis-manager</p><h2>Figures</h2></div>
+      <Cover />
+      <!-- The fixed-size still that scripts/render-covers.mjs photographs for the card and link previews. -->
+      <div class="kit-still"><Cover still /></div>
       <OutageFigure />
       <CutoverFigure />
     </section>
@@ -88,7 +92,7 @@ const swatches = ["paper", "raised", "ink", "ink-soft", "muted", "accent", "rule
         <Callout>A note callout, for something the reader should know.</Callout>
         <Callout kind="warning">A warning callout, for something that can go wrong.</Callout>
         <Figure caption="A figure with its caption.">
-          <img src="/diagrams/satisfactory-dash-deployment.svg" width="5070" height="2454" alt="Deployment diagram" />
+          <img src="/diagrams/satisfactory-dash-backend-modules.svg" width="2663" height="2417" alt="Backend modules diagram" />
         </Figure>
       </div>
     </section>
