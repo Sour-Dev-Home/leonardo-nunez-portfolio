@@ -52,6 +52,24 @@
   opacity: 0.35;
   cursor: default;
 }
+/* A toggle (aria-pressed) shows its state: a green dot while up, red on a dark red ground when down. */
+.fig-tbtn[aria-pressed] {
+  display: inline-flex;
+  gap: 8px;
+}
+.fig-tbtn[aria-pressed]::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--fig-on);
+}
+.fig-tbtn[aria-pressed="true"] {
+  background: var(--fig-off-bg);
+}
+.fig-tbtn[aria-pressed="true"]::before {
+  background: var(--fig-off);
+}
 .fig-tbtn.primary {
   background: var(--fig-accent);
   color: var(--fig-on-accent);

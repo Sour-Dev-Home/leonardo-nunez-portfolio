@@ -5,6 +5,7 @@ import Aside from "../design/components/Aside.astro";
 import Callout from "../design/components/Callout.astro";
 import Figure from "../design/components/Figure.astro";
 import Sidenote from "../design/components/Sidenote.astro";
+import OutageFigure from "../worlds/satis/figures/OutageFigure.astro";
 
 const sample = {
   name: "Sample project",
@@ -57,6 +58,12 @@ const swatches = ["paper", "raised", "ink", "ink-soft", "muted", "accent", "rule
     <section class="section page reveal">
       <div class="section-head"><p class="kicker">Work</p><h2>Card</h2></div>
       <div class="work-list"><ProjectCard project={sample} /><ProjectCard project={compact} /></div>
+    </section>
+
+    <!-- A world's figures, full width like they sit in a case study. -->
+    <section class="kit-writing page reveal world-satis">
+      <div class="section-head"><p class="kicker">World · satis-manager</p><h2>Figures</h2></div>
+      <OutageFigure />
     </section>
 
     <!-- Laid out like a case study (prose on the left, margin free for sidenotes),

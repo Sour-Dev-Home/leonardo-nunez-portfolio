@@ -8,5 +8,5 @@ const { goals } = Astro.props;
 
 <div class="fig-goals">
   <p class="fig-goals-title">Goals</p>
-  <ul>{goals.map((g) => <li data-goal={g.id} role="checkbox" aria-checked="false" aria-readonly="true">{g.text}</li>)}</ul>
+  <ul>{goals.map((g) => <li data-goal={g.id}>{g.text}<span class="visually-hidden" data-done></span></li>)}</ul>
 </div>

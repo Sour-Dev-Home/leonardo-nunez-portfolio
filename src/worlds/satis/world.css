@@ -34,6 +34,9 @@
   --fig-accent: var(--satis-route);
   --fig-on-accent: #1b1b1b;
   --fig-done: #2f8a57;
+  --fig-on: var(--satis-ok);
+  --fig-off: var(--satis-error);
+  --fig-off-bg: #4a2a26;
 }
 
 /* Inline words in the prose that name a figure's marks, in the mark's colour. */

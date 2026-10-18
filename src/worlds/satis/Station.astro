@@ -9,6 +9,7 @@ interface Props {
   sub: string;
   id?: string;
   zone?: "pc" | "off" | "cf" | "aws";
+  /** Makes the station a pointer shortcut for a figure action (its value names that action). */
   clickable?: string;
   mode?: "live" | "idle" | "down";
 }
@@ -16,15 +17,9 @@ const { kind, x, y, label, sub, id, zone, clickable, mode = "live" } = Astro.pro
 const cls = ["st", zone && `st-${zone}`, mode].filter(Boolean).join(" ");
 ---
 
-<g
-  class={cls}
-  data-station={id}
-  data-click={clickable ? "" : undefined}
-  transform={`translate(${x} ${y})`}
-  role={clickable ? "button" : undefined}
-  tabindex={clickable ? 0 : undefined}
-  aria-label={clickable}
->
+<!-- A clickable station is a pointer shortcut only: the figure's labelled toggle buttons are the
+     keyboard and screen-reader way to do the same (focusable items inside role="img" aren't allowed). -->
+<g class={cls} data-station={id} data-click={clickable ? "" : undefined} transform={`translate(${x} ${y})`}>
   <circle class="halo" r="34"></circle>
   {
     kind === "pc" && (
