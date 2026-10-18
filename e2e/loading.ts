@@ -34,7 +34,7 @@ export function mediaBoxes(page: Page) {
   );
 }
 
-const CONTENT = "h1, h2, h3, p, li, img, video, figure, pre, table, .button, .project-card";
+const CONTENT = "h1, h2, h3, p, li, img, video, figure, pre, table, .button, .project-card, .sidenote-note";
 
 /** Pairs of visible, non-nested content elements whose boxes intersect. */
 export function overlaps(page: Page) {

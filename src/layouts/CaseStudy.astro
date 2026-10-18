@@ -1,0 +1,32 @@
+---
+import Shell from "./Shell.astro";
+import { StackList } from "../components/StackList";
+import { ProjectLinks } from "../components/ProjectLinks";
+import type { Project } from "../lib/projects";
+
+interface Props {
+  project: Project;
+  slug: string;
+}
+const { project, slug } = Astro.props;
+---
+
+<Shell
+  title={`${project.name} — Case Study | Leonardo Nunez`}
+  description={project.summary}
+  path={`/projects/${slug}`}
+  image={project.ogImage}
+>
+  <main>
+    <article class="case-study page">
+      <header class="case-study-head reveal">
+        <p class="case-study-back"><a href="/">← Back to all projects</a></p>
+        <p class="kicker">Case study</p>
+        <h1>{project.name}</h1>
+        <StackList stack={project.stack} />
+        <ProjectLinks project={project} />
+      </header>
+      <div class="case-study-body prose reveal"><slot /></div>
+    </article>
+  </main>
+</Shell>

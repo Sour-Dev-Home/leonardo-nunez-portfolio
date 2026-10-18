@@ -1,0 +1,141 @@
+.case-study-head {
+  padding-top: var(--space-7);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--rule);
+}
+.case-study-back {
+  font-size: var(--step--1);
+}
+.prose {
+  max-width: var(--measure);
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-7);
+}
+.prose h2 {
+  font-size: var(--step-2);
+  margin-top: var(--space-7);
+}
+.prose h3 {
+  margin-top: var(--space-6);
+}
+.prose li + li {
+  margin-top: var(--space-2);
+}
+.prose strong {
+  color: var(--ink);
+}
+.prose .tradeoff {
+  display: block;
+  margin-top: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--rule-soft);
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+.prose .tradeoff-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: var(--space-2);
+}
+.prose .link-list {
+  list-style: none;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+.prose .link-list li {
+  margin: 0;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.prose details {
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+  padding: var(--space-3) 0;
+  margin: var(--space-4) 0;
+}
+.prose summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.figure,
+.prose .diagram-frame {
+  margin: var(--space-6) 0;
+  padding: 0;
+}
+.prose .diagram-frame video {
+  width: 100%;
+  background: #000;
+}
+.prose .diagram-frame img {
+  background: #fff; /* diagrams are drawn for a light background */
+  padding: var(--space-3);
+}
+figcaption {
+  margin-top: var(--space-3);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.aside {
+  margin: var(--space-6) 0;
+  padding: var(--space-4) 0 var(--space-4) var(--space-5);
+  border-left: 1px solid var(--rule);
+}
+.callout {
+  margin: var(--space-6) 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--rule);
+}
+.callout-warning {
+  border-color: var(--accent);
+}
+
+/* Sidenotes: a deliberate break from the system (spec Section 3). */
+.sidenote-note {
+  display: block;
+  font-family: var(--font-note);
+  font-size: var(--step-0);
+  line-height: 1.25;
+  color: var(--sticky-ink);
+  background: var(--sticky);
+  padding: var(--space-2) var(--space-3);
+  transform: rotate(2deg);
+  box-shadow: 0 1px 0 #d6b84a;
+}
+.sidenote-lead {
+  display: block;
+  font-size: var(--step--1);
+  opacity: 0.75;
+}
+.sidenote-toggle {
+  font-family: var(--font-note);
+  font-size: var(--step--1);
+  background: var(--sticky);
+  color: var(--sticky-ink);
+  padding: 0 var(--space-2);
+  cursor: pointer;
+}
+@media (max-width: 79.99rem) {
+  .sidenote-note {
+    display: none;
+    margin: var(--space-3) 0;
+  }
+  .sidenote-checkbox:checked + .sidenote-note {
+    display: block;
+  }
+}
+@media (min-width: 80rem) {
+  .sidenote-toggle {
+    display: none;
+  }
+  .sidenote-note {
+    float: right;
+    clear: right;
+    width: 15rem;
+    margin-right: calc(-15rem - var(--space-5));
+    margin-top: var(--space-1);
+  }
+}

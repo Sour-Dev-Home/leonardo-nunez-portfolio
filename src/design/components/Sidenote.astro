@@ -1,0 +1,19 @@
+---
+// A playful aside in the author's own voice (spec Section 3). Desktop: a sticky
+// note in the margin beside the paragraph. Narrow screens: a "psst" toggle.
+// CSS only: the checkbox drives the toggle, so no JavaScript ships.
+interface Props {
+  id: string;
+  lead?: string;
+}
+const { id, lead } = Astro.props;
+---
+
+<span class="sidenote">
+  <label for={`sn-${id}`} class="sidenote-toggle">psst</label>
+  <input type="checkbox" id={`sn-${id}`} class="sidenote-checkbox visually-hidden" />
+  <span class="sidenote-note" role="note">
+    {lead && <span class="sidenote-lead">↙ {lead}</span>}
+    <slot />
+  </span>
+</span>

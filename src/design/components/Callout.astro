@@ -1,0 +1,11 @@
+---
+interface Props {
+  kind?: "note" | "warning";
+}
+const { kind = "note" } = Astro.props;
+---
+
+<div class={`callout callout-${kind}`} role="note">
+  <p class="kicker">{kind === "warning" ? "Watch out" : "Note"}</p>
+  <slot />
+</div>

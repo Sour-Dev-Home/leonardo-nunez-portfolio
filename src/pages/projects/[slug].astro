@@ -1,8 +1,6 @@
 ---
 import { getCollection, render, type CollectionEntry } from "astro:content";
-import Shell from "../../layouts/Shell.astro";
-import { StackList } from "../../components/StackList";
-import { ProjectLinks } from "../../components/ProjectLinks";
+import CaseStudy from "../../layouts/CaseStudy.astro";
 import { hasCaseStudy } from "../../lib/projects";
 
 export async function getStaticPaths() {
@@ -19,19 +17,4 @@ const { Content } = await render(entry);
 const project = { ...entry.data, slug: entry.id };
 ---
 
-<Shell
-  title={`${project.name} — Case Study | Leonardo Nunez`}
-  description={project.summary}
-  path={`/projects/${entry.id}`}
-  image={project.ogImage}
->
-  <main>
-    <article class="section case-study">
-      <p class="case-study-back"><a href="/">← Back to all projects</a></p>
-      <h1>{project.name}</h1>
-      <StackList stack={project.stack} />
-      <ProjectLinks project={project} />
-      <div class="case-study-body"><Content /></div>
-    </article>
-  </main>
-</Shell>
+<CaseStudy project={project} slug={entry.id}><Content /></CaseStudy>
