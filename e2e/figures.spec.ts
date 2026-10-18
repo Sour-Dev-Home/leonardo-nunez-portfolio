@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { labelCollisions } from "./figures";
-import { viewAt } from "../src/worlds/satis/model/cutover";
+import { COPY, viewAt } from "../src/worlds/satis/model/cutover";
 
 const OUT = 'figure[data-figure="outage"]';
 
@@ -112,6 +112,17 @@ test.describe("cutover figure", () => {
     await expect(page.locator(`${CUT} svg[data-layout]:visible [data-station="pcBackend"]`)).toHaveClass(/live/);
   });
 
+  test("during the dump, the rollback line matches the caption's step", async ({ page }) => {
+    await readyCutover(page);
+    await page.locator(`${CUT} button[data-next]`).click(); // freeze
+    await page.locator(`${CUT} button[data-next]`).click(); // backup: the dump starts
+    await expect(page.locator(`${CUT} .fig-caption`)).toHaveText(COPY[2].caption);
+    // Read once, without retrying: a retrying assertion would pass after the dump lands.
+    expect(await page.locator(`${CUT} .fig-rollback`).textContent()).toContain(COPY[2].rollback);
+    await page.waitForTimeout(1700);
+    await expect(page.locator(`${CUT} .fig-rollback`)).toContainText(COPY[2].rollback);
+  });
+
   test("ignores Next while the dump is still moving (Review Focus 3)", async ({ page }) => {
     test.skip(!!process.env.REDUCED, "the dump is instant under reduced motion");
     await readyCutover(page);
@@ -166,6 +177,24 @@ test.describe("cutover figure", () => {
     await page.keyboard.press("Shift+Tab");
     await page.keyboard.press("Enter"); // Roll back, reached from the keyboard
     await expect(page.locator('[data-goal="back"]')).toHaveClass(/done/);
+  });
+
+  test("moves the track's highlight the moment Next is pressed, not when the dump lands", async ({ page }) => {
+    test.skip(!!process.env.REDUCED, "the dump is instant under reduced motion");
+    await readyCutover(page);
+    const steps = page.locator(`${CUT} .fig-track .stp`);
+    await page.locator(`${CUT} button[data-next]`).click(); // Freeze
+    await expect(steps.nth(0)).toHaveClass(/now/);
+    await page.locator(`${CUT} button[data-next]`).click(); // Back up: the dump takes 1.3 s
+    await expect(steps.nth(1)).toHaveClass(/now/, { timeout: 300 });
+    await expect(steps.nth(0)).toHaveClass(/done/, { timeout: 300 });
+  });
+
+  test("gives every step in the track the same size, Freeze included", async ({ page }) => {
+    await page.goto("/kit");
+    await page.locator(CUT).scrollIntoViewIfNeeded();
+    const widths = await page.locator(`${CUT} .fig-track .stp`).evaluateAll((els) => els.map((e) => e.getBoundingClientRect().width));
+    expect(Math.max(...widths) - Math.min(...widths), widths.join(", ")).toBeLessThanOrEqual(1);
   });
 
   test("has no step numbers in its track (cutover)", async ({ page }) => {
@@ -226,5 +255,76 @@ test.describe("figures on phones", () => {
     expect(await page.locator(`${OUT} svg[data-layout="desktop"] [data-dots] circle`).count()).toBeLessThanOrEqual(13);
     await page.locator(`${OUT} button[data-toggle="backend"]`).click();
     await expect(page.locator(`${OUT} button[data-toggle="backend"]`)).toHaveAttribute("aria-pressed", "true"); // one toggle, not two that cancel out
+  });
+
+  test("rotating keeps the outage figure's stations and pause", async ({ page, viewport }) => {
+    test.skip(viewport!.width !== 1280, "one run is enough");
+    await page.goto("/kit");
+    await page.locator(OUT).scrollIntoViewIfNeeded();
+    await expect(page.locator(`${OUT} button[data-playpause]`)).toHaveAttribute("data-ready", "");
+    await page.locator(`${OUT} button[data-toggle="backend"]`).click();
+    if (!process.env.REDUCED) await page.locator(`${OUT} button[data-playpause]`).click(); // reduced motion opens paused
+    await expect(page.locator(`${OUT} button[data-playpause]`)).toHaveAttribute("aria-label", "Play");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.locator(`${OUT} svg[data-layout="phone"]`)).toBeVisible();
+    await page.locator(OUT).scrollIntoViewIfNeeded();
+    await expect(page.locator(`${OUT} button[data-toggle="backend"]`)).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator(`${OUT} button[data-toggle="db"]`)).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator(`${OUT} svg[data-layout="phone"] [data-station="backend"]`)).toHaveClass(/down/);
+    await expect(page.locator(`${OUT} .fig-caption`)).toContainText("Cloudflare answers with an error");
+    await expect(page.locator(`${OUT} button[data-playpause]`)).toHaveAttribute("aria-label", "Play");
+  });
+
+  test("rotating keeps the cutover's step", async ({ page, viewport }) => {
+    test.skip(viewport!.width !== 1280, "one run is enough");
+    await readyCutover(page);
+    for (let i = 0; i < 3; i++) {
+      await page.locator(`${CUT} button[data-next]`).click();
+      await page.waitForTimeout(i === 1 || i === 2 ? 1700 : 400);
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.locator(`${CUT} svg[data-layout="phone"]`)).toBeVisible();
+    const v = viewAt(3);
+    await expect(page.locator(`${CUT} svg[data-layout="phone"] [data-station="rds"] [data-sub]`)).toHaveText(v.rdsNote);
+    await expect(page.locator(`${CUT} .fig-track .stp`).nth(2)).toHaveClass(/now/);
+    await expect(page.locator(`${CUT} .fig-caption`)).toHaveText(COPY[3].caption);
+    await expect(page.locator(`${CUT} button[data-prev]`)).toHaveAttribute("aria-disabled", "false");
+  });
+
+  test("rotating mid-dump lands the step and leaves no arc lit", async ({ page, viewport }) => {
+    test.skip(viewport!.width !== 1280, "one run is enough");
+    test.skip(!!process.env.REDUCED, "the dump is instant under reduced motion");
+    await readyCutover(page);
+    await page.locator(`${CUT} button[data-next]`).click(); // freeze
+    await page.locator(`${CUT} button[data-next]`).click(); // backup: the dump starts
+    await expect(page.locator(`${CUT} svg[data-layout="desktop"] [data-path="pDump"]`)).toHaveClass(/\bon\b/);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.locator(`${CUT} svg[data-layout="phone"]`)).toBeVisible();
+    await expect(page.locator(`${CUT} svg[data-layout="desktop"] [data-path="pDump"]`)).not.toHaveClass(/\bon\b/);
+    await expect(page.locator(`${CUT} svg[data-layout="phone"] [data-station="b2"] [data-sub]`)).toHaveText(viewAt(2).b2Note);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(page.locator(`${CUT} svg[data-layout="desktop"]`)).toBeVisible();
+    await expect(page.locator(`${CUT} svg [data-path="pDump"].on`)).toHaveCount(0);
+  });
+});
+
+test.describe("figures off-screen", () => {
+  test("the outage figure stops moving when scrolled away and moves again when back", async ({ page }) => {
+    test.skip(!!process.env.REDUCED, "it opens paused under reduced motion");
+    await page.goto("/kit");
+    await page.locator(OUT).scrollIntoViewIfNeeded();
+    await expect(page.locator(`${OUT} button[data-playpause]`)).toHaveAttribute("data-ready", "");
+    const orbs = () => page.locator(`${OUT} svg[data-layout]:not([hidden]) [data-dots] circle`).evaluateAll((cs) => cs.map((c) => c.getAttribute("transform")).join("|"));
+    await page.waitForTimeout(600);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect(page.locator(OUT)).not.toBeInViewport();
+    await page.waitForTimeout(300); // the observer reports
+    const away = await orbs();
+    await page.waitForTimeout(800);
+    expect(await orbs()).toBe(away);
+    await expect(page.locator(`${OUT} button[data-playpause]`)).toHaveAttribute("aria-label", "Pause"); // not paused for the reader
+    await page.locator(OUT).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(800);
+    expect(await orbs()).not.toBe(away);
   });
 });
