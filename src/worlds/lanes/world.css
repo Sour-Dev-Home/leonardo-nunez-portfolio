@@ -98,6 +98,17 @@
   stroke-linecap: round;
 }
 
+/* The switches are on/off settings, not a station going down: a pressed one is lit, not red. */
+.world-lanes .fig-tbtn[data-switch][aria-pressed="true"] {
+  background: color-mix(in srgb, var(--lanes-token) 22%, var(--fig-btn));
+}
+.world-lanes .fig-tbtn[data-switch][aria-pressed]::before {
+  background: var(--lanes-dim);
+}
+.world-lanes .fig-tbtn[data-switch][aria-pressed="true"]::before {
+  background: var(--lanes-token);
+}
+
 /* Inline words in the prose that name the figure's marks, in their colour; 4.5:1 on --paper in each theme. */
 .world-lanes .tok {
   font-weight: 700;

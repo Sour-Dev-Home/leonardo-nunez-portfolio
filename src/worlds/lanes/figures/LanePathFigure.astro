@@ -1,0 +1,43 @@
+---
+// One lane's path (../model/path.ts, from lanes' gate). The first frame is static markup; lane-view.ts animates
+// whichever drawing is showing once the figure scrolls into view.
+import LanePathDrawing from "./LanePathDrawing.astro";
+import Goals from "../../../design/figure/Goals.astro";
+import Controls from "../../../design/figure/Controls.astro";
+import { journey, NO_SWITCHES } from "../model/path";
+import "../../../design/figure/figure.css";
+import "../world.css";
+const first = journey(NO_SWITCHES)[0].caption;
+---
+
+<Goals
+  goals={[
+    { id: "merged", text: "Watch a clean lane reach main with nobody watching." },
+    { id: "form", text: "Send a sloppy task form, then complete it." },
+    { id: "bug", text: "Let a reviewer find a bug, and push the fix." },
+    { id: "rules", text: "Touch the rules, and approve the PR yourself." },
+    { id: "race", text: "Merge another PR first, and watch the queue re-check." },
+  ]}
+/>
+<figure class="fig" data-figure="lanes">
+  <LanePathDrawing layout="desktop" />
+  <LanePathDrawing layout="phone" />
+  <Controls label="Lane figure controls">
+    <button class="fig-tbtn" type="button" data-switch="sloppy" aria-pressed="false">Sloppy form</button>
+    <button class="fig-tbtn" type="button" data-switch="bug" aria-pressed="false">A bug</button>
+    <button class="fig-tbtn" type="button" data-switch="rules" aria-pressed="false">Touch the rules</button>
+    <button class="fig-tbtn" type="button" data-switch="raced" aria-pressed="false">Another PR first</button>
+    <button class="fig-tbtn primary" type="button" data-act aria-disabled="true">No action needed</button>
+  </Controls>
+  <p class="fig-caption" aria-live="polite">{first}</p>
+</figure>
+
+<script>
+  import { whenVisible } from "../../../design/figure/lazy";
+  import { mountResponsive } from "../../../design/figure/responsive";
+  for (const el of document.querySelectorAll<HTMLElement>('figure[data-figure="lanes"]')) {
+    whenVisible(el, () => {
+      void import("./lane-view").then((m) => mountResponsive(el, m.mount));
+    });
+  }
+</script>

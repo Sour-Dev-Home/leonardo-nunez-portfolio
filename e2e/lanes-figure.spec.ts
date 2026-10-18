@@ -1,0 +1,109 @@
+import { expect, test, type Page } from "@playwright/test";
+import { labelCollisions } from "./figures";
+
+const FIG = 'figure[data-figure="lanes"]';
+
+async function ready(page: Page, speed = "3") {
+  await page.goto("/kit");
+  await page.locator(FIG).scrollIntoViewIfNeeded();
+  await expect(page.locator(`${FIG} button[data-act]`)).toHaveAttribute("data-ready", "");
+  await page.locator(`${FIG} input[data-speed]`).fill(speed);
+}
+const caption = (page: Page) => page.locator(`${FIG} .fig-caption`);
+const act = (page: Page) => page.locator(`${FIG} button[data-act]`);
+
+test.describe("lanes figure", () => {
+  test("a clean lane reaches main and ticks its goal", async ({ page }) => {
+    await ready(page);
+    await expect(caption(page)).toHaveText("Merged to main.", { timeout: 30_000 });
+    await expect(page.locator('[data-goal="merged"]')).toHaveClass(/done/);
+  });
+
+  test("a sloppy form stops at the contract check until completed", async ({ page }) => {
+    await ready(page);
+    await page.locator(`${FIG} button[data-switch="sloppy"]`).click();
+    await expect(caption(page)).toContainText("Task contract incomplete", { timeout: 15_000 });
+    await expect(act(page)).toHaveAttribute("aria-disabled", "false");
+    await expect(act(page)).toHaveText("Complete the form");
+    await act(page).click();
+    await expect(page.locator('[data-goal="form"]')).toHaveClass(/done/);
+  });
+
+  test("a bug fails test-hunter, and the fix waits for fresh verdicts", async ({ page }) => {
+    await ready(page);
+    await page.locator(`${FIG} button[data-switch="bug"]`).click();
+    await expect(caption(page)).toContainText("review/test-hunter is failure", { timeout: 20_000 });
+    await act(page).click();
+    await expect(caption(page)).toContainText("A verdict covers only the commit it names", { timeout: 10_000 });
+    await expect(page.locator('[data-goal="bug"]')).toHaveClass(/done/);
+  });
+
+  test("touching the rules waits for the owner at the gate", async ({ page }) => {
+    await ready(page);
+    await page.locator(`${FIG} button[data-switch="rules"]`).click();
+    await expect(caption(page)).toHaveText("lanes/gate: waiting for a code-owner review in GitHub (owner-only path).", { timeout: 25_000 });
+    await act(page).click();
+    await expect(caption(page)).toHaveText("lanes/gate: approved by code owner @SourE-dev.", { timeout: 5_000 });
+    await expect(page.locator('[data-goal="rules"]')).toHaveClass(/done/);
+  });
+
+  test("a race makes the queue decide again", async ({ page }) => {
+    await ready(page);
+    await page.locator(`${FIG} button[data-switch="raced"]`).click();
+    await expect(caption(page)).toContainText("decides again", { timeout: 30_000 });
+    await expect(page.locator('[data-goal="race"]')).toHaveClass(/done/, { timeout: 10_000 });
+  });
+
+  test("a switch mid-run restarts the lane (Review Focus 1)", async ({ page }) => {
+    await ready(page);
+    await page.locator(`${FIG} button[data-switch="bug"]`).click();
+    await expect(caption(page)).toContainText("review/test-hunter is failure", { timeout: 20_000 });
+    await page.locator(`${FIG} button[data-switch="bug"]`).click(); // off again, mid-run
+    await expect(caption(page)).toContainText("A task issue");
+    await expect(act(page)).toHaveAttribute("aria-disabled", "true");
+    expect(await page.locator(`${FIG} svg[data-layout]:visible .lanes-token`).count()).toBe(1);
+    await expect(page.locator('[data-goal="bug"]')).not.toHaveClass(/done/);
+  });
+
+  test("the action button ignores presses with nothing waiting (Review Focus 2)", async ({ page }) => {
+    await ready(page, "0.4");
+    await act(page).click({ force: true });
+    await expect(caption(page)).toContainText("A task issue");
+    await page.locator(`${FIG} button[data-switch="sloppy"]`).click();
+    await expect(caption(page)).toContainText("Task contract incomplete", { timeout: 15_000 });
+    await act(page).dblclick();
+    await expect(caption(page)).toContainText("Task contract complete"); // one stop on, not two
+  });
+
+  test("keyboard only: Tab reaches the switches and the action, and focus stays put (Review Focus 3)", async ({ page }) => {
+    await ready(page);
+    await page.locator(`${FIG} .fig-bar button`).first().focus();
+    for (let i = 0; i < 10 && !(await page.evaluate(() => document.activeElement?.getAttribute("data-switch") === "sloppy")); i++) await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await expect(page.locator(`${FIG} button[data-switch="sloppy"]`)).toHaveAttribute("aria-pressed", "true");
+    for (let i = 0; i < 10 && !(await page.evaluate(() => document.activeElement?.hasAttribute("data-act"))); i++) await page.keyboard.press("Tab");
+    await expect(caption(page)).toContainText("Task contract incomplete", { timeout: 15_000 });
+    await page.keyboard.press("Enter");
+    await expect(act(page)).toBeFocused();
+    await expect(act(page)).toHaveAttribute("aria-disabled", "true");
+  });
+
+  test("opens paused under reduced motion, on a meaningful frame", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/kit");
+    await page.locator(FIG).scrollIntoViewIfNeeded();
+    await expect(page.locator(`${FIG} button[data-playpause]`)).toHaveAttribute("aria-label", "Play");
+    await expect(caption(page)).toContainText("A task issue");
+    expect(await page.locator(`${FIG} svg[data-layout]:visible .lanes-token`).count()).toBe(1);
+  });
+
+  test("no line crosses a label at any stop", async ({ page }) => {
+    await ready(page);
+    for (const sw of ["rules", "bug"]) await page.locator(`${FIG} button[data-switch="${sw}"]`).click();
+    for (let i = 0; i < 6; i++) {
+      expect(await labelCollisions(page, FIG)).toEqual([]);
+      await page.waitForTimeout(1500);
+      if ((await act(page).getAttribute("aria-disabled")) === "false") await act(page).click();
+    }
+  });
+});
