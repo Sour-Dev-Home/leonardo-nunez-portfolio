@@ -265,6 +265,27 @@
 .fig-track .conn.on::after {
   border-left-color: var(--satis-route);
 }
+/* Phones: the track takes its own full-width row (Roll back and Next share the next one), and the
+   steps tighten so all five fit. */
+@media (max-width: 40rem) {
+  .fig-track {
+    flex-basis: 100%;
+    min-width: 0;
+    order: -1;
+    gap: 3px;
+  }
+  .fig-track > li {
+    gap: 3px;
+    min-width: 0;
+  }
+  .fig-track .stp {
+    font-size: 10.5px;
+    padding: 7px 2px;
+  }
+  .fig-track .conn {
+    width: 6px;
+  }
+}
 .fig-rollback {
   font: 13px/1.5 var(--font-text);
   color: var(--fig-dim);

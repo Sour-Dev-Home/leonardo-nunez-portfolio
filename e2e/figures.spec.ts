@@ -173,6 +173,19 @@ test.describe("figures on phones", () => {
     }
   });
 
+  test("every control fits inside its figure (nothing clipped by the figure's edge)", async ({ page }) => {
+    await page.goto("/kit");
+    for (const sel of [OUT, CUT]) {
+      const clipped = await page.locator(sel).evaluate((fig) => {
+        const f = fig.getBoundingClientRect();
+        return [...fig.querySelectorAll(".fig-bar button, .fig-bar input, .fig-track .stp")]
+          .filter((el) => { const r = el.getBoundingClientRect(); return r.left < f.left - 0.5 || r.right > f.right + 0.5; })
+          .map((el) => el.textContent?.trim() || el.getAttribute("aria-label"));
+      });
+      expect(clipped, sel).toEqual([]);
+    }
+  });
+
   test("the cutover on a phone: no line crosses a label at any step", async ({ page, viewport }) => {
     test.skip(viewport!.width > 640, "phones only");
     await readyCutover(page);
