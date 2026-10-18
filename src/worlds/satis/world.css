@@ -1,42 +1,43 @@
-/* The satis-manager world. PLACEHOLDER colours until the palette round (plan Task 11).
+/* The satis-manager world: "FICSIT steel" (owner's pick in the palette round, 2026-10-18). Warm dark
+   steel and the game's amber-orange; dark in both site themes.
    Roles are fixed: route, snapshot, error, dropped, backup, one tint per area; red is failure only. */
 .world-satis {
-  --satis-steel: #1f2327;
-  --satis-steel-2: #2c3237;
-  --satis-line: #4a525a;
-  --satis-ink: #e9e5dc;
-  --satis-dim: #9aa1a8;
-  --satis-route: #ff6a13;
-  --satis-snapshot: #ff6a13;
-  --satis-error: #e5534b;
-  --satis-dropped: #ffb07a;
-  --satis-backup: #6a5acd;
-  --satis-ok: #5fd38d;
-  --satis-zone-pc: #272a2e;
-  --satis-zone-pc-rule: #4f565e;
-  --satis-zone-pc-ink: #c3c9cf;
-  --satis-zone-off: #24223a;
-  --satis-zone-off-rule: #48426e;
-  --satis-zone-off-ink: #a99de0;
-  --satis-zone-cf: #2c241d;
-  --satis-zone-cf-rule: #5c4430;
-  --satis-zone-cf-ink: #f0a36a;
-  --satis-zone-aws: #1d2630;
-  --satis-zone-aws-rule: #36495c;
-  --satis-zone-aws-ink: #8fb3d6;
+  --satis-steel: #1f2226;
+  --satis-steel-2: #2b3035;
+  --satis-line: #545c64;
+  --satis-ink: #ece7dc;
+  --satis-dim: #a3a9ae;
+  --satis-route: #fa9549;
+  --satis-snapshot: #fa9549;
+  --satis-error: #ef5350;
+  --satis-dropped: #c9a27a;
+  --satis-backup: #9b8cf0;
+  --satis-ok: #6fd49a;
+  --satis-zone-pc: #26292d;
+  --satis-zone-pc-rule: #4a5157;
+  --satis-zone-pc-ink: #c8cdd2;
+  --satis-zone-off: #262338;
+  --satis-zone-off-rule: #4a4370;
+  --satis-zone-off-ink: #b3a8ec;
+  --satis-zone-cf: #2e2620;
+  --satis-zone-cf-rule: #614a36;
+  --satis-zone-cf-ink: #f2b07c;
+  --satis-zone-aws: #1e2731;
+  --satis-zone-aws-rule: #3a4e63;
+  --satis-zone-aws-ink: #9cc0e2;
   --fig-bg: var(--satis-steel);
   --fig-ink: var(--satis-ink);
   --fig-dim: var(--satis-dim);
   --fig-rule: #5a636b;
-  --fig-bar: #262a2e;
-  --fig-btn: #3a4046;
-  --fig-btn-hover: #4a5158;
+  --fig-bar: #25292d;
+  --fig-btn: #383e44;
+  --fig-btn-hover: #474e55;
   --fig-accent: var(--satis-route);
   --fig-on-accent: #1b1b1b;
-  --fig-done: #2f8a57;
+  --fig-done: #6fd49a;
   --fig-on: var(--satis-ok);
   --fig-off: var(--satis-error);
-  --fig-off-bg: #4a2a26;
+  --fig-off-bg: #4d2a28;
 }
 
 /* Inline words in the prose that name a figure's marks, in the mark's colour. */
@@ -51,7 +52,7 @@
 /* On the page's paper, not the figure's steel: each pair keeps 4.5:1 against --paper in its theme. */
 .world-satis .tok-snapshot,
 .world-satis .tok-route {
-  color: #a33a08;
+  color: #9a4a0a;
 }
 .world-satis .tok-error {
   color: #b0342a;
@@ -65,7 +66,7 @@
 @media (prefers-color-scheme: dark) {
   .world-satis .tok-snapshot,
   .world-satis .tok-route {
-    color: #ff8a4c;
+    color: #fa9549;
   }
   .world-satis .tok-error {
     color: #ff7b72;
@@ -74,7 +75,7 @@
     color: #e0b48a;
   }
   .world-satis .tok-backup {
-    color: #a99de0;
+    color: #b3a8ec;
   }
 }
 
@@ -248,7 +249,7 @@
   color: var(--satis-ok);
 }
 .fig-track .stp.now {
-  background: #4a3324;
+  background: #4a3520;
   color: var(--satis-route);
 }
 .fig-track .conn {
