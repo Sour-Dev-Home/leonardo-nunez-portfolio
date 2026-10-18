@@ -1,0 +1,20 @@
+---
+import Shell from "../layouts/Shell.astro";
+import { About } from "../components/About";
+import { Skills } from "../components/Skills";
+---
+
+<Shell
+  title="About | Leonardo Nunez"
+  description="Background, education and skills: electrical and computer engineering at Rice, now full-stack web."
+  path="/about"
+>
+  <main>
+    <header class="hero page reveal">
+      <p class="kicker">Leonardo Nunez</p>
+      <h1>About</h1>
+    </header>
+    <About />
+    <Skills />
+  </main>
+</Shell>

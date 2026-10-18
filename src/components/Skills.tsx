@@ -16,8 +16,11 @@ const SKILL_GROUPS: { title: string; items: string[] }[] = [
 
 export function Skills() {
   return (
-    <section id="skills" className="section">
-      <h2>Skills</h2>
+    <section id="skills" className="section page reveal">
+      <div className="section-head">
+        <p className="kicker">Toolbox</p>
+        <h2>Skills</h2>
+      </div>
       <div className="skills-grid">
         {SKILL_GROUPS.map((group) => (
           <div key={group.title} className="skill-group">

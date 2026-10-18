@@ -99,3 +99,18 @@
     align-self: start;
   }
 }
+
+.skills-grid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+.skill-group ul {
+  list-style: none;
+  padding: 0;
+  border-top: 1px solid var(--rule-soft);
+}
+.skill-group li {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
