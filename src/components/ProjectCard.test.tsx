@@ -40,6 +40,19 @@ describe("ProjectCard", () => {
     expect(container.querySelector(".project-card-compact")).toBeInTheDocument();
   });
 
+  it("shows the project's still when it has one, with empty alt text (decorative)", () => {
+    const { container } = renderCard({ ...baseProject, ogImage: "/demo/poster.png" });
+    const img = container.querySelector(".work-card-still img");
+    expect(img).toHaveAttribute("src", "/demo/poster.png");
+    expect(img).toHaveAttribute("alt", "");
+    expect(img).toHaveAttribute("width");
+  });
+
+  it("falls back to a typographic still without an image", () => {
+    const { container } = renderCard(baseProject);
+    expect(container.querySelector(".work-card-type")?.textContent).toBe("Test Project");
+  });
+
   it("does not apply the compact class by default", () => {
     const { container } = renderCard(baseProject);
     expect(container.querySelector(".project-card-compact")).not.toBeInTheDocument();

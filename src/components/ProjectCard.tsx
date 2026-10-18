@@ -8,16 +8,26 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const isCompact = project.emphasis === "secondary";
+  const classes = ["work-card", "project-card", isCompact && "project-card-compact"].filter(Boolean).join(" ");
 
   return (
-    <article className={isCompact ? "project-card project-card-compact" : "project-card"}>
-      <div className="project-card-header">
-        <h3>{project.name}</h3>
-        {project.status === "in-progress" && <span className="badge">In progress</span>}
+    <article className={classes}>
+      <div className="work-card-still" aria-hidden="true">
+        {project.ogImage ? (
+          <img src={project.ogImage} alt="" width={1200} height={630} decoding="async" />
+        ) : (
+          <span className="work-card-type">{project.name}</span>
+        )}
       </div>
-      <p>{project.description}</p>
-      <StackList stack={project.stack} />
-      <ProjectLinks project={project} showCaseStudyLink />
+      <div className="work-card-body">
+        <div className="project-card-header">
+          <h3>{project.name}</h3>
+          {project.status === "in-progress" && <span className="badge">In progress</span>}
+        </div>
+        <p>{project.description}</p>
+        <StackList stack={project.stack} />
+        <ProjectLinks project={project} showCaseStudyLink />
+      </div>
     </article>
   );
 }
