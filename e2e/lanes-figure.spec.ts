@@ -107,3 +107,41 @@ test.describe("lanes figure", () => {
     }
   });
 });
+
+test.describe("lanes figure on phones", () => {
+  test("uses the vertical drawing below 40rem, readable and collision-free", async ({ page, viewport }) => {
+    test.skip(viewport!.width > 640, "phones only");
+    await page.goto("/kit");
+    await page.locator(FIG).scrollIntoViewIfNeeded();
+    await expect(page.locator(`${FIG} svg[data-layout="phone"]`)).toBeVisible();
+    await expect(page.locator(`${FIG} svg[data-layout="desktop"]`)).toBeHidden();
+    const smallest = await page
+      .locator(`${FIG} svg[data-layout="phone"] text`)
+      .evaluateAll((ts) => Math.min(...ts.map((t) => t.getBoundingClientRect().height)));
+    expect(smallest).toBeGreaterThanOrEqual(9);
+    expect(await labelCollisions(page, FIG)).toEqual([]);
+    const clipped = await page.locator(FIG).evaluate((fig) => {
+      const f = fig.getBoundingClientRect();
+      return [...fig.querySelectorAll(".fig-bar button, svg[data-layout='phone'] text")]
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && (r.left < f.left - 0.5 || r.right > f.right + 0.5);
+        })
+        .map((el) => el.textContent?.trim());
+    });
+    expect(clipped).toEqual([]);
+  });
+
+  test("resizing across the breakpoint remounts once (Review Focus 4)", async ({ page, viewport }) => {
+    test.skip(viewport!.width !== 1280, "one run is enough");
+    await ready(page);
+    await page.waitForTimeout(1500);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.waitForTimeout(800);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.waitForTimeout(800);
+    expect(await page.locator(`${FIG} svg[data-layout="desktop"] .lanes-token`).count()).toBe(1);
+    await page.locator(`${FIG} button[data-switch="sloppy"]`).click();
+    await expect(page.locator(`${FIG} button[data-switch="sloppy"]`)).toHaveAttribute("aria-pressed", "true"); // one listener, not two
+  });
+});
