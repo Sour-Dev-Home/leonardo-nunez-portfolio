@@ -166,6 +166,22 @@ typography rather than effects.
   and is approved by Leonardo; each is an `<aside>` announced as a note; text meets
   WCAG AA contrast whatever the font.
 
+**Font round, decided 2026-10-18 (owner, in the visual companion):**
+
+- **Headlines: Fraunces** (variable, with its "soft" and "wonky" axes on) and
+  **body: Public Sans** (variable). Chosen over Instrument Serif + Sans and
+  Newsreader for warmth and character.
+- **Sidenotes: Gochi Hand** on a yellow sticky note (`#ffe066`, ink text, about 2°
+  tilt), set at about body size (the larger first mock was too big), sitting close
+  to the text column rather than far out in the margin.
+- **Palette with measured contrast:** paper `#f3efe6`, ink `#141414`, muted
+  `#5c574f` (6.2:1), vermilion `#b83a14` (5.0:1); dark mode paper `#17150f`, ink
+  `#f3efe6`, muted `#a59d8f` (6.8:1), vermilion `#f2794a` (6.6:1); ink on the sticky
+  14:1.
+- **Fonts are files in the repo** (`public/fonts/`, OFL, from Fontsource 5.3.0),
+  preloaded and declared with `font-display: optional`, so a late font never
+  reflows the page (the font version of media pop-in).
+
 **`STYLE.md` contents:**
 
 - tokens and when to use each;
