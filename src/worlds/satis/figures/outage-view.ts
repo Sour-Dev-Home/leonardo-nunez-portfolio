@@ -3,7 +3,7 @@
 import { initialOutage, setBackendUp, setDbUp, stepOutage, SCALED, type OutageState, type Target } from "../model/outage";
 import { seeded } from "../model/random";
 import { ease, lerp, squash } from "../../../design/figure/ease";
-import { prefersReducedMotion, startLoop } from "../../../design/figure/loop";
+import { prefersReducedMotion, startLoop, whileOnScreen } from "../../../design/figure/loop";
 import { tickGoal, wireControls } from "../../../design/figure/controls";
 import { OUTAGE, type OutageLayout } from "./layouts";
 
@@ -30,7 +30,14 @@ export function visibleSvg(root: HTMLElement): SVGSVGElement {
   return all.find((s) => !s.hasAttribute("hidden") && getComputedStyle(s).display !== "none") ?? all[0];
 }
 
-export function mount(root: HTMLElement): () => void {
+/** What survives a remount (rotating a phone): the stations the reader took down, and their pause. */
+export interface OutageKept {
+  backendDown: boolean;
+  dbDown: boolean;
+  playing: boolean;
+}
+
+export function mount(root: HTMLElement, kept: Partial<OutageKept> = {}): () => void {
   const svg = visibleSvg(root);
   const L: OutageLayout = svg.dataset.layout === "phone" ? OUTAGE.phone : OUTAGE.desktop;
   const dots = svg.querySelector<SVGGElement>("[data-dots]")!;
@@ -143,8 +150,9 @@ export function mount(root: HTMLElement): () => void {
       apply(dt);
       draw(dt);
     },
-    { autoplay: !reduced },
+    { autoplay: kept.playing ?? !reduced },
   );
+  const offScreen = whileOnScreen(root, loop);
   if (reduced) {
     // A meaningful paused frame: a few snapshots on their way, the same every time.
     for (let i = 0; i < 160; i++) apply(0.025);
@@ -154,6 +162,7 @@ export function mount(root: HTMLElement): () => void {
   const setStation = (which: "backend" | "db", down: boolean) => {
     if (which === "backend") setBackendUp(s, !down);
     else setDbUp(s, !down);
+    kept[which === "backend" ? "backendDown" : "dbDown"] = down;
     const st = svg.querySelector(`[data-station="${which}"]`)!;
     st.classList.toggle("down", down);
     st.classList.toggle("live", !down);
@@ -172,8 +181,8 @@ export function mount(root: HTMLElement): () => void {
     on(root.querySelector(`button[data-toggle="${which}"]`)!, "click", () => toggle(which));
     on(svg.querySelector(`[data-station="${which}"]`)!, "click", () => toggle(which)); // the toggle button is the keyboard way
   }
-  setStation("backend", false);
-  setStation("db", false);
+  setStation("backend", kept.backendDown ?? false);
+  setStation("db", kept.dbDown ?? false);
   const unwire = wireControls(root, loop, () => {
     dots.replaceChildren();
     orbs = new Map();
@@ -186,6 +195,8 @@ export function mount(root: HTMLElement): () => void {
   });
   root.querySelector("[data-playpause]")?.setAttribute("data-ready", "");
   return () => {
+    kept.playing = loop.playing();
+    offScreen();
     loop.destroy();
     unwire();
     off.forEach((f) => f());
