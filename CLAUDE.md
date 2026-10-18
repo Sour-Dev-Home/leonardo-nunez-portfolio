@@ -50,7 +50,9 @@ this repo's own verified setup, since it's ahead of `satisfactory-dash` on most 
 Astro (static; React components rendered at build time, no client JavaScript yet) +
 TypeScript, deployed as a Cloudflare Worker with static assets by Workers Builds
 (build command `npm run build`, Node from `.node-version`; `wrangler.json` serves
-`dist/` with a real 404 page and slashless URLs). Vitest + React
+`dist/` with a real 404 page and slashless URLs; `public/_headers` sets browser
+caching: hashed `/_astro/*` files for a year, fonts 30 days, pictures a day, pages
+never). Vitest + React
 Testing Library for unit tests; `npm run test:dist` checks the built HTML (meta tags,
 links, media sizes, JS budget, 404). Playwright (`e2e/`) checks every page at 360,
 390, 768 and 1280 px: layout, axe, reduced motion, loading states and screenshots.

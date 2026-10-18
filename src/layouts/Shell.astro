@@ -25,6 +25,18 @@ interface Props {
 
 const { title, description, path, image, noindex, noteFont } = Astro.props;
 const meta = buildMeta({ title, description, path, image }, Astro.site!);
+
+// Chrome prerenders a page of this site when a link to it is hovered (or pressed
+// on touch), so the click swaps pages almost instantly. JSON, not code: other
+// browsers ignore it and the page still runs no JavaScript.
+const speculationRules = JSON.stringify({
+  prerender: [
+    {
+      where: { and: [{ href_matches: "/*" }, { not: { selector_matches: "[target=_blank], [download]" } }] },
+      eagerness: "moderate",
+    },
+  ],
+});
 ---
 
 <!doctype html>
@@ -40,6 +52,8 @@ const meta = buildMeta({ title, description, path, image }, Astro.site!);
       )
     }
     {noindex && <meta name="robots" content="noindex" />}
+    <script is:inline type="speculationrules" set:html={speculationRules} />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{meta.title}</title>
     <link rel="canonical" href={meta.canonical} />

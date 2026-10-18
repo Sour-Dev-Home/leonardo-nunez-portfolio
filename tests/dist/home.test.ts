@@ -3,6 +3,7 @@ import { join } from "node:path";
 import sharp from "sharp";
 import { describe, it, expect } from "vitest";
 import { SITE, page, metaContent, hrefs, distFileExists } from "./helpers";
+import { RUNNABLE_SCRIPTS } from "./budget";
 
 describe("home page", () => {
   const doc = page("index.html");
@@ -62,7 +63,7 @@ describe("home page", () => {
   });
 
   it("ships no JavaScript", () => {
-    expect(doc.querySelectorAll("script")).toHaveLength(0);
+    expect(doc.querySelectorAll(RUNNABLE_SCRIPTS)).toHaveLength(0);
   });
 });
 

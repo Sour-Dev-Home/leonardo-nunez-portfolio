@@ -38,6 +38,12 @@ describe("pageScriptBytes", () => {
     expect(pageScriptBytes(html, dir)).toBe(gzipSync(code).length * 2);
   });
 
+  it("doesn't count data blocks the browser never runs (speculation rules, JSON-LD)", () => {
+    const code = "console.log('x');";
+    const html = `<script type="speculationrules">{"prerender":[]}</script><script type="application/ld+json">{}</script><script type="module">${code}</script>`;
+    expect(pageScriptBytes(html, fixtureDir({}))).toBe(gzipSync(code).length);
+  });
+
   it("counts chunks a script imports, once each, however they are imported", () => {
     const dir = fixtureDir({
       "_astro/island.js": 'import { a } from "./shared.js"; import "./side.js"; const b = () => import("./lazy.js");',

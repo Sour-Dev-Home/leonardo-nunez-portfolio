@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { SITE, metaContent, page } from "./helpers";
+import { RUNNABLE_SCRIPTS } from "./budget";
 
 describe("about page", () => {
   const doc = page("about.html");
@@ -22,6 +23,6 @@ describe("about page", () => {
   });
 
   it("ships no JavaScript", () => {
-    expect(doc.querySelectorAll("script")).toHaveLength(0);
+    expect(doc.querySelectorAll(RUNNABLE_SCRIPTS)).toHaveLength(0);
   });
 });

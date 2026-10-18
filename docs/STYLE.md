@@ -67,6 +67,8 @@ world", and anything that could describe anyone.
 
 - `.reveal`: sections fade and rise in on load, staggered by position.
 - Page-to-page cross-fade with CSS view transitions (`@view-transition`).
+- Chrome prerenders a page when its link is hovered (speculation rules in
+  `Shell.astro`), so the cross-fade starts from a page that is already loaded.
 - Both turn off under reduced motion. No JavaScript.
 - Anything new must pass the loading-state tests (`e2e/loading.spec.ts`): nothing
   may overlap mid-load or at 0, 50 or 100% of an animation, and media must reserve
