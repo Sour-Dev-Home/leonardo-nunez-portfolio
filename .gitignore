@@ -38,3 +38,5 @@ src/content/case-studies/generated/
 
 # Brainstorming companion sessions
 .superpowers/
+# lanes
+.lanes/

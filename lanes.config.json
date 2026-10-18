@@ -1,0 +1,59 @@
+{
+  "requiredChecks": [
+    "verify",
+    "security",
+    "lanes/gate"
+  ],
+  "paths": {
+    "skip": [
+      "^docs/",
+      "\\.md$",
+      "\\.test\\.m?[jt]sx?$",
+      "(^|/)__tests__/",
+      "(^|/)test/"
+    ],
+    "contract": [
+      "^contracts/",
+      "\\.schema\\.json$",
+      "(^|/)schema\\.ts$",
+      "^src/lib/projects\\.ts$",
+      "^src/content\\.config\\.ts$"
+    ],
+    "sensitive": [
+      "^\\.github/",
+      "^\\.claude/",
+      "^\\.githooks/",
+      "^scripts/lanes/",
+      "^scripts/preflight\\.mjs$",
+      "^lanes\\.config\\.json$",
+      "(^|/)auth/",
+      "(^|/)secrets?/",
+      "^deploy/",
+      "^dashboard/",
+      "(^|/)\\.env",
+      "^package(-lock)?\\.json$",
+      "(^|/)(pnpm-lock\\.yaml|yarn\\.lock)$",
+      "^vendor/",
+      "(^|/)CLAUDE\\.md$",
+      "^\\.gitattributes$",
+      "^wrangler\\.json$",
+      "^astro\\.config\\.ts$",
+      "^public/_headers$",
+      "^public/images/"
+    ],
+    "ui": [
+      "^src/(components|design|layouts|pages|worlds)/",
+      "\\.astro$",
+      "\\.css$",
+      "^public/",
+      "^dashboard/"
+    ],
+    "owner": []
+  },
+  "metrics": {
+    "mainWorkflow": "ci.yml"
+  },
+  "gate": {
+    "nonLanePrs": true
+  }
+}
