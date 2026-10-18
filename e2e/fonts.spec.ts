@@ -9,6 +9,10 @@ for (const { name, path } of PAGES.filter((p) => p.status === 200)) {
     let released = false;
     await page.route("**/fonts/*.woff2", (route) => (released ? route.continue() : void held.push(route)));
     await page.goto(path, { waitUntil: "domcontentloaded" });
+    // Measure what the visitor actually sees: wait until a frame has been painted.
+    // Before the first paint Chrome may still be waiting on preloaded fonts, and a
+    // font arriving then changes nothing anyone saw.
+    await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
     const before = await page.evaluate(() => document.querySelector("main")!.getBoundingClientRect().height);
     // "Late" means after optional's ~100 ms block period; a font released inside
     // that window is on time and may legitimately be used.

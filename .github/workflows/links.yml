@@ -34,7 +34,7 @@ jobs:
             --root-dir ${{ github.workspace }}/dist
             --fallback-extensions html
             --exclude linkedin\.com
-            --exclude ^https://(www\.)?leonardonunez\.dev
+            --exclude '^https://(www\.)?leonardonunez\.dev'
             'dist/**/*.html'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
