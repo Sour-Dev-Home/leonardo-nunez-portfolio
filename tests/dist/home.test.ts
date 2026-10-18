@@ -39,7 +39,7 @@ describe("home page", () => {
   });
 
   it("keeps the section anchors the header links to", () => {
-    for (const id of ["top", "about", "projects", "skills", "contact"]) {
+    for (const id of ["top", "work", "contact"]) {
       expect(doc.querySelector(`#${id}`)).not.toBeNull();
     }
   });

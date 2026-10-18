@@ -2,8 +2,12 @@ const LINKEDIN_URL = "https://www.linkedin.com/in/leonardo-nunez-708634248";
 
 export function Contact() {
   return (
-    <section id="contact" className="section">
-      <h2>Contact</h2>
+    <section id="contact" className="section page reveal">
+      <div className="section-head">
+        <p className="kicker">Say hello</p>
+        <h2>Contact</h2>
+      </div>
+      <div>
       <p>Open to full-stack developer roles — reach out any of these ways.</p>
       <ul className="contact-list">
         <li>
@@ -20,6 +24,7 @@ export function Contact() {
           </a>
         </li>
       </ul>
+      </div>
     </section>
   );
 }
