@@ -1,0 +1,127 @@
+/* The satis-manager world. PLACEHOLDER colours until the palette round (plan Task 11).
+   Roles are fixed: route, snapshot, error, dropped, backup, one tint per area; red is failure only. */
+.world-satis {
+  --satis-steel: #1f2327;
+  --satis-steel-2: #2c3237;
+  --satis-line: #4a525a;
+  --satis-ink: #e9e5dc;
+  --satis-dim: #9aa1a8;
+  --satis-route: #ff6a13;
+  --satis-snapshot: #ff6a13;
+  --satis-error: #e5534b;
+  --satis-dropped: #ffb07a;
+  --satis-backup: #6a5acd;
+  --satis-ok: #5fd38d;
+  --satis-zone-pc: #272a2e;
+  --satis-zone-pc-rule: #4f565e;
+  --satis-zone-pc-ink: #c3c9cf;
+  --satis-zone-off: #24223a;
+  --satis-zone-off-rule: #48426e;
+  --satis-zone-off-ink: #a99de0;
+  --satis-zone-cf: #2c241d;
+  --satis-zone-cf-rule: #5c4430;
+  --satis-zone-cf-ink: #f0a36a;
+  --satis-zone-aws: #1d2630;
+  --satis-zone-aws-rule: #36495c;
+  --satis-zone-aws-ink: #8fb3d6;
+  --fig-bg: var(--satis-steel);
+  --fig-ink: var(--satis-ink);
+  --fig-dim: var(--satis-dim);
+  --fig-rule: #5a636b;
+  --fig-bar: #262a2e;
+  --fig-btn: #3a4046;
+  --fig-btn-hover: #4a5158;
+  --fig-accent: var(--satis-route);
+  --fig-on-accent: #1b1b1b;
+  --fig-done: #2f8a57;
+}
+
+/* Inline words in the prose that name a figure's marks, in the mark's colour. */
+.world-satis .tok {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.world-satis .tok i {
+  font-style: normal;
+  margin-right: 3px;
+}
+.world-satis .tok-snapshot,
+.world-satis .tok-route {
+  color: #c24a0a;
+}
+.world-satis .tok-error {
+  color: #b0342a;
+}
+.world-satis .tok-dropped {
+  color: #8a6a4a;
+}
+.world-satis .tok-backup {
+  color: #5a4bb8;
+}
+
+/* Stations: an opaque disc in the panel's colour hides the wires behind; dimming never touches the disc. */
+.st .halo {
+  fill: var(--fig-bg);
+}
+.st-pc .halo {
+  fill: var(--satis-zone-pc);
+}
+.st-off .halo {
+  fill: var(--satis-zone-off);
+}
+.st-cf .halo {
+  fill: var(--satis-zone-cf);
+}
+.st-aws .halo {
+  fill: var(--satis-zone-aws);
+}
+.st > * {
+  transition: opacity var(--dur) ease;
+}
+.st.idle > :not(.halo) {
+  opacity: 0.4;
+}
+.st .body {
+  fill: var(--satis-steel-2);
+  stroke: var(--satis-line);
+  stroke-width: 1.5;
+  transition: stroke var(--dur);
+}
+.st.down .body {
+  stroke: var(--satis-error);
+  stroke-dasharray: 4 3;
+}
+.st.live .frame {
+  stroke: var(--satis-ok);
+}
+.st .dark {
+  fill: #121416;
+}
+.st .lbl {
+  fill: var(--satis-ink);
+  font: 600 12px var(--font-text);
+  text-anchor: middle;
+}
+.st .lbl.dim {
+  fill: var(--satis-dim);
+  font-weight: 500;
+  font-size: 10.5px;
+}
+.st[data-click] {
+  cursor: pointer;
+}
+.st[data-click]:hover .halo {
+  stroke: color-mix(in srgb, var(--satis-route) 60%, transparent);
+  stroke-width: 1;
+}
+.fig .wire {
+  stroke: var(--satis-line);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 2 5;
+  stroke-linecap: round;
+  transition: opacity var(--dur) ease;
+}
+.fig .wire.idle {
+  opacity: 0.3;
+}
