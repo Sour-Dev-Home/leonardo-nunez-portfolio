@@ -28,9 +28,10 @@ describe("satisfactory-dash case study", () => {
     ]);
   });
 
-  it("opens on its cover and places both figures in the article", () => {
-    expect(doc.querySelector(".world-satis .satis-cover")).not.toBeNull();
-    expect(doc.querySelector('figure[data-figure="outage"]')).not.toBeNull();
+  // The cover repeated the page's own heading, so it only makes the card and preview stills.
+  it("places both figures in the article, with no cover above the heading", () => {
+    expect(doc.querySelector(".satis-cover")).toBeNull();
+    expect(doc.querySelector('.world-satis figure[data-figure="outage"]')).not.toBeNull();
     expect(doc.querySelector('figure[data-figure="cutover"]')).not.toBeNull();
   });
 
@@ -58,6 +59,12 @@ describe("satisfactory-dash case study", () => {
       expect(links.some((h) => h.startsWith(GH + path)), path).toBe(true);
     }
     expect(links).toContain("https://demo.satis-manager.com");
+    expect(links).toContain("https://satis-manager.com");
+  });
+
+  it("tells how it was built in a sidenote: three agents first, then lanes", () => {
+    const notes = doc.querySelectorAll(".case-study-body .sidenote-note").map((n) => n.text);
+    expect(notes.some((t) => /architect/.test(t) && /lanes/i.test(t))).toBe(true);
   });
 
   it("references media that is actually in the build", () => {

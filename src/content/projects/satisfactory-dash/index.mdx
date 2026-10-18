@@ -23,7 +23,7 @@ import Figure from "../../../design/components/Figure.astro";
 
 ## The problem
 
-Satisfactory players who run a dedicated server can't see how their factory is doing without joining the game. satisfactory-dash is a dashboard for that: production, overflow and power, live, with a [public demo](https://demo.satis-manager.com).
+Satisfactory players who run a dedicated server can't see how their factory is doing without joining the game. satisfactory-dash is a dashboard for that: production, overflow and power, live. It runs in production at [satis-manager.com](https://satis-manager.com), and a [public demo](https://demo.satis-manager.com) shows it without a game server.
 
 For its first months the backend and its database ran on my gaming PC, beside the game itself. That PC was already short of memory and was never meant to be a server. This is the story of moving the service off it, without losing data and without a way in to my home network.
 
@@ -46,9 +46,7 @@ Anything the agent can't deliver yet waits in its <span class="tok">queue</span>
 
 When the link breaks, something has to give. The system picks availability: the dashboard keeps answering with the last snapshot it has, [marked stale](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/frontend/src/components/DataAge.tsx), rather than going blank, and the agent keeps collecting. The cost is consistency: history arrives late, and if the outage outlasts the queue (about ten minutes of snapshots, [agentRunner.ts](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/agent/src/agentRunner.ts)), the oldest readings are <span class="tok tok-dropped"><i>○</i>dropped</span> for good ([queue.ts](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/agent/src/queue.ts)). For a live dashboard, the newest data matters most.
 
-<Sidenote id="liveness" lead="psst">The first health check I gave the backend on AWS asked "is the database answering?". During RDS's weekly maintenance that would have made AWS replace a perfectly healthy backend after about 90 seconds. It now asks "is the process alive?", and an outside monitor watches the database ([#425](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/infra/aws/ecs.tf#L22)).</Sidenote>
-
-The figure's database toggle shows that split: with the database down, the backend stays up and says so, and nothing restarts it.
+The figure's database toggle shows one more split: with the database down, the backend stays up and says so, and nothing restarts it. AWS only checks that the backend's process is alive; an outside monitor watches the database ([#425](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/infra/aws/ecs.tf#L22)).
 
 ## The move to AWS
 
@@ -84,4 +82,6 @@ The credits run out in a few months, and the exit is already written: the same i
 
 ## How it was built
 
-I built satisfactory-dash with Claude Code, through [lanes](https://github.com/Sour-Dev-Home/lanes): one fresh session per GitHub issue, gated by required checks and reviewer agents, with every change reviewed by me before it merged. The [repository](https://github.com/Sour-Dev-Home/satisfactory-dash) is public.
+<Sidenote id="agents" lead="psst">Development started with three Claude agents: a developer, an architect and a frontend agent. Midway through I tried more thorough task management with my own tool, lanes, and it ran the rest of the project.</Sidenote>
+
+I built satisfactory-dash with Claude Code, most of it through [lanes](https://github.com/Sour-Dev-Home/lanes): one fresh session per GitHub issue, gated by required checks and reviewer agents, with every change reviewed by me before it merged. The [repository](https://github.com/Sour-Dev-Home/satisfactory-dash) is public.

@@ -22,7 +22,6 @@ const { project, slug, world } = Astro.props;
 >
   <main>
     <article class:list={["case-study page", world && `world-${world}`]}>
-      <slot name="cover" />
       <header class="case-study-head reveal">
         <p class="case-study-back"><a href="/">← Back to all projects</a></p>
         <p class="kicker">Case study</p>
