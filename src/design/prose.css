@@ -128,7 +128,9 @@ figcaption {
   }
 }
 @media (min-width: 80rem) {
-  .sidenote-toggle {
+  /* The note is always shown here, so the toggle and its checkbox go away. */
+  .sidenote-toggle,
+  .sidenote-checkbox {
     display: none;
   }
   .sidenote-note {
