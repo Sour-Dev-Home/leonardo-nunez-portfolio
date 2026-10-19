@@ -25,12 +25,12 @@ const { project, slug, world } = Astro.props;
       <header class="case-study-head reveal">
         <p class="case-study-back"><a href="/">← Back to all projects</a></p>
         <p class="kicker">Case study</p>
-        <!-- A break point after each dot: "leonardonunez.dev" is one word, wider than a phone at this size. -->
+        {/* A break point after each dot: "leonardonunez.dev" is one word, wider than a phone at this size. */}
         <h1>{project.name.split(".").map((part, i, all) => (i < all.length - 1 ? <>{part}.<wbr /></> : part))}</h1>
         <StackList stack={project.stack} />
         <ProjectLinks project={project} />
       </header>
-      <!-- No .reveal here: the body's first blocks stagger in on their own (motion.css). -->
+      {/* No .reveal here: the body's first blocks stagger in on their own (motion.css). */}
       <div class="case-study-body prose"><slot /></div>
     </article>
   </main>

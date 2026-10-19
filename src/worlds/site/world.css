@@ -129,6 +129,11 @@
 [data-figure="site"]:not([data-mounted]) .m-page {
   visibility: hidden;
 }
+/* Until site-view.ts mounts the figure (or ever, without JavaScript) its buttons would do nothing, so they aren't
+   offered. Hidden, not removed, so the figure is the same size before and after. */
+[data-figure="site"]:not([data-mounted]) :is(.fig-bar, .sf-pick) {
+  visibility: hidden;
+}
 .m-head {
   display: flex;
   justify-content: space-between;

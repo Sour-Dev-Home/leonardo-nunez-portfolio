@@ -23,7 +23,8 @@ export function labelCollisions(fig: ParentNode): string[] {
 }
 
 /** How far a page title starts from its box's left content edge, in px. Caught on /about and /kit (#38): a grid
- *  meant for the home hero's portrait put the kicker in one column and the h1 in the other. */
+ *  meant for the home hero's portrait put the kicker in one column and the h1 in the other. The rects are on-screen
+ *  (after transforms) but paddingLeft is in the box's own CSS px, so a scaled box with padding needs converting. */
 export function titleGap(h1: Element): number {
   const box = h1.parentElement!;
   const left = box.getBoundingClientRect().left + parseFloat(getComputedStyle(box).paddingLeft);
