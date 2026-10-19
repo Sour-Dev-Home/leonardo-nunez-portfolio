@@ -23,8 +23,8 @@ const LABEL: Record<(typeof STATIONS)[number], [string, string]> = {
 
 <svg data-layout={layout} viewBox={`0 0 ${d.w} ${d.h}`} role="img" aria-label="One lane's path from a task issue to main, through its checks.">
   <path class="wire" data-path="track" d={d.track}></path>
-  <!-- Drawn before the stations, so the token passes behind each icon; it rests just short of a station's
-       disc (lane-view.ts), so it stays in sight there (owner's reviews). -->
+  {/* Drawn before the stations, so the token passes behind each icon; it rests just short of a station's
+       disc (lane-view.ts), so it stays in sight there (owner's reviews). */}
   <g data-dots><circle class="lanes-token" r="7" transform={`translate(${d.at.issue.x + 44} ${d.at.issue.y})`}></circle></g>
   {STATIONS.map((id) => <LaneStation kind={id} x={d.at[id].x} y={d.at[id].y} label={LABEL[id][0]} sub={LABEL[id][1]} labels={d.labels} />)}
 </svg>

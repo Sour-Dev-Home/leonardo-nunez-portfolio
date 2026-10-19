@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, it, expect } from "vitest";
-import { SITE, page, metaContent, hrefs, distFileExists } from "./helpers";
+import { SITE, page, metaContent, hrefs, distFileExists, builtPages } from "./helpers";
 import { RUNNABLE_SCRIPTS } from "./budget";
 
 const GH = "https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/";
@@ -100,5 +102,21 @@ describe("satisfactory-dash case study", () => {
 describe("data-only projects", () => {
   it("get no page", () => {
     expect(distFileExists("projects/home-lab.html")).toBe(false);
+  });
+});
+
+// Source comments are notes for whoever edits the layout, not copy: an HTML comment in an .astro
+// file ships to every visitor. React's empty "<!-- -->" text separators are the only comments left.
+describe("every case study", () => {
+  const studies = builtPages().filter((f) => f.startsWith("projects/"));
+
+  it("is built", () => {
+    expect(studies.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it.each(studies)("%s ships no source comments", (file) => {
+    const html = readFileSync(join(process.cwd(), "dist", file), "utf-8");
+    const comments = [...html.matchAll(/<!--([\s\S]*?)-->/g)].map((m) => m[1].trim()).filter(Boolean);
+    expect(comments).toEqual([]);
   });
 });

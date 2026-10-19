@@ -34,6 +34,28 @@ test.describe("where it breaks: the frames", () => {
     expect(after?.height).toBeCloseTo(before!.height, 0);
   });
 
+  // The buttons do nothing until site-view.ts mounts the figure, so they aren't offered before then.
+  test("shows its controls once mounted", async ({ page }) => {
+    const fig = await open(page);
+    await expect(fig).toHaveAttribute("data-mounted", "");
+    await expect(fig.locator(".fig-bar")).toBeVisible();
+    await expect(fig.locator(".sf-pick")).toBeVisible();
+  });
+});
+
+test.describe("where it breaks: without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("offers no controls that would do nothing, at the same size", async ({ page }) => {
+    await page.goto(URL);
+    const fig = page.locator(FIG);
+    await expect(fig).not.toHaveAttribute("data-mounted", "");
+    await expect(fig.locator(".fig-bar")).toBeHidden();
+    await expect(fig.locator(".sf-pick")).toBeHidden();
+    // Hidden, not removed: the figure keeps the size it has once mounted.
+    expect(await fig.locator(".fig-bar").evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(0);
+  });
+
   test("lays each frame out at its own width, not the window's", async ({ page }) => {
     await page.goto(URL);
     expect(await frameDrawings(page)).toEqual([
@@ -98,6 +120,21 @@ test.describe("where it breaks: the bugs", () => {
   test("every frame passes before a bug is injected", async ({ page }) => {
     await open(page);
     expect(await results(page)).toEqual(expected([]));
+  });
+
+  test("Fix it does nothing before a bug is picked", async ({ page }) => {
+    const fig = await open(page);
+    const fix = fig.locator("[data-fix]");
+    const caption = await fig.locator(".fig-caption").textContent();
+    await expect(fix).toHaveAttribute("aria-disabled", "true");
+    // Playwright won't click an aria-disabled button by itself; a reader still can.
+    await fix.click({ force: true });
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Space");
+    expect(await results(page)).toEqual(expected([]));
+    await expect(fig.locator(".fig-caption")).toHaveText(caption!);
+    await expect(fig).not.toHaveAttribute("data-fixed", "");
+    await expect(fix).toBeFocused();
   });
 
   for (const c of CASES) {
