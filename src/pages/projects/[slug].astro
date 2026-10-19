@@ -2,6 +2,7 @@
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import CaseStudy from "../../layouts/CaseStudy.astro";
 import { hasCaseStudy } from "../../lib/projects";
+import { WORLDS } from "../../worlds";
 
 export async function getStaticPaths() {
   const entries = await getCollection("projects");
@@ -17,6 +18,6 @@ const { Content } = await render(entry);
 const project = { ...entry.data, slug: entry.id };
 ---
 
-<CaseStudy project={project} slug={entry.id} world={entry.data.world ? "satis" : undefined}>
+<CaseStudy project={project} slug={entry.id} world={entry.data.world ? WORLDS[entry.id] : undefined}>
   <Content />
 </CaseStudy>

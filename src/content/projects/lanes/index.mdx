@@ -1,0 +1,75 @@
+---
+name: lanes
+summary: >-
+  Building software with parallel Claude Code sessions, one per GitHub issue, gated by required checks and reviewers.
+description: >-
+  A workflow for building software with parallel Claude Code sessions ("lanes"): one fresh session per GitHub issue, with contracts at every handoff (the task issue form, the PR template, reviewer verdicts tied to a commit) and required GitHub checks as the only gatekeeper, so low-risk work merges unattended. A lanes/gate status, computed from the live diff and the issue's labels, fails closed; reviewer agents (test-hunter, security, UI, architecture) are chosen by tier and by the files a change touches; files that set the rules always wait for the owner's code-owner review; and a merge queue re-checks the merged commit. Lanes act as a GitHub App, never as the owner. 365 lane PRs merged into lanes itself and 22 into satisfactory-dash by 2026-10-18, with its costs and limits measured and written down in 34 decision records and 7 history notes.
+status: in-progress
+stack: [Node.js, GitHub Actions, Claude Code]
+repoUrl: https://github.com/Sour-Dev-Home/lanes
+emphasis: secondary
+order: 2
+world: true
+ogImage: /og/lanes.png
+cover:
+  src: /covers/lanes.png
+---
+
+import LanePathFigure from "../../../worlds/lanes/figures/LanePathFigure.astro";
+import Aside from "../../../design/components/Aside.astro";
+
+## The problem
+
+I build with several Claude Code sessions at once. Each is fast, and none of them should be trusted with `main`, which deploys. Nobody watches at night. So the question lanes answers is narrow: how can AI sessions ship to `main` unattended without ever breaking it?
+
+The answer is to make GitHub's required checks the only gatekeeper. No session can merge by being persuasive; a change merges only when the checks say so.
+
+## How a lane ships
+
+A lane is one fresh Claude session for one GitHub issue, in its own worktree. It reads a task contract, writes the failing test first, then the code, and opens a pull request. Fresh reviewer agents read the diff: [test-hunter always, and the security, UI and architecture reviewers when the files call for them](https://github.com/Sour-Dev-Home/lanes/blob/main/scripts/lanes/lib.mjs). Then [`lanes/gate`](https://github.com/Sour-Dev-Home/lanes/blob/main/scripts/lanes/gate.mjs) decides, and the merge queue checks the merged result once more.
+
+<LanePathFigure />
+
+Each switch in the figure is a real rule, and every status line is the gate's own text.
+
+## What it refuses
+
+The gate fails closed: an unread input, an unknown permission or a list that might be cut short all count as "no". A verdict covers only the commit it names, so a lane can't fix a bug and keep its old approval. The files that decide the rules themselves (the workflows, the config) always wait for my review.
+
+It is honest about what it can't do. It stops honest mistakes and strangers, not a lane that turns hostile ([USING.md](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/USING.md)), and it doesn't certify the code it merges ([SECURITY.md](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/SECURITY.md)).
+
+## Results
+
+lanes was built with itself: 365 lane PRs merged into the lanes repository between September 27 and October 18. It then ran [satisfactory-dash](/projects/satisfactory-dash), where 22 lane PRs merged in four days.
+
+A measurement of 76 lanes showed what a lane costs: from a median of 2.4M tokens for changes under 50 lines to 17.1M for 500 to 1,000, with reviewers' serious findings steady at about 0.2 per 100 changed lines whatever the size ([lane size and cost](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/history/2026-09-30-lane-size-and-cost.md)).
+
+## Limits and trade-offs
+
+lanes is not a general answer, and its own history says so.
+
+**Conway's law.** Lanes talk to each other only through issues, and each sees only its own files, so the system was built in file-sized slices. Changes that needed a holistic view were split, then queued one after another anyway, and I had to merge issues back together by hand ([v0.1.0 snapshot](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/history/2026-09-29-lanes-v0.1.0-snapshot.md)). The tool's structure shaped the work's structure. One ~200-line change became four serial lanes costing about 15M tokens, against 6 to 8M as one. I changed the rule: issues are now split by size, about 100 to 300 changed lines, not by module ([decision](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/history/2026-09-30-lane-size-and-cost.md)).
+
+**A fixed cost per lane.** Every lane pays to read its context and run its reviewers. Under 50 changed lines, that costs four to five times more per line. Small, tightly coupled work is cheaper in one session.
+
+**Guards as a patch chain.** Filtering what a session types into a shell can always be dodged; each fix closed the gap the last review found, and the chain had no natural end ([snapshot](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/history/2026-09-29-lanes-v0.1.0-snapshot.md)). That is why the real gate judges results on GitHub, not intentions in a terminal.
+
+**One machine.** The queue and every lane run on my computer. When it sleeps, nothing new starts or gets fixed ([recorded, deferred](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/history/2026-10-02-lanes-depends-on-the-owners-machine.md)).
+
+**Not hands-off.** Approvals, launches and upgrades stay with me by design. An early mode that let lanes act as me was retired because it introduced bugs of its own ([retired](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/history/2026-10-01-retire-solo-profile.md)).
+
+**When not to use it.** This site. It is small, static and mine alone, and its CI and my reviews are enough, so I chose not to install lanes here.
+
+<details>
+<summary>More detail: the parts of a lane</summary>
+<Aside>
+- A task issue form with Goal, Acceptance criteria, Interface contract, Scope, Blocked by and Tier, checked by issue-contract before any lane launches.
+- Tiers: skip (docs and tests only), quick and full; reviewers are chosen by tier and by the files changed.
+- Lanes act as a GitHub App, never as me; my approval is a native code-owner review.
+- A token budget per night and per lane, read from local records and sent nowhere.
+</Aside>
+</details>
+
+## How it was built
+
+lanes was built through lanes: its own changes went through its own gate, which is how most of the trade-offs above were found. It is open source on [GitHub](https://github.com/Sour-Dev-Home/lanes).

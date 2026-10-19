@@ -1,19 +1,23 @@
-// Renders the satis cover stills from /kit's #satis-cover-still: the work card's picture and the
-// link-preview image. Run after `npm run build`, with `npm run preview` serving dist/.
+// Renders each world's cover stills from its still on /kit (#<world>-cover-still): the work card's picture and
+// the link-preview image. Run after `npm run build`, with `npm run preview` serving dist/.
 import { chromium } from "@playwright/test";
 
 const base = process.env.BASE_URL ?? "http://127.0.0.1:4321";
-const shots = [
-  // [output, CSS width, CSS height, device scale] → 1600 × 900 and 1200 × 630.
-  ["public/covers/satisfactory-dash.png", 800, 450, 2],
-  ["public/og/satisfactory-dash.png", 800, 420, 1.5],
+const covers = [
+  { id: "satis-cover-still", name: "satisfactory-dash" },
+  { id: "lanes-cover-still", name: "lanes" },
 ];
+// [still, output, CSS width, CSS height, device scale] → 1600 × 900 and 1200 × 630.
+const shots = covers.flatMap(({ id, name }) => [
+  [id, `public/covers/${name}.png`, 800, 450, 2],
+  [id, `public/og/${name}.png`, 800, 420, 1.5],
+]);
 
 const browser = await chromium.launch();
-for (const [out, w, h, scale] of shots) {
+for (const [id, out, w, h, scale] of shots) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: scale, reducedMotion: "reduce" });
   await page.goto(`${base}/kit`, { waitUntil: "networkidle" });
-  const el = page.locator("#satis-cover-still");
+  const el = page.locator(`#${id}`);
   await el.evaluate((n, [ww, hh]) => {
     n.style.width = `${ww}px`;
     n.style.height = `${hh}px`;

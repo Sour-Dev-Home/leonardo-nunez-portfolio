@@ -6,7 +6,11 @@ import { parse } from "node-html-parser";
 /** Gzipped JavaScript budget per built page, in bytes. Only pages with interactive figures may run
  *  JavaScript, each within its own budget; every other page runs none. */
 export const DEFAULT_BUDGET = 0;
-export const BUDGETS: Record<string, number> = { "projects/satisfactory-dash.html": 15_000, "kit.html": 15_000 };
+export const BUDGETS: Record<string, number> = {
+  "projects/satisfactory-dash.html": 15_000,
+  "projects/lanes.html": 15_000,
+  "kit.html": 15_000,
+};
 export const SCRIPTED_PAGES = Object.keys(BUDGETS);
 
 /** Every script URL a page loads: script src, module preloads and Astro island bundles. */

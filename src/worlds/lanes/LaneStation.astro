@@ -1,0 +1,104 @@
+---
+// One station of the lanes figure: an opaque disc that hides the track and the token behind it, a flat icon, a
+// label and a sub-label. Not focusable: the figure's labelled buttons are the keyboard path.
+import type { StationId } from "./model/path";
+interface Props {
+  kind: StationId;
+  x: number;
+  y: number;
+  label: string;
+  sub: string;
+  /** Labels under the icon, or beside it on the right (stations stacked vertically on phones). */
+  labels?: "below" | "right";
+}
+const { kind, x, y, label, sub, labels = "below" } = Astro.props;
+const side = labels === "right";
+---
+
+<g class="lst" data-station={kind} transform={`translate(${x} ${y})`}>
+  <circle class="halo" r="34"></circle>
+  {
+    kind === "issue" && (
+      <>
+        <circle class="ring" r="16" />
+        <circle class="dotc" r="4" />
+      </>
+    )
+  }
+  {
+    kind === "contract" && (
+      <>
+        <rect class="body" x="-14" y="-18" width="28" height="36" rx="3" />
+        <rect class="body" x="-7" y="-22" width="14" height="7" rx="2" />
+        <path class="mark" d="M-7 2 l5 5 l9 -10" />
+      </>
+    )
+  }
+  {
+    kind === "lane" && (
+      <>
+        <rect class="body" x="-22" y="-16" width="44" height="32" rx="4" />
+        <path class="mark" d="M-14 -6 l6 5 l-6 5" />
+        <path class="mark" d="M-4 5 H8" />
+      </>
+    )
+  }
+  {
+    kind === "pr" && (
+      <>
+        <circle class="ring" cx="-9" cy="-14" r="4.5" />
+        <circle class="ring" cx="-9" cy="14" r="4.5" />
+        <circle class="ring" cx="10" cy="14" r="4.5" />
+        <path class="mark" d="M-9 -9.5 V9.5 M10 9.5 V-2 Q10 -8 4 -8 H-2" />
+      </>
+    )
+  }
+  {
+    kind === "reviewers" && (
+      <>
+        <circle class="ring" cx="-4" cy="-4" r="11" />
+        <path class="mark" d="M4 4 L15 15" />
+      </>
+    )
+  }
+  {
+    kind === "gate" && (
+      <>
+        <rect class="body" x="-22" y="-4" width="44" height="8" rx="2" />
+        <rect class="body" x="-24" y="-18" width="6" height="36" rx="2" />
+        <rect class="body" x="18" y="-18" width="6" height="36" rx="2" />
+      </>
+    )
+  }
+  {
+    kind === "queue" && (
+      <>
+        <rect class="body" x="-18" y="-15" width="36" height="7" rx="2" />
+        <rect class="body" x="-18" y="-3.5" width="36" height="7" rx="2" />
+        <rect class="body" x="-18" y="8" width="36" height="7" rx="2" />
+      </>
+    )
+  }
+  {
+    kind === "main" && (
+      <>
+        <path class="mark" d="M-20 0 H20" />
+        <circle class="dotc" r="6" />
+      </>
+    )
+  }
+  {
+    label && (
+      <text class:list={["lbl", { side }]} x={side ? 46 : 0} y={side ? -3 : 52}>
+        {label}
+      </text>
+    )
+  }
+  {
+    sub && (
+      <text class:list={["lbl dim", { side }]} data-sub x={side ? 46 : 0} y={side ? 11 : 66}>
+        {sub}
+      </text>
+    )
+  }
+</g>

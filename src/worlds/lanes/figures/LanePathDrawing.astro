@@ -1,0 +1,30 @@
+---
+// The lanes figure's drawing for one layout (layouts.ts).
+import LaneStation from "../LaneStation.astro";
+import { LANES } from "./layouts";
+import { STATIONS, reviewersFor, NO_SWITCHES } from "../model/path";
+
+interface Props {
+  layout: "desktop" | "phone";
+}
+const { layout } = Astro.props;
+const d = LANES[layout];
+const LABEL: Record<(typeof STATIONS)[number], [string, string]> = {
+  issue: ["Task issue", "the form"],
+  contract: ["Contract check", "issue-contract"],
+  lane: ["Lane", "fresh session"],
+  pr: ["Pull request", "Closes #482"],
+  reviewers: ["Reviewers", reviewersFor(NO_SWITCHES).join(", ")],
+  gate: ["Gate", "lanes/gate"],
+  queue: ["Merge queue", "re-checks"],
+  main: ["main", "deployed"],
+};
+---
+
+<svg data-layout={layout} viewBox={`0 0 ${d.w} ${d.h}`} role="img" aria-label="One lane's path from a task issue to main, through its checks.">
+  <path class="wire" data-path="track" d={d.track}></path>
+  <!-- Drawn before the stations, so the token passes behind each icon; it rests just short of a station's
+       disc (lane-view.ts), so it stays in sight there (owner's reviews). -->
+  <g data-dots><circle class="lanes-token" r="7" transform={`translate(${d.at.issue.x + 44} ${d.at.issue.y})`}></circle></g>
+  {STATIONS.map((id) => <LaneStation kind={id} x={d.at[id].x} y={d.at[id].y} label={LABEL[id][0]} sub={LABEL[id][1]} labels={d.labels} />)}
+</svg>

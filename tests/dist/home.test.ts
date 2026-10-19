@@ -39,7 +39,7 @@ describe("home page", () => {
 
   it("links only to case studies that exist", () => {
     const caseLinks = hrefs(doc).filter((h) => h.startsWith("/projects/"));
-    expect(caseLinks).toEqual(["/projects/satisfactory-dash"]);
+    expect(caseLinks).toEqual(["/projects/satisfactory-dash", "/projects/lanes"]);
   });
 
   it("keeps the section anchors the header links to", () => {
