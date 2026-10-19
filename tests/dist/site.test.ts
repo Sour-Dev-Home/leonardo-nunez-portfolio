@@ -39,6 +39,7 @@ describe("leonardonunez.dev case study", () => {
       "pull/38",
       "pull/40",
       "pull/43",
+      "pull/46",
       "blob/main/.github/workflows/ci.yml",
       "blob/main/e2e/layout.spec.ts",
       "blob/main/e2e/loading.spec.ts",

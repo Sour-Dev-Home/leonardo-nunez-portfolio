@@ -57,7 +57,7 @@ The gate earns its keep on bugs nobody sees on their own screen. In
 my Windows machine, but CI's Linux fonts set a label wider, and on tablets a route crossed "CLOUDFLARE". The check
 failed, the route was redrawn to climb clear, and a unit test now keeps the clearance. It caught this page too: its
 own title, "leonardonunez.dev", is one long word, and on a 360 px phone it ran 65 px off the screen until the title
-was allowed to break after the dot.
+was allowed to break after the dot ([#46](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/46)).
 
 It misses things too. A grid meant for the home page's portrait applied to every page header, so on tablets and
 desktops the titles of two pages split into two columns. It passed every check, because no check asked where a
@@ -97,7 +97,8 @@ starts loading when you hover its link.
 - **Tests can be wrong too.** The site's smooth scrolling made a test measure a figure mid-scroll, and it failed on
   tablets until it scrolled instantly ([#43](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/43)).
   Writing the table above showed the budget check had never counted a figure's lazily loaded script: the
-  minifier quotes that import with backticks, which the check didn't read. Every page still fit once it did.
+  minifier quotes that import with backticks, which the check didn't read. Every page still fit once it did
+  ([#46](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/46)).
 - **It only checks what someone thought of.** The split titles passed everything
   ([#38](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/38)). Checks grow from misses, and my own
   review of each preview is still part of the gate.
