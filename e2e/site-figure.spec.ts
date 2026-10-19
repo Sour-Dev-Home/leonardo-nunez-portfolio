@@ -128,8 +128,38 @@ test.describe("where it breaks: the bugs", () => {
   });
 });
 
-test.describe("where it breaks: on phones", () => {
-  test.beforeEach(({ viewport }) => test.skip(viewport!.width > 640, "phone layout only"));
+// One frame at a time at every screen size (owner, 2026-10-19: four frames side by side were too small on a PC to
+// see the fix).
+test.describe("where it breaks: one frame at a time", () => {
+  test("picking a bug shows the first width it fails at", async ({ page }) => {
+    const fig = await open(page);
+    for (const c of CASES) {
+      await fig.locator(`[data-bug="${c.id}"]`).click();
+      await expect(fig).toHaveAttribute("data-show", String(c.failsAt[0]));
+      await expect(fig.locator(`[data-pick="${c.failsAt[0]}"]`)).toHaveAttribute("aria-pressed", "true");
+      await fig.locator(`[data-bug="${c.id}"]`).click();
+    }
+  });
+
+  // A selected tab isn't a failing one: the dot shows the width's result, not the selection.
+  test("a selected width tab shows its result, not red for being selected", async ({ page }) => {
+    const fig = await open(page);
+    const dot = (w: number) => fig.locator(`[data-pick="${w}"]`).evaluate((b) => getComputedStyle(b, "::before").backgroundColor);
+    await fig.locator('[data-bug="fonts"]').click();
+    const failing = await dot(768);
+    expect(failing).not.toBe(await dot(360));
+    await fig.locator("[data-fix]").click();
+    expect(await dot(768)).toBe(await dot(360));
+  });
+
+  test("draws the shown page at least half size on a wide screen", async ({ page, viewport }) => {
+    test.skip(viewport!.width <= 640, "a phone is narrower than half of 1280 px");
+    const fig = await open(page);
+    for (const w of [360, 390, 768, 1280]) {
+      await fig.locator(`[data-pick="${w}"]`).click();
+      expect(Number(await fig.locator(`.sf[data-w="${w}"] .m-page`).getAttribute("data-scale")), String(w)).toBeGreaterThanOrEqual(0.5);
+    }
+  });
 
   test("shows one frame at a time, picked by width", async ({ page }) => {
     const fig = await open(page);

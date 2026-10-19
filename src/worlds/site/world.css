@@ -25,16 +25,54 @@
   --fig-off-bg: #4a2628;
 }
 
-/* Four frames side by side, each as wide as its screen relative to the others. */
-[data-figure="site"] .sf-row {
+/* One frame at a time, picked by width: four side by side were too small on a PC to see a fix (owner,
+   2026-10-19). The others stay laid out (the checks measure them) but unseen. A frame is drawn at up to 75% of its
+   real size (480 px tall), narrower if the figure is. */
+[data-figure="site"] .sf-pick {
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 1rem 1rem 0;
+}
+[data-figure="site"] [data-pick][data-result="fail"]::after {
+  content: " · fails";
+}
+/* A width tab's dot is that width's result; the selected tab is outlined, not turned red like a toggle that's down. */
+[data-figure="site"] [data-pick]::before {
+  background: var(--fig-on);
+}
+[data-figure="site"] [data-pick][data-result="fail"]::before {
+  background: var(--fig-off);
+}
+[data-figure="site"] [data-pick][aria-pressed="true"] {
+  background: var(--fig-btn);
+  outline: 2px solid var(--fig-accent);
+  outline-offset: 1px;
+}
+[data-figure="site"] .sf-row {
+  position: relative;
   padding: 1rem;
 }
 [data-figure="site"] .sf {
-  flex: var(--w) 1 0;
-  min-width: 0;
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  right: 0;
+  width: min(100% - 2rem, var(--w) * 0.75px);
+  margin-inline: auto;
+  opacity: 0;
+  pointer-events: none;
+}
+[data-figure="site"][data-show="360"] .sf[data-w="360"],
+[data-figure="site"][data-show="390"] .sf[data-w="390"],
+[data-figure="site"][data-show="768"] .sf[data-w="768"],
+[data-figure="site"][data-show="1280"] .sf[data-w="1280"] {
+  position: relative;
+  top: auto;
+  /* In flow, 100% is already inside the row's padding. */
+  width: min(100%, var(--w) * 0.75px);
+  opacity: 1;
+  pointer-events: auto;
 }
 [data-figure="site"] .sf-view {
   aspect-ratio: var(--w) / 640;
@@ -66,42 +104,6 @@
   font-weight: 400;
   opacity: 0.8;
 }
-[data-figure="site"] .sf-pick {
-  display: none;
-}
-
-/* Phones: one frame at a time. The others stay laid out (the checks measure them) but unseen. */
-@media (max-width: 40rem) {
-  [data-figure="site"] .sf-pick {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    padding: 1rem 1rem 0;
-  }
-  [data-figure="site"] [data-pick][data-result="fail"]::after {
-    content: " · fails";
-  }
-  [data-figure="site"] .sf-row {
-    display: block;
-    position: relative;
-  }
-  [data-figure="site"] .sf {
-    position: absolute;
-    inset: 1rem 1rem auto;
-    opacity: 0;
-    pointer-events: none;
-  }
-  [data-figure="site"][data-show="360"] .sf[data-w="360"],
-  [data-figure="site"][data-show="390"] .sf[data-w="390"],
-  [data-figure="site"][data-show="768"] .sf[data-w="768"],
-  [data-figure="site"][data-show="1280"] .sf[data-w="1280"] {
-    position: relative;
-    inset: auto;
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   [data-figure="site"] .sf-view {
     transition: none;

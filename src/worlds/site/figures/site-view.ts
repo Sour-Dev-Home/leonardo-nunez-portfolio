@@ -54,8 +54,15 @@ export function mount(root: HTMLElement): () => void {
     }
   }
 
-  /** Applies the state, checks every frame, and (after a press) says what happened. */
-  function run(announce: boolean) {
+  /** Shows the frame for one width. */
+  function show(w: string) {
+    for (const p of picks) p.setAttribute("aria-pressed", String(p.dataset.pick === w));
+    root.dataset.show = w;
+    fit();
+  }
+
+  /** Applies the state, checks every frame, and (after a press) says what happened. Returns the failing widths. */
+  function run(announce: boolean): Width[] {
     if (current) root.dataset.case = current.id;
     else delete root.dataset.case;
     root.toggleAttribute("data-fixed", fixed);
@@ -76,10 +83,11 @@ export function mount(root: HTMLElement): () => void {
     }
     for (const b of bugs) b.setAttribute("aria-pressed", String(b.dataset.bug === current?.id));
     fix.setAttribute("aria-disabled", String(!current || fixed || failing.length === 0));
-    if (!announce) return;
+    if (!announce) return failing;
     if (!current) caption.textContent = idle;
     else if (failing.length) caption.textContent = `${current.bug} ${failureText(current, failing, detail)}`;
     else caption.textContent = `${fixed ? current.fix : current.bug} Passes at all four widths.`;
+    return failing;
   }
 
   const offs = bugs.map((b) => {
@@ -87,7 +95,9 @@ export function mount(root: HTMLElement): () => void {
       const c = CASES.find((x) => x.id === b.dataset.bug)!;
       current = current?.id === c.id ? null : c;
       fixed = false;
-      run(true);
+      // Go straight to where it breaks, so the reader watches that page fail and then get fixed.
+      const failing = run(true);
+      if (failing.length) show(String(failing[0]));
     };
     b.addEventListener("click", fn);
     return () => b.removeEventListener("click", fn);
@@ -103,11 +113,7 @@ export function mount(root: HTMLElement): () => void {
     run(true);
   };
   const pickOffs = picks.map((b) => {
-    const fn = () => {
-      for (const p of picks) p.setAttribute("aria-pressed", String(p === b));
-      root.dataset.show = b.dataset.pick!;
-      fit();
-    };
+    const fn = () => show(b.dataset.pick!);
     b.addEventListener("click", fn);
     return () => b.removeEventListener("click", fn);
   });
