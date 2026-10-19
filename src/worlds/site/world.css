@@ -108,11 +108,12 @@
   }
 }
 
-/* The miniature page: laid out at its real width (--w px), scaled down by the view's `zoom`. Its breakpoints are
-   the site's (40rem, 64rem), read from its own width through container queries. */
+/* The miniature page: laid out at its real width (--w px), scaled down by a transform (site-view.ts). Its
+   breakpoints are the site's (40rem, 64rem), read from its own width through container queries. */
 [data-figure="site"] .m-page {
   width: calc(var(--w) * 1px);
   height: 640px;
+  transform-origin: 0 0;
   box-sizing: border-box;
   container: mini / inline-size;
   overflow: auto hidden;

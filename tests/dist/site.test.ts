@@ -48,10 +48,31 @@ describe("leonardonunez.dev case study", () => {
       "blob/main/lighthouserc.json",
       "blob/main/tests/dist/budget.ts",
       "blob/main/public/_headers",
-      "tree/main/src/design/checks",
+      "blob/main/src/layouts/Shell.astro",
     ]) {
       expect(links.some((h) => h.startsWith(GH + path)), path).toBe(true);
     }
+  });
+
+  // Final review: each claim says only what its source says.
+  it("states its claims as their sources do", () => {
+    const text = body().text;
+    // #35 shipped the picture bug, then fixed it with the loading tests.
+    expect(text).not.toMatch(/never shipped/);
+    const misses = body().querySelectorAll("p").filter((p) => /reserved/.test(p.text));
+    expect(misses.some((p) => p.querySelectorAll("a").some((a) => a.getAttribute("href") === GH + "pull/35"))).toBe(true);
+    // Only #40 is called a catch (owner, 2026-10-18).
+    expect(text).not.toMatch(/caught this page/);
+    // Only verify, e2e and Lighthouse are required on main.
+    expect(text).not.toMatch(/nothing merges until it is green/);
+    expect(text).toMatch(/required/);
+    // #43's commit doesn't say which widths failed.
+    expect(body().querySelectorAll("li").find((li) => /smooth scrolling/.test(li.text))!.text).not.toMatch(/tablets/);
+  });
+
+  // The link checker fails on a path that only exists once this merges.
+  it("links only pages that exist before it merges", () => {
+    expect(hrefs(doc).some((h) => h.includes("/tree/main/src/design/checks"))).toBe(false);
   });
 
   it("names the miss in its limits, with its PR", () => {

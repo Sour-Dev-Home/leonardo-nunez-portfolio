@@ -15,8 +15,8 @@ function failure(c: Case, frame: HTMLElement): string | null {
       return hits.length ? hits.join(", ") : null;
     }
     case "hero": {
-      const zoom = Number(page.style.zoom) || 1;
-      return Math.abs(titleGap(page.querySelector(".m-h1")!)) / zoom < 1 ? null : "the title doesn't start at the content's left edge";
+      const scale = Number(page.dataset.scale) || 1;
+      return Math.abs(titleGap(page.querySelector(".m-h1")!)) / scale < 1 ? null : "the title doesn't start at the content's left edge";
     }
     case "media": {
       // Measure the page as it would be while the picture loads, then loaded, as the e2e test does.
@@ -42,11 +42,15 @@ export function mount(root: HTMLElement): () => void {
   let current: Case | null = null;
   let fixed = false;
 
-  // Scale each page to its view; the page keeps laying itself out at its real width.
+  // Scale each page to its view; the page keeps laying itself out at its real width. A transform, not CSS zoom:
+  // Firefox leaves zoom out of getScreenCTM(), so the collision check would look in the wrong place.
   function fit() {
     for (const f of frames) {
       const view = f.querySelector<HTMLElement>(".sf-view")!;
-      f.querySelector<HTMLElement>(".m-page")!.style.zoom = String(view.clientWidth / Number(f.dataset.w));
+      const page = f.querySelector<HTMLElement>(".m-page")!;
+      const scale = view.clientWidth / Number(f.dataset.w);
+      page.dataset.scale = String(scale);
+      page.style.transform = `scale(${scale})`;
     }
   }
 

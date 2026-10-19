@@ -1,5 +1,6 @@
 // The bugs the "Where it breaks" figure can inject. Each names the e2e test that guards against it, by its exact
-// title, and whether the gate caught it (#40), missed it and then gained a test (#38), or guarded it from the start.
+// title, and whether the gate caught it (#40), missed it and then gained a test (#38, #35), or guarded it from the
+// start.
 
 export const WIDTHS = [360, 390, 768, 1280] as const;
 export type Width = (typeof WIDTHS)[number];
@@ -49,7 +50,8 @@ export const CASES: readonly Case[] = [
   {
     id: "media",
     label: "No reserved space",
-    verdict: "guarded",
+    verdict: "missed",
+    pr: 35,
     test: { file: "e2e/loading.spec.ts", title: "media keeps its size and nothing moves while it loads" },
     failsAt: [360, 390, 768, 1280],
     bug: "The picture has no height until it loads, then pushes the text down.",

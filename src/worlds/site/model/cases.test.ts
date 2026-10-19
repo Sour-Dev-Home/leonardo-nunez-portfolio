@@ -8,9 +8,11 @@ describe("the figure's cases", () => {
     expect(WIDTHS).toEqual([360, 390, 768, 1280]);
   });
 
-  it("call only #40 a catch, and #38 a miss", () => {
+  // #35's body: the case study's video and diagrams "had no size … grew from 0 px and pushed the text down",
+  // fixed along with the loading tests. That bug shipped, so it is a miss, not guarded.
+  it("call only #40 a catch, and #38 and #35 misses", () => {
     expect(CASES.filter((c) => c.verdict === "caught").map((c) => c.pr)).toEqual([40]);
-    expect(CASES.filter((c) => c.verdict === "missed").map((c) => c.pr)).toEqual([38]);
+    expect(CASES.filter((c) => c.verdict === "missed").map((c) => c.pr)).toEqual([38, 35]);
   });
 
   it("fail at the widths the spec names", () => {

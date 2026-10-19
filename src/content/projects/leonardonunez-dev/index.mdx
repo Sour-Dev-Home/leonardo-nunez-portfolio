@@ -26,7 +26,9 @@ layout: every change has to prove itself at every width before it reaches the li
 
 ## What every change must pass
 
-Every pull request runs the same gate ([ci.yml](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/blob/main/.github/workflows/ci.yml)), and nothing merges until it is green:
+Every pull request runs the same gate ([ci.yml](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/blob/main/.github/workflows/ci.yml)).
+The build checks, Playwright and Lighthouse are required, so nothing merges until they pass; the rest report on every
+change:
 
 - lint, typecheck, unit tests, and tests on the built pages: meta tags, links, picture sizes and the JavaScript budget;
 - Playwright at 360, 390, 768 and 1280 px: every page loads, nothing scrolls sideways
@@ -45,7 +47,7 @@ Every pull request runs the same gate ([ci.yml](https://github.com/Sour-Dev-Home
 ## Where it breaks
 
 Each frame below is one small page, laid out at a real screen width. Pick a bug to inject: every frame then runs the
-check CI runs, from the same code ([src/design/checks](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/tree/main/src/design/checks)),
+check CI runs, from the same code ([#46](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/46)),
 and shows where it fails. Then fix it.
 
 <SiteFigure />
@@ -55,9 +57,10 @@ and shows where it fails. Then fix it.
 The gate earns its keep on bugs nobody sees on their own screen. In
 [#40](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/40) the satis-manager figures looked right on
 my Windows machine, but CI's Linux fonts set a label wider, and on tablets a route crossed "CLOUDFLARE". The check
-failed, the route was redrawn to climb clear, and a unit test now keeps the clearance. It caught this page too: its
-own title, "leonardonunez.dev", is one long word, and on a 360 px phone it ran 65 px off the screen until the title
-was allowed to break after the dot ([#46](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/46)).
+failed, the route was redrawn to climb clear, and a unit test now keeps the clearance. The same tests stopped this
+page's own title before it went live: "leonardonunez.dev" is one long word, and on a 360 px phone it ran 65 px off
+the screen until the title was allowed to break after the dot
+([#46](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/46)).
 
 It misses things too. A grid meant for the home page's portrait applied to every page header, so on tablets and
 desktops the titles of two pages split into two columns. It passed every check, because no check asked where a
@@ -65,7 +68,10 @@ title starts. I found it on the live site, and
 [#38](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/38) fixed it and added that check, which failed
 before the fix.
 
-The figure's other two bugs never shipped: their checks were there first.
+Pictures without reserved space were a miss too: the case study's video and diagrams grew from nothing and pushed
+the text down as they loaded, on the live site, until
+[#35](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/35) reserved their space and added the loading
+tests that now guard every page.
 
 ## Fast by default
 
@@ -83,7 +89,8 @@ tests fail any page over its budget, and a figure's script loads only when it sc
 
 Built files with hashed names are cached for a year and pages not at all, so a deploy shows on the next visit
 ([_headers](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/blob/main/public/_headers)). In Chrome, a page
-starts loading when you hover its link.
+starts loading when you hover its link
+([speculation rules](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/blob/main/src/layouts/Shell.astro)).
 
 ## Limits and trade-offs
 
@@ -94,8 +101,8 @@ starts loading when you hover its link.
   doesn't fail them, which means a change that small passes too.
 - **Local isn't CI.** A figure can pass on my machine and fail in CI on font widths alone
   ([#40](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/40)). Figures now leave generous clearance.
-- **Tests can be wrong too.** The site's smooth scrolling made a test measure a figure mid-scroll, and it failed on
-  tablets until it scrolled instantly ([#43](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/43)).
+- **Tests can be wrong too.** The site's smooth scrolling made a test measure a figure mid-scroll, and it failed until
+  it scrolled instantly ([#43](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/43)).
   Writing the table above showed the budget check had never counted a figure's lazily loaded script: the
   minifier quotes that import with backticks, which the check didn't read. Every page still fit once it did
   ([#46](https://github.com/Sour-Dev-Home/leonardo-nunez-portfolio/pull/46)).
@@ -106,9 +113,9 @@ starts loading when you hover its link.
 <details>
 <summary>More detail: how the figure checks a page it scaled down</summary>
 <Aside>
-- Each frame's page is laid out at its real width and scaled with CSS `zoom`; its breakpoints read its own width
-  through container queries, not the window's.
-- The checks measure boxes on screen, so they hold at any scale; the title check divides by the zoom.
+- Each frame's page is laid out at its real width and scaled with a CSS transform; its breakpoints read its own
+  width through container queries, not the window's.
+- The checks measure boxes on screen, so they hold at any scale; the title check divides by the scale.
 - The label's width is fixed with `textLength`, so "CI's wider fonts" fails at 768 px on every machine.
 </Aside>
 </details>
