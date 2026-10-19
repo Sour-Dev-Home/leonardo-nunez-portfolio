@@ -60,7 +60,7 @@ links, media sizes, JS budget, 404). Playwright (`e2e/`) checks every page at 36
 390, 768 and 1280 px: layout, axe, reduced motion, loading states and screenshots.
 oxlint for linting. CI (`.github/workflows/ci.yml`) runs `verify`
 (lint/typecheck/test/build/test:dist), `e2e` (Playwright in its official container,
-screenshots included), `lighthouse` (mobile, ≥ 90) and `links` (lychee; also
+screenshots included; one `e2e-shard` job per viewport, which `e2e` waits for and merges), `lighthouse` (mobile, ≥ 90) and `links` (lychee; also
 nightly in `links.yml`) on every push and PR.
 
 **Visual changes:** screenshot baselines in `e2e/__screenshots__/` are valid only
