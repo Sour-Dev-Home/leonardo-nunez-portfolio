@@ -127,3 +127,43 @@ test.describe("where it breaks: the bugs", () => {
     expect(await fig.locator(".sf-view").first().evaluate((el) => getComputedStyle(el).transitionDuration)).toBe("0s");
   });
 });
+
+test.describe("where it breaks: on phones", () => {
+  test.beforeEach(({ viewport }) => test.skip(viewport!.width > 640, "phone layout only"));
+
+  test("shows one frame at a time, picked by width", async ({ page }) => {
+    const fig = await open(page);
+    const shown = () => page.locator(`${FIG} .sf`).evaluateAll((els) => els.filter((e) => getComputedStyle(e).opacity === "1").map((e) => Number((e as HTMLElement).dataset.w)));
+    expect(await shown()).toEqual([360]);
+    await fig.locator('[data-pick="768"]').click();
+    expect(await shown()).toEqual([768]);
+    await expect(fig.locator('[data-pick="768"]')).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("the width picker shows each width's result", async ({ page }) => {
+    const fig = await open(page);
+    await fig.locator('[data-bug="hero"]').click();
+    for (const [w, r] of expected([768, 1280])) await expect(fig.locator(`[data-pick="${w}"]`)).toHaveAttribute("data-result", r as string);
+  });
+
+  test("the shown frame fits the figure", async ({ page }) => {
+    const fig = await open(page);
+    for (const w of [360, 1280]) {
+      await fig.locator(`[data-pick="${w}"]`).click();
+      const f = await fig.locator(`.sf[data-w="${w}"]`).boundingBox();
+      const box = await fig.boundingBox();
+      expect(f!.x).toBeGreaterThanOrEqual(box!.x);
+      expect(f!.x + f!.width).toBeLessThanOrEqual(box!.x + box!.width + 0.5);
+    }
+  });
+});
+
+test("resizing keeps the bug, its results and the caption (Review Focus 3)", async ({ page, viewport }) => {
+  const fig = await open(page);
+  await fig.locator('[data-bug="hero"]').click();
+  const caption = await fig.locator(".fig-caption").textContent();
+  await page.setViewportSize(viewport!.width > 640 ? { width: 390, height: 844 } : { width: 1280, height: 800 });
+  await expect.poll(() => results(page)).toEqual(expected([768, 1280]));
+  await expect(fig).toHaveAttribute("data-case", "hero");
+  await expect(fig.locator(".fig-caption")).toHaveText(caption!);
+});
