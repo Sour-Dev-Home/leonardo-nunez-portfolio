@@ -13,8 +13,6 @@ export default defineConfig({
   // platform suffix: a baseline from another OS is never valid here.
   snapshotPathTemplate: "{testDir}/__screenshots__/{projectName}/{arg}{ext}",
   forbidOnly: !!process.env.CI,
-  // Tests in one file run side by side too, not one after another.
-  fullyParallel: true,
   // CI runs one job per viewport (PW_BLOB); each writes a blob report, and the
   // `e2e` job merges them into one HTML report.
   reporter: process.env.PW_BLOB ? [["list"], ["blob"]] : process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
