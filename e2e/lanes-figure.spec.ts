@@ -88,6 +88,17 @@ test.describe("lanes figure", () => {
     await expect(act(page)).toHaveAttribute("aria-disabled", "true");
   });
 
+  test("keeps the token visible on top while it waits at a station (owner's review)", async ({ page }) => {
+    await ready(page);
+    await page.locator(`${FIG} button[data-switch="sloppy"]`).click();
+    await expect(caption(page)).toContainText("Task contract incomplete", { timeout: 15_000 });
+    const onTop = await page.locator(`${FIG} svg[data-layout]:visible .lanes-token`).evaluate((tok) => {
+      const r = tok.getBoundingClientRect();
+      return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === tok;
+    });
+    expect(onTop).toBe(true);
+  });
+
   test("opens paused under reduced motion, on a meaningful frame", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/kit");

@@ -1,6 +1,5 @@
 ---
-// The lanes figure's drawing for one layout (layouts.ts). The token is drawn before the stations, so it slides out
-// from behind one and into the next.
+// The lanes figure's drawing for one layout (layouts.ts). The token is drawn after the stations, on top of them.
 import LaneStation from "../LaneStation.astro";
 import { LANES } from "./layouts";
 import { STATIONS, reviewersFor, NO_SWITCHES } from "../model/path";
@@ -24,6 +23,7 @@ const LABEL: Record<(typeof STATIONS)[number], [string, string]> = {
 
 <svg data-layout={layout} viewBox={`0 0 ${d.w} ${d.h}`} role="img" aria-label="One lane's path from a task issue to main, through its checks.">
   <path class="wire" data-path="track" d={d.track}></path>
-  <g data-dots><circle class="lanes-token" r="7" transform={`translate(${d.at.issue.x} ${d.at.issue.y})`}></circle></g>
   {STATIONS.map((id) => <LaneStation kind={id} x={d.at[id].x} y={d.at[id].y} label={LABEL[id][0]} sub={LABEL[id][1]} labels={d.labels} />)}
+  <!-- Drawn last, so the token stays visible on top of a station while it waits there (owner's review). -->
+  <g data-dots><circle class="lanes-token" r="7" transform={`translate(${d.at.issue.x} ${d.at.issue.y})`}></circle></g>
 </svg>
