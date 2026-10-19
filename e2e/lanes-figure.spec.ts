@@ -93,6 +93,8 @@ test.describe("lanes figure", () => {
     await page.locator(`${FIG} button[data-switch="sloppy"]`).click();
     await expect(caption(page)).toContainText("Task contract incomplete", { timeout: 15_000 });
     const onTop = await page.locator(`${FIG} svg[data-layout]:visible .lanes-token`).evaluate((tok) => {
+      // Centre it first: at the top of the viewport the sticky site header would be what's on top.
+      tok.scrollIntoView({ block: "center" });
       const r = tok.getBoundingClientRect();
       return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === tok;
     });
