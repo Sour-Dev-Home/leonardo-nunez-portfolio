@@ -74,7 +74,7 @@ Modding is thinly documented, and an AI assistant will happily invent an engine 
 
 <Sidenote id="refused" lead="true story">The harness refused its very first run: my own game server was still up.</Sidenote>
 
-The questions are answered by small throwaway mods, each run by a harness against a separate test server, which produces a pass or a fail plus the logs behind it. So far, a mod loads on the dedicated server ([#6](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/6)) and can send an HTTP request ([#7](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/7)). HTTPS works too, and a server with the wrong certificate is refused ([#8](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/8)).
+The questions are answered by small throwaway mods, each run by a harness against a separate test server, which produces a pass or a fail plus the logs behind it. So far, a mod loads on the dedicated server ([#6](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/6)) and can send an HTTP request ([#7](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/7)). HTTPS works too, and a server with the wrong certificate is refused ([#8](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/8)). And a mod posting every 30 seconds leaves the server's tick rate where it was: 22.0 against 22.3 without it ([#9](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/9)). The first run of that test failed: the server runs faster for a while after it boots, and the harness had been measuring across the drop.
 
 ## What I’d do differently
 
