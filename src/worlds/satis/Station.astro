@@ -20,8 +20,8 @@ const side = labels === "right";
 const cls = ["st", zone && `st-${zone}`, mode].filter(Boolean).join(" ");
 ---
 
-<!-- A clickable station is a pointer shortcut only: the figure's labelled toggle buttons are the
-     keyboard and screen-reader way to do the same (focusable items inside role="img" aren't allowed). -->
+{/* A clickable station is a pointer shortcut only: the figure's labelled toggle buttons are the
+     keyboard and screen-reader way to do the same (focusable items inside role="img" aren't allowed). */}
 <g class={cls} data-station={id} data-click={clickable ? "" : undefined} transform={`translate(${x} ${y})`}>
   <circle class="halo" r="34"></circle>
   {
