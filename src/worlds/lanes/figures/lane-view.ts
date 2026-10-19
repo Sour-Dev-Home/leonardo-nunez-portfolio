@@ -16,7 +16,12 @@ function visibleSvg(root: HTMLElement): SVGSVGElement {
   return [...root.querySelectorAll<SVGSVGElement>("svg[data-layout]")].find((s) => !s.hasAttribute("hidden"))!;
 }
 
-export function mount(root: HTMLElement): () => void {
+/** What survives a remount (rotating a phone): the reader's pause. The switches keep theirs in aria-pressed. */
+export interface LanesKept {
+  playing: boolean;
+}
+
+export function mount(root: HTMLElement, kept: Partial<LanesKept> = {}): () => void {
   const svg = visibleSvg(root);
   const reduced = prefersReducedMotion();
   const track = svg.querySelector<SVGPathElement>('[data-path="track"]')!;
@@ -110,7 +115,7 @@ export function mount(root: HTMLElement): () => void {
     return true;
   }
 
-  const loop = startLoop(frame, { autoplay: !reduced });
+  const loop = startLoop(frame, { autoplay: kept.playing ?? !reduced });
   const offScreen = whileOnScreen(root, loop);
   const unwire = wireControls(root, loop, restart);
   const onAct = () => {
@@ -132,6 +137,7 @@ export function mount(root: HTMLElement): () => void {
   restart();
   act.setAttribute("data-ready", "");
   return () => {
+    kept.playing = loop.playing();
     loop.destroy();
     offScreen();
     unwire();

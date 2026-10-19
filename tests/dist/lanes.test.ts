@@ -42,6 +42,12 @@ describe("lanes case study", () => {
     expect(links).toContain("/projects/satisfactory-dash");
   });
 
+  // The trust-model wording ("mistakes and strangers, not a hostile lane") is USING.md's, not SECURITY.md's.
+  it("links the hostile-lane limit to the page that states it", () => {
+    const p = doc.querySelectorAll(".case-study-body p").find((el) => el.text.includes("turns hostile"))!;
+    expect(p.querySelectorAll("a").map((a) => a.getAttribute("href"))).toContain(GH + "docs/USING.md");
+  });
+
   it("keeps deeper material in closed 'More detail' sections", () => {
     const details = doc.querySelectorAll(".case-study-body details");
     expect(details.filter((d) => /More detail/.test(d.querySelector("summary")?.text ?? "")).length).toBeGreaterThanOrEqual(1);

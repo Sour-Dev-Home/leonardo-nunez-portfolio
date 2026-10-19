@@ -166,6 +166,14 @@ test.describe("lanes figure on phones", () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.waitForTimeout(800);
     expect(await page.locator(`${FIG} svg[data-layout="desktop"] .lanes-token`).count()).toBe(1);
+    // A reader's pause survives the rotation, as on the satis figures.
+    await page.locator(`${FIG} button[data-playpause]`).click();
+    await expect(page.locator(`${FIG} button[data-playpause]`)).toHaveAttribute("aria-label", "Play");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.waitForTimeout(800);
+    await expect(page.locator(`${FIG} button[data-playpause]`)).toHaveAttribute("aria-label", "Play");
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.waitForTimeout(800);
     await page.locator(`${FIG} button[data-switch="sloppy"]`).click();
     await expect(page.locator(`${FIG} button[data-switch="sloppy"]`)).toHaveAttribute("aria-pressed", "true"); // one listener, not two
   });

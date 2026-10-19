@@ -3,7 +3,7 @@ name: lanes
 summary: >-
   Building software with parallel Claude Code sessions, one per GitHub issue, gated by required checks and reviewers.
 description: >-
-  A workflow for building software with parallel Claude Code sessions ("lanes"): one fresh session per GitHub issue, with contracts at every handoff (the task issue form, the PR template, reviewer verdicts tied to a commit) and required GitHub checks as the only gatekeeper, so low-risk work merges unattended. A lanes/gate status, computed from the live diff and the issue's labels, fails closed; reviewer agents (test-hunter, security, UI, architecture) are chosen by tier and by the files a change touches; files that set the rules always wait for the owner's code-owner review; and a merge queue re-checks the merged commit. Lanes act as a GitHub App, never as the owner. 365 lane PRs merged into lanes itself and 22 into satisfactory-dash by 2026-10-18, with its costs and limits measured and written down in 34 decision records and history notes.
+  A workflow for building software with parallel Claude Code sessions ("lanes"): one fresh session per GitHub issue, with contracts at every handoff (the task issue form, the PR template, reviewer verdicts tied to a commit) and required GitHub checks as the only gatekeeper, so low-risk work merges unattended. A lanes/gate status, computed from the live diff and the issue's labels, fails closed; reviewer agents (test-hunter, security, UI, architecture) are chosen by tier and by the files a change touches; files that set the rules always wait for the owner's code-owner review; and a merge queue re-checks the merged commit. Lanes act as a GitHub App, never as the owner. 365 lane PRs merged into lanes itself and 22 into satisfactory-dash by 2026-10-18, with its costs and limits measured and written down in 34 decision records and 7 history notes.
 status: in-progress
 stack: [Node.js, GitHub Actions, Claude Code]
 repoUrl: https://github.com/Sour-Dev-Home/lanes
@@ -36,7 +36,7 @@ Each switch in the figure is a real rule, and every status line is the gate's ow
 
 The gate fails closed: an unread input, an unknown permission or a list that might be cut short all count as "no". A verdict covers only the commit it names, so a lane can't fix a bug and keep its old approval. The files that decide the rules themselves (the workflows, the config) always wait for my review.
 
-It is honest about what it can't do. It stops honest mistakes and strangers, not a lane that turns hostile, and it doesn't certify the code it merges ([SECURITY.md](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/SECURITY.md)).
+It is honest about what it can't do. It stops honest mistakes and strangers, not a lane that turns hostile ([USING.md](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/USING.md)), and it doesn't certify the code it merges ([SECURITY.md](https://github.com/Sour-Dev-Home/lanes/blob/main/docs/SECURITY.md)).
 
 ## Results
 
