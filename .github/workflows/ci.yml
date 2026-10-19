@@ -31,12 +31,19 @@ jobs:
 
       - run: npm run test:dist
 
-  e2e:
+  # One job per viewport (the projects in playwright.config.ts), in parallel. The
+  # required check is the `e2e` job below, which waits for all four.
+  e2e-shard:
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.64.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [phone-360, phone-390, tablet-768, desktop-1280]
     env:
       PW_VISUAL: "1"
+      PW_BLOB: "1"
     steps:
       - uses: actions/checkout@v7
 
@@ -57,7 +64,7 @@ jobs:
       # Changed screenshots fail with a diff. Missing ones are written (Playwright
       # counts that as a pass), so the next step fails the job instead and the
       # artifact below carries the new images in the right folders.
-      - run: npx playwright test --update-snapshots=missing
+      - run: npx playwright test --project=${{ matrix.project }} --update-snapshots=missing
 
       - name: Fail if any screenshot had no baseline
         run: |
@@ -69,27 +76,86 @@ jobs:
             exit 1
           fi
 
+      # This viewport's folder only; the `e2e` job puts the four back together.
       - if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: screenshots
-          path: e2e/__screenshots__/
+          name: screenshots-${{ matrix.project }}
+          path: e2e/__screenshots__/${{ matrix.project }}/
           if-no-files-found: ignore
 
       - if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: blob-report-${{ matrix.project }}
+          path: blob-report/
           if-no-files-found: ignore
 
       # Traces and videos of failed tests: open with `npx playwright show-trace`.
       - if: failure()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: test-results
+          name: test-results-${{ matrix.project }}
           path: test-results/
           if-no-files-found: ignore
+
+  # The required check: passes only if every viewport passed. It also merges the
+  # shards' screenshots into one `screenshots` artifact (same folders as before)
+  # and their reports into one HTML `playwright-report`.
+  e2e:
+    if: always()
+    needs: e2e-shard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v7.0.0
+        with:
+          pattern: screenshots-*
+          path: shards/screenshots
+
+      - uses: actions/download-artifact@v7.0.0
+        with:
+          pattern: blob-report-*
+          path: shards/blobs
+
+      - name: Merge the shards
+        run: |
+          mkdir -p screenshots blob-reports
+          for d in shards/screenshots/screenshots-*; do
+            [ -d "$d" ] && mv "$d" "screenshots/${d##*/screenshots-}"
+          done
+          for d in shards/blobs/blob-report-*; do
+            for f in "$d"/*.zip; do [ -f "$f" ] && cp "$f" "blob-reports/${d##*/blob-report-}.zip"; done
+          done
+          if ls blob-reports/*.zip > /dev/null 2>&1; then
+            npx playwright merge-reports --reporter html ./blob-reports
+          fi
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: screenshots
+          path: screenshots/
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+      - name: Fail unless every viewport passed
+        if: needs.e2e-shard.result != 'success'
+        run: |
+          echo "::error::e2e-shard finished as '${{ needs.e2e-shard.result }}'. Open the failing viewport's job."
+          exit 1
 
   lighthouse:
     runs-on: ubuntu-latest
