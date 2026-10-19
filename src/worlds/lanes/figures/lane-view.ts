@@ -7,6 +7,9 @@ import { prefersReducedMotion, startLoop, whileOnScreen } from "../../../design/
 import { tickGoal, wireControls } from "../../../design/figure/controls";
 
 const SPEED = 170; // track units per second
+// Where the token rests at a station: this far along the track before its centre, just clear of the disc (r 34)
+// for the token (r 7), so it stays in sight without covering the icon. It passes behind the icons in between.
+const REST = 44;
 const DWELL: Record<Stop["kind"], number> = { pass: 1.4, wait: 2.2, fail: 2.2 };
 
 function visibleSvg(root: HTMLElement): SVGSVGElement {
@@ -38,6 +41,8 @@ export function mount(root: HTMLElement): () => void {
     }
     along[id] = best;
   }
+  // Short of the station; the first one, at the very start of the track, rests just past it instead.
+  const rest = (id: string) => (along[id] >= REST ? along[id] - REST : along[id] + REST);
 
   // The switches' state lives on their buttons, so a remount (rotating a phone) picks it up.
   let sw: Switches = { ...NO_SWITCHES };
@@ -67,7 +72,7 @@ export function mount(root: HTMLElement): () => void {
     stops = journey(sw);
     reviewersSub.textContent = reviewersFor(sw).join(", ");
     i = 0;
-    from = to = along.issue;
+    from = to = rest("issue");
     place(from);
     show(stops[0]);
     loop.wake();
@@ -81,7 +86,7 @@ export function mount(root: HTMLElement): () => void {
     }
     i += 1;
     from = to;
-    to = along[stops[i].at];
+    to = rest(stops[i].at);
     if (to === from || reduced) {
       place(to);
       show(stops[i]);
@@ -132,6 +137,6 @@ export function mount(root: HTMLElement): () => void {
     unwire();
     offs.forEach((f) => f());
     act.removeEventListener("click", onAct);
-    place(along.issue);
+    place(rest("issue"));
   };
 }

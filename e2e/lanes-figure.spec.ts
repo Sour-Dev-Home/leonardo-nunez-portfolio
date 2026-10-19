@@ -88,17 +88,29 @@ test.describe("lanes figure", () => {
     await expect(act(page)).toHaveAttribute("aria-disabled", "true");
   });
 
-  test("keeps the token visible on top while it waits at a station (owner's review)", async ({ page }) => {
+  // Owner's reviews: the token travels behind the icons (it never covers one), yet stays in sight at a stop,
+  // resting on the track just short of the station's disc.
+  test("passes behind the icons, and waits beside a station in sight without covering it", async ({ page }) => {
     await ready(page);
+    const drawnFirst = await page.locator(`${FIG} svg[data-layout]:visible`).evaluate((svg) => {
+      const dots = svg.querySelector("[data-dots]")!;
+      const station = svg.querySelector(".lst")!;
+      return Boolean(dots.compareDocumentPosition(station) & Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+    expect(drawnFirst).toBe(true);
     await page.locator(`${FIG} button[data-switch="sloppy"]`).click();
     await expect(caption(page)).toContainText("Task contract incomplete", { timeout: 15_000 });
-    const onTop = await page.locator(`${FIG} svg[data-layout]:visible .lanes-token`).evaluate((tok) => {
-      // Centre it first: at the top of the viewport the sticky site header would be what's on top.
-      tok.scrollIntoView({ block: "center" });
+    const at = await page.locator(`${FIG} svg[data-layout]:visible .lanes-token`).evaluate((tok) => {
+      // Centre it first (instantly: the site scrolls smoothly), or the sticky site header may be what's on top.
+      tok.scrollIntoView({ block: "center", behavior: "instant" });
       const r = tok.getBoundingClientRect();
-      return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === tok;
+      const halo = tok.ownerSVGElement!.querySelector('[data-station="contract"] .halo')!.getBoundingClientRect();
+      const [cx, cy] = [r.left + r.width / 2, r.top + r.height / 2];
+      const gap = Math.hypot(cx - (halo.left + halo.width / 2), cy - (halo.top + halo.height / 2)) - halo.width / 2 - r.width / 2;
+      return { inSight: document.elementFromPoint(cx, cy) === tok, gap };
     });
-    expect(onTop).toBe(true);
+    expect(at.inSight).toBe(true);
+    expect(at.gap).toBeGreaterThanOrEqual(0); // clear of the disc, so it covers no part of the icon
   });
 
   test("opens paused under reduced motion, on a meaningful frame", async ({ page }) => {
