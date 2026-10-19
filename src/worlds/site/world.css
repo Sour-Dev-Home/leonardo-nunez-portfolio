@@ -178,8 +178,18 @@
 [data-figure="site"] .m-page .m-svg {
   display: none;
   width: 100%;
-  height: 64px;
+  height: 96px;
   margin-top: 12px;
+}
+.m-svg .m-node {
+  fill: #e6e1d6;
+  stroke: #8a8578;
+  stroke-width: 1.5;
+}
+.m-svg .m-node-label {
+  fill: var(--site-text);
+  font: 600 11px var(--font-text);
+  text-anchor: middle;
 }
 [data-figure="site"] .m-page .m-svg[data-layout="phone"] {
   display: block;

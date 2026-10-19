@@ -16,18 +16,33 @@ const { w } = Astro.props;
       <div class="m-text">A dashboard for a factory game, moved from a home PC to AWS.</div>
       <div class="m-code"><span>curl https://api.satis-manager.com/v1/health</span></div>
       <div class="m-fig">
+        <!-- A small copy of the satis cutover figure: the API's route from the home PC up to AWS, through the
+             Cloudflare tunnel. The label spans x 84–224 (CI's fonts: 84–254). On tablets the route climbs at 244,
+             20 clear of it until CI's fonts push the label across (#40); Fix it climbs at 274 instead. -->
         <svg class="m-svg" data-layout="phone">
-          <path class="wire" data-path="route" d="M260 4 V60"></path>
-          <text class="m-label" x="40" y="48" textLength="140" lengthAdjust="spacingAndGlyphs">CLOUDFLARE</text>
+          <rect class="m-node" x="4" y="60" width="70" height="28" rx="4"></rect>
+          <text class="m-node-label" x="39" y="78">Home PC</text>
+          <rect class="m-node" x="284" y="8" width="40" height="28" rx="4"></rect>
+          <text class="m-node-label" x="304" y="26">AWS</text>
+          <path class="wire" data-path="route" d="M74 74 H276 V22 H284"></path>
+          <text class="m-label" x="84" y="48" textLength="140" lengthAdjust="spacingAndGlyphs">CLOUDFLARE</text>
         </svg>
         <svg class="m-svg" data-layout="tablet">
-          <path class="wire" data-path="route" d="M200 4 V60"></path>
-          <path class="wire m-climb" data-path="climb" d="M200 4 V8 H240 V60"></path>
-          <text class="m-label" x="40" y="48" textLength="140" lengthAdjust="spacingAndGlyphs">CLOUDFLARE</text>
+          <rect class="m-node" x="4" y="60" width="70" height="28" rx="4"></rect>
+          <text class="m-node-label" x="39" y="78">Home PC</text>
+          <rect class="m-node" x="300" y="8" width="60" height="28" rx="4"></rect>
+          <text class="m-node-label" x="330" y="26">AWS</text>
+          <path class="wire" data-path="route" d="M74 74 H244 V22 H300"></path>
+          <path class="wire m-climb" data-path="climb" d="M74 74 H274 V22 H300"></path>
+          <text class="m-label" x="84" y="48" textLength="140" lengthAdjust="spacingAndGlyphs">CLOUDFLARE</text>
         </svg>
         <svg class="m-svg" data-layout="desktop">
-          <path class="wire" data-path="route" d="M260 4 V60"></path>
-          <text class="m-label" x="40" y="48" textLength="140" lengthAdjust="spacingAndGlyphs">CLOUDFLARE</text>
+          <rect class="m-node" x="4" y="60" width="70" height="28" rx="4"></rect>
+          <text class="m-node-label" x="39" y="78">Home PC</text>
+          <rect class="m-node" x="300" y="8" width="60" height="28" rx="4"></rect>
+          <text class="m-node-label" x="330" y="26">AWS</text>
+          <path class="wire" data-path="route" d="M74 74 H276 V22 H300"></path>
+          <text class="m-label" x="84" y="48" textLength="140" lengthAdjust="spacingAndGlyphs">CLOUDFLARE</text>
         </svg>
       </div>
     </div>

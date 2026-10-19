@@ -45,6 +45,18 @@ test.describe("where it breaks: the frames", () => {
   });
 });
 
+// The drawing must read as the cutover it stands for (owner, 2026-10-19: a bare line through "CLOUDFLARE" looked odd).
+test("each frame's drawing reads as the cutover: Home PC to AWS through Cloudflare", async ({ page }) => {
+  await open(page);
+  const labels = await page.locator(`${FIG} .sf`).evaluateAll((frames) =>
+    frames.map((f) => {
+      const shown = [...f.querySelectorAll<SVGSVGElement>("svg.m-svg")].find((s) => s.getBoundingClientRect().width > 0)!;
+      return [...shown.querySelectorAll("text")].map((t) => t.textContent);
+    }),
+  );
+  for (const l of labels) expect(l).toEqual(["Home PC", "AWS", "CLOUDFLARE"]);
+});
+
 test.describe("where it breaks: the bugs", () => {
   test("every frame passes before a bug is injected", async ({ page }) => {
     await open(page);
