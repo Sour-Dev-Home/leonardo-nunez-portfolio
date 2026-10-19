@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { LANES } from "./layouts";
-import { STATIONS } from "../model/path";
+import { NO_SWITCHES, reviewersFor, STATIONS } from "../model/path";
 
 // Rough label half-width: 12 px semibold at ~6.6 units per character, times 1.3 for CI's wider Linux fonts.
 const half = (text: string) => (text.length * 6.6 * 1.3) / 2;
@@ -24,6 +24,14 @@ describe("lanes layouts", () => {
   });
   it("phone: labels on the right fit inside the drawing", () => {
     const l = LANES.phone;
-    for (const id of STATIONS) expect(l.at[id].x + 46 + 2 * half(LONGEST_SUB)).toBeLessThanOrEqual(l.w + 40);
+    // Side labels start 46 units right of the station (LaneStation.astro); the sub-label is 10.5 px (world.css).
+    const SIDE = 46;
+    const subWidth = (text: string) => 2 * half(text) * (10.5 / 12);
+    const subs = [reviewersFor(NO_SWITCHES), reviewersFor({ ...NO_SWITCHES, rules: true })].map((r) => r.join(", "));
+    expect(subs).toContain(LONGEST_SUB);
+    for (const id of STATIONS) {
+      for (const sub of subs) expect(l.at[id].x + SIDE + subWidth(sub), id).toBeLessThanOrEqual(l.w);
+      expect(l.at[id].x + SIDE + 2 * half("Contract check"), id).toBeLessThanOrEqual(l.w); // the longest label
+    }
   });
 });

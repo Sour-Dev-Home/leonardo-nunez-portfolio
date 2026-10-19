@@ -21,7 +21,8 @@ const { still = false } = Astro.props;
     <LaneStation kind="issue" x={70} y={50} label="Task issue" sub="one per lane" />
     <LaneStation kind="gate" x={260} y={50} label="Gate" sub="lanes/gate" />
     <LaneStation kind="main" x={450} y={50} label="main" sub="merged" />
-    <!-- Drawn last, on top of the stations, as in the figure. -->
+    <!-- Drawn last, on top of the stations, unlike the figure (whose token passes behind them and rests beside
+         each one): this orb never stops, so it has no resting place to stay visible in. -->
     <circle class="lanes-orb" r="6"></circle>
   </svg>
   <div class="lanes-hazard" aria-hidden="true"></div>
