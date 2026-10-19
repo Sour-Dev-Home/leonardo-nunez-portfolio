@@ -61,6 +61,39 @@ test("each frame's drawing is a small satis cutover: its areas and station icons
   }
 });
 
+// Owner review (2026-10-19): on phones the tunnel's sub-label ran across into the AWS area and its disc sat off to
+// the right. Every label and station must sit inside one area, at every width, whatever the bug.
+test("keeps every label and station inside its area, at every width", async ({ page }) => {
+  const fig = await open(page);
+  for (const state of [null, "fonts"]) {
+    if (state) await fig.locator(`[data-bug="${state}"]`).click();
+    const outside = await page.locator(`${FIG} .sf`).evaluateAll((frames) =>
+      frames.flatMap((f) => {
+        const svg = [...f.querySelectorAll<SVGSVGElement>("svg.m-svg")].find((s) => s.getBoundingClientRect().width > 0)!;
+        const areas = [...svg.querySelectorAll(".zbg")].map((a) => a.getBoundingClientRect());
+        const marks = [...svg.querySelectorAll<SVGGraphicsElement>(".st text, .st .halo")].filter((m) => m.textContent !== "" || m.tagName !== "text");
+        return marks
+          .filter((m) => {
+            const r = m.getBoundingClientRect();
+            return !areas.some((a) => r.left >= a.left - 0.5 && r.right <= a.right + 0.5 && r.top >= a.top - 0.5 && r.bottom <= a.bottom + 0.5);
+          })
+          .map((m) => `${(f as HTMLElement).dataset.w}: ${m.tagName === "text" ? m.textContent : "station disc"}`)
+          .concat(
+            // Each station sits centred across its area, not pushed to one side.
+            [...svg.querySelectorAll(".st .halo")].flatMap((h) => {
+              const r = h.getBoundingClientRect();
+              const cx = (r.left + r.right) / 2;
+              const cy = (r.top + r.bottom) / 2;
+              const area = areas.find((a) => cx > a.left && cx < a.right && cy > a.top && cy < a.bottom)!;
+              return Math.abs(cx - (area.left + area.right) / 2) > 1 ? [`${(f as HTMLElement).dataset.w}: station off-centre`] : [];
+            }),
+          );
+      }),
+    );
+    expect(outside, state ?? "no bug").toEqual([]);
+  }
+});
+
 test.describe("where it breaks: the bugs", () => {
   test("every frame passes before a bug is injected", async ({ page }) => {
     await open(page);

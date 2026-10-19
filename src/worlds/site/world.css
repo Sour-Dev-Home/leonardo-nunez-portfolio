@@ -183,10 +183,10 @@
   border-radius: 8px;
   background: var(--satis-steel);
 }
+/* Each drawing sets its own height (MiniCutover.astro). */
 [data-figure="site"] .m-page .m-svg {
   display: none;
   width: 100%;
-  height: 150px;
 }
 [data-figure="site"] .m-page .m-svg[data-layout="phone"] {
   display: block;
