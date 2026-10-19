@@ -24,4 +24,10 @@ describe("media reserves its space before it loads", () => {
     const og = await sharp(join(process.cwd(), "dist/og/satisfactory-dash.png")).metadata();
     expect([card.width, card.height, og.width, og.height]).toEqual([1600, 900, 1200, 630]);
   });
+
+  it("ships the lanes cover stills at their sizes", async () => {
+    const card = await sharp(join(process.cwd(), "dist/covers/lanes.png")).metadata();
+    const og = await sharp(join(process.cwd(), "dist/og/lanes.png")).metadata();
+    expect([card.width, card.height, og.width, og.height]).toEqual([1600, 900, 1200, 630]);
+  });
 });

@@ -1,0 +1,109 @@
+---
+// The lanes world's cover: an issue going through the gate to main. CSS only, no script.
+// `still` renders the fixed-size version that scripts/render-covers.mjs photographs.
+import "./world.css";
+import LaneStation from "./LaneStation.astro";
+
+interface Props {
+  still?: boolean;
+}
+const { still = false } = Astro.props;
+---
+
+<header class:list={["lanes-cover", "world-lanes", { still }]} id={still ? "lanes-cover-still" : undefined}>
+  <div class="lanes-cover-text">
+    <p class="lanes-kick">Case study · in use</p>
+    <p class="lanes-title">lanes</p>
+    <p class="lanes-sub">Parallel AI sessions that ship to main unattended, behind required checks.</p>
+  </div>
+  <svg viewBox="0 0 520 140" aria-hidden="true">
+    <path class="wire" d="M70 50 H450"></path>
+    <LaneStation kind="issue" x={70} y={50} label="Task issue" sub="one per lane" />
+    <LaneStation kind="gate" x={260} y={50} label="Gate" sub="lanes/gate" />
+    <LaneStation kind="main" x={450} y={50} label="main" sub="merged" />
+    <!-- Drawn last, on top of the stations, as in the figure. -->
+    <circle class="lanes-orb" r="6"></circle>
+  </svg>
+  <div class="lanes-hazard" aria-hidden="true"></div>
+</header>
+
+<style>
+  .lanes-cover {
+    position: relative;
+    overflow: hidden;
+    background: var(--lanes-bg);
+    color: var(--lanes-ink);
+    border-radius: 12px;
+    padding: var(--space-6) var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .lanes-kick {
+    font: 700 var(--step--1) var(--font-text);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--lanes-token);
+    margin: 0;
+  }
+  .lanes-title {
+    font-family: var(--font-display);
+    font-variation-settings: var(--display-axes);
+    font-size: var(--step-3);
+    line-height: 1.05;
+    margin: 0;
+  }
+  .lanes-sub {
+    color: var(--lanes-dim);
+    max-width: 34ch;
+    margin: 0;
+  }
+  .lanes-cover svg {
+    width: 100%;
+    max-width: 640px;
+  }
+  .wire {
+    stroke: var(--lanes-line);
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 2 5;
+    stroke-linecap: round;
+  }
+  .lanes-orb {
+    fill: var(--lanes-token);
+    offset-path: path("M70 50 H450");
+    animation: lanes-run 4s ease-in-out infinite;
+  }
+  @keyframes lanes-run {
+    from {
+      offset-distance: 0%;
+    }
+    to {
+      offset-distance: 100%;
+    }
+  }
+  .lanes-hazard {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 8px;
+    background: repeating-linear-gradient(-45deg, var(--lanes-token) 0 10px, var(--lanes-bg) 10px 20px);
+  }
+  .still {
+    width: 800px;
+    height: 450px;
+    margin: 0;
+    padding: 36px 44px 28px;
+    gap: 14px;
+    align-content: center;
+    border-radius: 0;
+  }
+  .still svg {
+    max-width: 560px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lanes-orb {
+      animation: none;
+      offset-distance: 50%;
+    }
+  }
+</style>

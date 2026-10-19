@@ -99,7 +99,6 @@ describe("satisfactory-dash case study", () => {
 
 describe("data-only projects", () => {
   it("get no page", () => {
-    expect(distFileExists("projects/lanes.html")).toBe(false);
     expect(distFileExists("projects/home-lab.html")).toBe(false);
   });
 });
