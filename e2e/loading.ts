@@ -1,5 +1,7 @@
 import { join } from "node:path";
 import type { Page, Route } from "@playwright/test";
+import { mediaBoxes as boxes } from "../src/design/checks/checks";
+import { inPage } from "./in-page";
 
 /** Holds every image and video request (except the favicon) until released. */
 export async function holdMedia(page: Page) {
@@ -29,17 +31,9 @@ export async function holdMedia(page: Page) {
   };
 }
 
+/** Every image and video's rounded box (src/design/checks). */
 export function mediaBoxes(page: Page) {
-  return page.$$eval("img, video", (els) =>
-    els.map((el) => {
-      const r = el.getBoundingClientRect();
-      return {
-        src: el.getAttribute("src") ?? el.getAttribute("poster") ?? "",
-        width: Math.round(r.width),
-        height: Math.round(r.height),
-      };
-    }),
-  );
+  return inPage(page, null, boxes);
 }
 
 const CONTENT = "h1, h2, h3, p, li, img, video, figure, pre, table, .button, .project-card, .sidenote-note";
