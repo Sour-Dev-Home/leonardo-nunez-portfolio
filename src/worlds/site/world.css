@@ -175,21 +175,18 @@
 }
 /* Scoped under the figure and page so these win over the kit's `.fig svg[data-layout]` rules, which switch on the
    window's width; the miniature switches on its own. */
+/* The miniature's figure: the satis world's own steel, areas and station icons (satis/world.css), as on the real
+   case study. */
+[data-figure="site"] .m-fig {
+  margin-top: 12px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--satis-steel);
+}
 [data-figure="site"] .m-page .m-svg {
   display: none;
   width: 100%;
-  height: 96px;
-  margin-top: 12px;
-}
-.m-svg .m-node {
-  fill: #e6e1d6;
-  stroke: #8a8578;
-  stroke-width: 1.5;
-}
-.m-svg .m-node-label {
-  fill: var(--site-text);
-  font: 600 11px var(--font-text);
-  text-anchor: middle;
+  height: 150px;
 }
 [data-figure="site"] .m-page .m-svg[data-layout="phone"] {
   display: block;
@@ -210,17 +207,8 @@
     display: block;
   }
 }
-.m-svg .wire {
-  fill: none;
-  stroke: #2f6f8f;
-  stroke-width: 3;
-}
 .m-svg .m-climb {
   visibility: hidden;
-}
-.m-label {
-  fill: var(--site-text);
-  font: 600 13px var(--font-text);
 }
 
 /* The bugs (on while the figure carries data-case and not data-fixed) and their fixes. */
@@ -250,7 +238,7 @@
 
 /* What failed, outlined in the failing frames. */
 [data-figure="site"][data-case="fonts"] .sf[data-result="fail"] .m-label {
-  fill: #b3261e;
+  fill: var(--satis-error);
 }
 [data-figure="site"][data-case="hero"] .sf[data-result="fail"] .m-h1,
 [data-figure="site"][data-case="media"] .sf[data-result="fail"] .m-img,

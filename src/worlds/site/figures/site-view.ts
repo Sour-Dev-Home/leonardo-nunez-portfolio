@@ -4,7 +4,7 @@ import { CASES, failureText, type Case, type Width } from "../model/cases";
 import { labelCollisions, mediaBoxes, overflowX, titleGap } from "../../../design/checks/checks";
 
 // The label's width under the machine's fonts and under CI's wider ones (#40), fixed so the geometry is exact.
-const LABEL = { normal: "140", ci: "170" };
+const LABEL = { normal: "80", ci: "104" };
 
 /** The case's check on one frame: why it fails, or null when it passes. */
 function failure(c: Case, frame: HTMLElement): string | null {

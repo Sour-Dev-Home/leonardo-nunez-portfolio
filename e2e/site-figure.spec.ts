@@ -45,16 +45,20 @@ test.describe("where it breaks: the frames", () => {
   });
 });
 
-// The drawing must read as the cutover it stands for (owner, 2026-10-19: a bare line through "CLOUDFLARE" looked odd).
-test("each frame's drawing reads as the cutover: Home PC to AWS through Cloudflare", async ({ page }) => {
+// The drawing must read as the satis cutover figure it stands for, with that figure's areas and station icons
+// (owner, 2026-10-19: a bare line through "CLOUDFLARE" looked odd, then too bare).
+test("each frame's drawing is a small satis cutover: its areas and station icons", async ({ page }) => {
   await open(page);
-  const labels = await page.locator(`${FIG} .sf`).evaluateAll((frames) =>
+  const drawings = await page.locator(`${FIG} .sf`).evaluateAll((frames) =>
     frames.map((f) => {
       const shown = [...f.querySelectorAll<SVGSVGElement>("svg.m-svg")].find((s) => s.getBoundingClientRect().width > 0)!;
-      return [...shown.querySelectorAll("text")].map((t) => t.textContent);
+      return { texts: [...shown.querySelectorAll("text")].map((t) => t.textContent), stations: shown.querySelectorAll(".st").length };
     }),
   );
-  for (const l of labels) expect(l).toEqual(["Home PC", "AWS", "CLOUDFLARE"]);
+  for (const d of drawings) {
+    expect(d.texts).toEqual(expect.arrayContaining(["GAMING PC", "CLOUDFLARE", "AWS", "Tunnel", "Backend"]));
+    expect(d.stations).toBe(3);
+  }
 });
 
 test.describe("where it breaks: the bugs", () => {
