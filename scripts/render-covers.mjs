@@ -6,6 +6,7 @@ const base = process.env.BASE_URL ?? "http://127.0.0.1:4321";
 const covers = [
   { id: "satis-cover-still", name: "satisfactory-dash" },
   { id: "lanes-cover-still", name: "lanes" },
+  { id: "site-cover-still", name: "leonardonunez-dev" },
 ];
 // [still, output, CSS width, CSS height, device scale] → 1600 × 900 and 1200 × 630.
 const shots = covers.flatMap(({ id, name }) => [

@@ -111,6 +111,7 @@
    the site's (40rem, 64rem), read from its own width through container queries. */
 [data-figure="site"] .m-page {
   width: calc(var(--w) * 1px);
+  height: 640px;
   box-sizing: border-box;
   container: mini / inline-size;
   overflow: auto hidden;
@@ -118,6 +119,11 @@
   background: var(--site-paper);
   color: var(--site-text);
   font: 14px/1.4 var(--font-text);
+}
+/* Until the view scales it, the page is full size and runs past its view; contrast checkers then take its paper
+   for the background of the labels below. Scaled, its 640 px height fills the view exactly. */
+[data-figure="site"]:not([data-mounted]) .m-page {
+  visibility: hidden;
 }
 .m-head {
   display: flex;

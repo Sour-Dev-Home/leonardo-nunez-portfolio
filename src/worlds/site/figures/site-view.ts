@@ -118,6 +118,7 @@ export function mount(root: HTMLElement): () => void {
 
   fit();
   run(false);
+  root.setAttribute("data-mounted", "");
   fix.setAttribute("data-ready", "");
   return () => {
     ro.disconnect();

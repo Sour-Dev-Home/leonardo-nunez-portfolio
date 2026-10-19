@@ -1,0 +1,119 @@
+---
+// The leonardonunez.dev world's cover: one page at four widths, one failing. CSS only, no script.
+// `still` renders the fixed-size version that scripts/render-covers.mjs photographs.
+import "./world.css";
+
+interface Props {
+  still?: boolean;
+}
+const { still = false } = Astro.props;
+const frames = [
+  { w: 360, fail: false },
+  { w: 390, fail: false },
+  { w: 768, fail: true },
+  { w: 1280, fail: false },
+];
+---
+
+<header class:list={["site-cover", "world-site", { still }]} id={still ? "site-cover-still" : undefined}>
+  <div class="site-cover-text">
+    <p class="site-kick">Case study · this site</p>
+    <p class="site-title">leonardonunez.dev</p>
+    <p class="site-sub">Every change proven at four screen widths before it ships.</p>
+  </div>
+  <div class="site-frames" aria-hidden="true">
+    {
+      frames.map(({ w, fail }) => (
+        <div class:list={["site-frame", { fail }]} style={`--w: ${w}`}>
+          <span class="bar" />
+          <span class="line" />
+          <span class="line short" />
+          <span class="w">{w}</span>
+        </div>
+      ))
+    }
+  </div>
+</header>
+
+<style>
+  .site-cover {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+    padding: var(--space-6) var(--space-5);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--site-bg);
+    color: var(--site-ink);
+  }
+  .site-cover.still {
+    box-sizing: border-box;
+    margin: 0;
+    align-content: space-between;
+  }
+  .site-kick {
+    margin: 0;
+    color: var(--site-dim);
+    font: 600 0.8rem/1.2 var(--font-text);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .site-title {
+    margin: 0.3rem 0;
+    font: 700 clamp(2rem, 6vw, 3.4rem) / 1 var(--font-display);
+    overflow-wrap: anywhere;
+  }
+  .site-sub {
+    margin: 0;
+    max-width: 32ch;
+    color: var(--site-dim);
+  }
+  /* Widths in proportion to the screens; their shared aspect base gives every frame the same height. */
+  .site-frames {
+    width: min(100%, 44rem);
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+  }
+  .site-frame {
+    position: relative;
+    /* 2798 = 360 + 390 + 768 + 1280; 2.25rem = the three gaps. */
+    flex: none;
+    width: calc(var(--w) * (100% - 2.25rem) / 2798);
+    aspect-ratio: var(--w) / 640;
+    box-sizing: border-box;
+    padding: 10px;
+    border-radius: 4px;
+    background: var(--site-paper);
+    outline: 1px solid #55575f;
+  }
+  .site-frame.fail {
+    outline: 2px solid var(--site-fail);
+  }
+  .site-frame .bar,
+  .site-frame .line {
+    display: block;
+    height: 6%;
+    margin-bottom: 6%;
+    border-radius: 2px;
+    background: #c9c4b8;
+  }
+  .site-frame .bar {
+    background: #5c7d8a;
+    height: 18%;
+  }
+  .site-frame .short {
+    width: 60%;
+  }
+  .site-frame .w {
+    position: absolute;
+    right: 6%;
+    bottom: 4%;
+    color: var(--site-muted);
+    font: 600 0.7rem var(--font-text);
+  }
+  /* Darker than --site-fail: it sits on the paper, not the dark background. */
+  .site-frame.fail .w {
+    color: #b3261e;
+  }
+</style>

@@ -10,7 +10,8 @@ export const BUDGETS: Record<string, number> = {
   "projects/satisfactory-dash.html": 15_000,
   "projects/lanes.html": 15_000,
   "projects/leonardonunez-dev.html": 15_000,
-  "kit.html": 15_000,
+  // The kit shows every world's figures at once; it isn't a reader's page.
+  "kit.html": 20_000,
 };
 export const SCRIPTED_PAGES = Object.keys(BUDGETS);
 
