@@ -9,6 +9,7 @@ export const DEFAULT_BUDGET = 0;
 export const BUDGETS: Record<string, number> = {
   "projects/satisfactory-dash.html": 15_000,
   "projects/lanes.html": 15_000,
+  "projects/leonardonunez-dev.html": 15_000,
   "kit.html": 15_000,
 };
 export const SCRIPTED_PAGES = Object.keys(BUDGETS);

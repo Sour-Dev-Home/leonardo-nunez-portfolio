@@ -1,0 +1,240 @@
+/* The leonardonunez.dev world. Placeholder colours until the palette round; the roles are fixed: pass, fail, and
+   the outline marking what failed. The miniature pages keep the site's own paper and ink. */
+.world-site {
+  --site-bg: #1c1d22;
+  --site-ink: #e9e7e1;
+  --site-dim: #a7a7b1;
+  --site-pass: #6fd49a;
+  --site-fail: #ef5350;
+  --site-paper: #f4f1ea;
+  --site-text: #1d1f24;
+  --site-muted: #50535b;
+  --fig-bg: var(--site-bg);
+  --fig-ink: var(--site-ink);
+  --fig-dim: var(--site-dim);
+  --fig-rule: #55575f;
+  --fig-bar: #23242a;
+  --fig-btn: #34363d;
+  --fig-btn-hover: #43454d;
+  --fig-accent: #8fb3ff;
+  --fig-on-accent: #10131a;
+  --fig-done: var(--site-pass);
+  --fig-on: var(--site-pass);
+  --fig-off: var(--site-fail);
+  --fig-off-bg: #4a2628;
+}
+
+/* Four frames side by side, each as wide as its screen relative to the others. */
+[data-figure="site"] .sf-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+}
+[data-figure="site"] .sf {
+  flex: var(--w) 1 0;
+  min-width: 0;
+}
+[data-figure="site"] .sf-view {
+  aspect-ratio: var(--w) / 640;
+  overflow: hidden;
+  border-radius: 6px;
+  outline: 1px solid var(--fig-rule);
+  background: var(--site-paper);
+  transition: outline-color 0.2s;
+}
+[data-figure="site"] .sf[data-result="fail"] .sf-view {
+  outline: 2px solid var(--site-fail);
+}
+[data-figure="site"] .sf-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 0.4rem;
+  margin-top: 0.4rem;
+  font: 600 0.75rem/1.3 var(--font-sans);
+  color: var(--fig-dim);
+}
+[data-figure="site"] .sf-out {
+  color: var(--site-pass);
+}
+[data-figure="site"] .sf[data-result="fail"] .sf-out {
+  color: var(--site-fail);
+}
+[data-figure="site"] .sf-verdict {
+  font-weight: 400;
+  opacity: 0.8;
+}
+[data-figure="site"] .sf-pick {
+  display: none;
+}
+
+/* Phones: one frame at a time. The others stay laid out (the checks measure them) but unseen. */
+@media (max-width: 40rem) {
+  [data-figure="site"] .sf-pick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 1rem 1rem 0;
+  }
+  [data-figure="site"] [data-pick][data-result="fail"]::after {
+    content: " · fails";
+  }
+  [data-figure="site"] .sf-row {
+    display: block;
+    position: relative;
+  }
+  [data-figure="site"] .sf {
+    position: absolute;
+    inset: 1rem 1rem auto;
+    opacity: 0;
+    pointer-events: none;
+  }
+  [data-figure="site"][data-show="360"] .sf[data-w="360"],
+  [data-figure="site"][data-show="390"] .sf[data-w="390"],
+  [data-figure="site"][data-show="768"] .sf[data-w="768"],
+  [data-figure="site"][data-show="1280"] .sf[data-w="1280"] {
+    position: relative;
+    inset: auto;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-figure="site"] .sf-view {
+    transition: none;
+  }
+}
+
+/* The miniature page: laid out at its real width (--w px), scaled down by the view's `zoom`. Its breakpoints are
+   the site's (40rem, 64rem), read from its own width through container queries. */
+[data-figure="site"] .m-page {
+  width: calc(var(--w) * 1px);
+  box-sizing: border-box;
+  container: mini / inline-size;
+  overflow: auto hidden;
+  padding: 12px 16px 16px;
+  background: var(--site-paper);
+  color: var(--site-text);
+  font: 14px/1.4 var(--font-sans);
+}
+.m-head {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #c9c4b8;
+  font-weight: 700;
+}
+.m-hero {
+  margin: 20px 0 14px;
+}
+.m-kicker {
+  color: var(--site-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.m-h1 {
+  font: 700 30px/1.1 var(--font-serif);
+}
+.m-img {
+  aspect-ratio: 16 / 7;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #9db4c0, #5c7d8a);
+}
+.m-text {
+  margin: 12px 0;
+}
+.m-code {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  padding: 4px 6px;
+  background: #e6e1d6;
+  font: 12px/1.6 var(--font-mono, monospace);
+  white-space: nowrap;
+}
+.m-code span {
+  display: inline-block;
+  width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+/* Scoped under the figure and page so these win over the kit's `.fig svg[data-layout]` rules, which switch on the
+   window's width; the miniature switches on its own. */
+[data-figure="site"] .m-page .m-svg {
+  display: none;
+  width: 100%;
+  height: 64px;
+  margin-top: 12px;
+}
+[data-figure="site"] .m-page .m-svg[data-layout="phone"] {
+  display: block;
+}
+@container mini (min-width: 40rem) {
+  [data-figure="site"] .m-page .m-svg[data-layout="phone"] {
+    display: none;
+  }
+  [data-figure="site"] .m-page .m-svg[data-layout="tablet"] {
+    display: block;
+  }
+}
+@container mini (min-width: 64rem) {
+  [data-figure="site"] .m-page .m-svg[data-layout="tablet"] {
+    display: none;
+  }
+  [data-figure="site"] .m-page .m-svg[data-layout="desktop"] {
+    display: block;
+  }
+}
+.m-svg .wire {
+  fill: none;
+  stroke: #2f6f8f;
+  stroke-width: 3;
+}
+.m-svg .m-climb {
+  visibility: hidden;
+}
+.m-label {
+  fill: var(--site-text);
+  font: 600 13px var(--font-sans);
+}
+
+/* The bugs (on while the figure carries data-case and not data-fixed) and their fixes. */
+[data-figure="site"][data-case="fonts"][data-fixed] .m-svg[data-layout="tablet"] [data-path="route"] {
+  visibility: hidden;
+}
+[data-figure="site"][data-case="fonts"][data-fixed] .m-climb {
+  visibility: visible;
+}
+@container mini (min-width: 40rem) {
+  [data-figure="site"][data-case="hero"]:not([data-fixed]) .m-hero,
+  .m-hero:has(.m-portrait) {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 1rem;
+    align-items: end;
+  }
+}
+[data-figure="site"][data-case="media"]:not([data-fixed]) .m-page:not(.loaded) .m-img {
+  aspect-ratio: auto;
+  height: 0;
+}
+[data-figure="site"][data-case="line"]:not([data-fixed]) .m-code {
+  max-width: none;
+  width: max-content;
+  overflow: visible;
+}
+
+/* What failed, outlined in the failing frames. */
+[data-figure="site"][data-case="fonts"] .sf[data-result="fail"] .m-label {
+  fill: #b3261e;
+}
+[data-figure="site"][data-case="hero"] .sf[data-result="fail"] .m-h1,
+[data-figure="site"][data-case="media"] .sf[data-result="fail"] .m-img,
+[data-figure="site"][data-case="line"] .sf[data-result="fail"] .m-code {
+  outline: 3px solid var(--site-fail);
+  outline-offset: 2px;
+}
