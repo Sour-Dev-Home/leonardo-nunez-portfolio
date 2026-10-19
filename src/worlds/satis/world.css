@@ -233,6 +233,8 @@
   position: relative;
   flex: 1 1 0;
   min-width: 0;
+  /* Inside a case study, the article's list spacing would push every step but Freeze down. */
+  margin: 0;
 }
 .fig-track .stp {
   flex: 1 1 0;
