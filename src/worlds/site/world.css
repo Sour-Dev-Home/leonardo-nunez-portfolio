@@ -52,7 +52,7 @@
   justify-content: space-between;
   gap: 0 0.4rem;
   margin-top: 0.4rem;
-  font: 600 0.75rem/1.3 var(--font-sans);
+  font: 600 0.75rem/1.3 var(--font-text);
   color: var(--fig-dim);
 }
 [data-figure="site"] .sf-out {
@@ -117,7 +117,7 @@
   padding: 12px 16px 16px;
   background: var(--site-paper);
   color: var(--site-text);
-  font: 14px/1.4 var(--font-sans);
+  font: 14px/1.4 var(--font-text);
 }
 .m-head {
   display: flex;
@@ -136,10 +136,11 @@
   text-transform: uppercase;
 }
 .m-h1 {
-  font: 700 30px/1.1 var(--font-serif);
+  font: 700 30px/1.1 var(--font-display);
 }
+/* A fixed height, not an aspect ratio, so the 1280 frame still shows the page below the picture. */
 .m-img {
-  aspect-ratio: 16 / 7;
+  height: 120px;
   border-radius: 4px;
   background: linear-gradient(135deg, #9db4c0, #5c7d8a);
 }
@@ -152,7 +153,7 @@
   overflow-x: auto;
   padding: 4px 6px;
   background: #e6e1d6;
-  font: 12px/1.6 var(--font-mono, monospace);
+  font: 12px/1.6 ui-monospace, monospace;
   white-space: nowrap;
 }
 .m-code span {
@@ -199,7 +200,7 @@
 }
 .m-label {
   fill: var(--site-text);
-  font: 600 13px var(--font-sans);
+  font: 600 13px var(--font-text);
 }
 
 /* The bugs (on while the figure carries data-case and not data-fixed) and their fixes. */
@@ -219,7 +220,6 @@
   }
 }
 [data-figure="site"][data-case="media"]:not([data-fixed]) .m-page:not(.loaded) .m-img {
-  aspect-ratio: auto;
   height: 0;
 }
 [data-figure="site"][data-case="line"]:not([data-fixed]) .m-code {
