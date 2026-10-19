@@ -1,0 +1,29 @@
+---
+// One miniature page at a real screen width. Its contents use no content tags (no h1, p, img…), so the page-wide
+// e2e checks never mistake it for the article.
+import MiniCutover from "./MiniCutover.astro";
+import "../../satis/world.css";
+
+interface Props {
+  w: number;
+}
+const { w } = Astro.props;
+---
+
+<div class="sf" data-w={w} data-result="pass" role="img" aria-label={`The page at ${w} px: passes`} style={`--w: ${w}`}>
+  <div class="sf-view">
+    <div class="m-page loaded" aria-hidden="true">
+      <div class="m-head"><span>LN</span><span>Work · About</span></div>
+      <div class="m-hero"><div class="m-kicker">Case study</div><div class="m-h1">satis-manager</div></div>
+      <div class="m-img"></div>
+      <div class="m-text">A dashboard for a factory game, moved from a home PC to AWS.</div>
+      <div class="m-code"><span>curl https://api.satis-manager.com/v1/health</span></div>
+      <div class="m-fig world-satis">
+        <MiniCutover layout="phone" />
+        <MiniCutover layout="tablet" />
+        <MiniCutover layout="desktop" />
+      </div>
+    </div>
+  </div>
+  <div class="sf-foot"><span>{w} px</span><span class="sf-out">passes</span></div>
+</div>
