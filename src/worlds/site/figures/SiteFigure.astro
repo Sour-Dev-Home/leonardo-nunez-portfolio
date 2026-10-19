@@ -1,0 +1,36 @@
+---
+// Where it breaks: one small page at four real widths, checked with the code CI runs (src/design/checks). The
+// frames are static markup; site-view.ts injects the reader's bug and runs the checks once the figure is in view.
+import SiteFrame from "./SiteFrame.astro";
+import Controls from "../../../design/figure/Controls.astro";
+import { CASES, VERDICT_TEXT, WIDTHS } from "../model/cases";
+import "../../../design/figure/figure.css";
+import "../world.css";
+---
+
+<figure class="fig" data-figure="site" data-show="360">
+  <div class="sf-pick" role="group" aria-label="Screen width">
+    {WIDTHS.map((w, i) => <button class="fig-tbtn" type="button" data-pick={w} aria-pressed={String(i === 0)}>{w} px</button>)}
+  </div>
+  <div class="sf-row">{WIDTHS.map((w) => <SiteFrame w={w} />)}</div>
+  <Controls label="Figure controls" speed={false} play={false}>
+    {
+      CASES.map((c) => (
+        <button class="fig-tbtn" type="button" data-bug={c.id} aria-pressed="false">
+          {c.label} <span class="sf-verdict">· {VERDICT_TEXT[c.verdict]}</span>
+        </button>
+      ))
+    }
+    <button class="fig-tbtn primary" type="button" data-fix aria-disabled="true">Fix it</button>
+  </Controls>
+  <p class="fig-caption" aria-live="polite">Pick a bug to inject. Each frame then runs the check CI runs on every page.</p>
+</figure>
+
+<script>
+  import { whenVisible } from "../../../design/figure/lazy";
+  for (const el of document.querySelectorAll<HTMLElement>('figure[data-figure="site"]')) {
+    whenVisible(el, () => {
+      void import("./site-view").then((m) => m.mount(el));
+    });
+  }
+</script>

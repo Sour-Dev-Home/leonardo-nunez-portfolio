@@ -1,0 +1,85 @@
+---
+// A small copy of the satis cutover figure, with its areas and station icons, for the "CI's wider fonts" case. The
+// API route comes down past the CLOUDFLARE label into the tunnel and on to AWS. In page px, not a viewBox: the
+// miniature lays out at its real width. The CLOUDFLARE label is fixed at 80 wide (CI's fonts: 104, site-view.ts).
+// On tablets the route runs 20 clear of its end until CI's fonts push the label across (#40); Fix it moves the
+// route to the climb, 28 clear of even the wider label. Phones (areas stacked, as the real figure does there) and
+// desktops have room either way. Each station sits centred in its area, its labels inside it (e2e checks both).
+import Station from "../../satis/Station.astro";
+
+interface Props {
+  layout: "phone" | "tablet" | "desktop";
+}
+const { layout } = Astro.props;
+
+interface Area {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** The station's centre. */
+  sy: number;
+}
+interface Layout {
+  h: number;
+  pc: Area;
+  cf: Area;
+  aws: Area;
+  route: string;
+  climb?: string;
+}
+const row = (x: number, w: number): Area => ({ x, y: 4, w, h: 142, sy: 74 });
+const LAYOUTS: Record<Props["layout"], Layout> = {
+  phone: {
+    h: 254,
+    cf: { x: 2, y: 4, w: 324, h: 124, sy: 54 },
+    pc: { x: 2, y: 134, w: 158, h: 116, sy: 190 },
+    aws: { x: 168, y: 134, w: 158, h: 116, sy: 190 },
+    route: "M164 0 V54 H300 V190 H247",
+  },
+  tablet: {
+    h: 150,
+    pc: row(4, 236),
+    cf: row(248, 232),
+    aws: row(488, 244),
+    route: "M364 0 V74 H610",
+    climb: "M392 0 V46 H364 V74 H610",
+  },
+  desktop: {
+    h: 150,
+    pc: row(4, 408),
+    cf: row(420, 408),
+    aws: row(836, 408),
+    route: "M624 0 V74 H1040",
+  },
+};
+const d = LAYOUTS[layout];
+const cx = (a: Area) => a.x + a.w / 2;
+const AREAS = [
+  ["pc", "GAMING PC", d.pc],
+  ["cf", "CLOUDFLARE", d.cf],
+  ["aws", "AWS", d.aws],
+] as const;
+---
+
+<svg class="m-svg" data-layout={layout} style={`height: ${d.h}px`}>
+  {AREAS.map(([z, , a]) => <rect class={`zbg zbg-${z}`} x={a.x} y={a.y} width={a.w} height={a.h} rx="10" />)}
+  {
+    AREAS.map(([z, name, a]) =>
+      z === "cf" ? (
+        <text class="zlabel zlabel-cf m-label" x={a.x + 12} y={a.y + 18} textLength="80" lengthAdjust="spacingAndGlyphs">
+          {name}
+        </text>
+      ) : (
+        <text class={`zlabel zlabel-${z}`} x={a.x + 12} y={a.y + 18}>
+          {name}
+        </text>
+      ),
+    )
+  }
+  <path class="route" data-path="route" d={d.route}></path>
+  {d.climb && <path class="route m-climb" data-path="climb" d={d.climb}></path>}
+  <Station kind="rack" zone="pc" mode="idle" x={cx(d.pc)} y={d.pc.sy} label="Backend" sub="" />
+  <Station kind="tunnel" zone="cf" x={cx(d.cf)} y={d.cf.sy} label="Tunnel" sub="api.satis-manager.com" />
+  <Station kind="rack" zone="aws" x={cx(d.aws)} y={d.aws.sy} label="Backend" sub="" />
+</svg>

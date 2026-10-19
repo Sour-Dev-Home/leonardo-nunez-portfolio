@@ -1,0 +1,248 @@
+/* The leonardonunez.dev world: "Ink and violet" (palette B, the owner's pick on 2026-10-19). Deep indigo with a
+   violet action, apart from satis's amber and lanes' teal. Roles are fixed: pass, fail, and the outline marking
+   what failed. The miniature pages keep the site's own paper and ink. */
+.world-site {
+  --site-bg: #1f1b2e;
+  --site-ink: #ece8f6;
+  --site-dim: #aca5c4;
+  --site-pass: #7fd8a6;
+  --site-fail: #ff6b6b;
+  --site-paper: #f4f1ea;
+  --site-text: #1d1f24;
+  --site-muted: #50535b;
+  --fig-bg: var(--site-bg);
+  --fig-ink: var(--site-ink);
+  --fig-dim: var(--site-dim);
+  --fig-rule: #5a5378;
+  --fig-bar: #262138;
+  --fig-btn: #363050;
+  --fig-btn-hover: #453e63;
+  --fig-accent: #b79cff;
+  --fig-on-accent: #1a1430;
+  --fig-done: var(--site-pass);
+  --fig-on: var(--site-pass);
+  --fig-off: var(--site-fail);
+  --fig-off-bg: #4a2628;
+}
+
+/* One frame at a time, picked by width: four side by side were too small on a PC to see a fix (owner,
+   2026-10-19). The others stay laid out (the checks measure them) but unseen. A frame is drawn at up to 75% of its
+   real size (480 px tall), narrower if the figure is. */
+[data-figure="site"] .sf-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 1rem 1rem 0;
+}
+[data-figure="site"] [data-pick][data-result="fail"]::after {
+  content: " · fails";
+}
+/* A width tab's dot is that width's result; the selected tab is outlined, not turned red like a toggle that's down. */
+[data-figure="site"] [data-pick]::before {
+  background: var(--fig-on);
+}
+[data-figure="site"] [data-pick][data-result="fail"]::before {
+  background: var(--fig-off);
+}
+[data-figure="site"] [data-pick][aria-pressed="true"] {
+  background: var(--fig-btn);
+  outline: 2px solid var(--fig-accent);
+  outline-offset: 1px;
+}
+[data-figure="site"] .sf-row {
+  position: relative;
+  padding: 1rem;
+}
+[data-figure="site"] .sf {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  right: 0;
+  width: min(100% - 2rem, var(--w) * 0.75px);
+  margin-inline: auto;
+  opacity: 0;
+  pointer-events: none;
+}
+[data-figure="site"][data-show="360"] .sf[data-w="360"],
+[data-figure="site"][data-show="390"] .sf[data-w="390"],
+[data-figure="site"][data-show="768"] .sf[data-w="768"],
+[data-figure="site"][data-show="1280"] .sf[data-w="1280"] {
+  position: relative;
+  top: auto;
+  /* In flow, 100% is already inside the row's padding. */
+  width: min(100%, var(--w) * 0.75px);
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-figure="site"] .sf-view {
+  aspect-ratio: var(--w) / 640;
+  overflow: hidden;
+  border-radius: 6px;
+  outline: 1px solid var(--fig-rule);
+  background: var(--site-paper);
+  transition: outline-color 0.2s;
+}
+[data-figure="site"] .sf[data-result="fail"] .sf-view {
+  outline: 2px solid var(--site-fail);
+}
+[data-figure="site"] .sf-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 0.4rem;
+  margin-top: 0.4rem;
+  font: 600 0.75rem/1.3 var(--font-text);
+  color: var(--fig-dim);
+}
+[data-figure="site"] .sf-out {
+  color: var(--site-pass);
+}
+[data-figure="site"] .sf[data-result="fail"] .sf-out {
+  color: var(--site-fail);
+}
+[data-figure="site"] .sf-verdict {
+  font-weight: 400;
+  opacity: 0.8;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-figure="site"] .sf-view {
+    transition: none;
+  }
+}
+
+/* The miniature page: laid out at its real width (--w px), scaled down by a transform (site-view.ts). Its
+   breakpoints are the site's (40rem, 64rem), read from its own width through container queries. */
+[data-figure="site"] .m-page {
+  width: calc(var(--w) * 1px);
+  height: 640px;
+  transform-origin: 0 0;
+  box-sizing: border-box;
+  container: mini / inline-size;
+  overflow: auto hidden;
+  padding: 12px 16px 16px;
+  background: var(--site-paper);
+  color: var(--site-text);
+  font: 14px/1.4 var(--font-text);
+}
+/* Until the view scales it, the page is full size and runs past its view; contrast checkers then take its paper
+   for the background of the labels below. Scaled, its 640 px height fills the view exactly. */
+[data-figure="site"]:not([data-mounted]) .m-page {
+  visibility: hidden;
+}
+.m-head {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #c9c4b8;
+  font-weight: 700;
+}
+.m-hero {
+  margin: 20px 0 14px;
+}
+.m-kicker {
+  color: var(--site-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.m-h1 {
+  font: 700 30px/1.1 var(--font-display);
+}
+/* A fixed height, not an aspect ratio, so the 1280 frame still shows the page below the picture. */
+.m-img {
+  height: 120px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #9db4c0, #5c7d8a);
+}
+.m-text {
+  margin: 12px 0;
+}
+.m-code {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  padding: 4px 6px;
+  background: #e6e1d6;
+  font: 12px/1.6 ui-monospace, monospace;
+  white-space: nowrap;
+}
+.m-code span {
+  display: inline-block;
+  width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+/* Scoped under the figure and page so these win over the kit's `.fig svg[data-layout]` rules, which switch on the
+   window's width; the miniature switches on its own. */
+/* The miniature's figure: the satis world's own steel, areas and station icons (satis/world.css), as on the real
+   case study. */
+[data-figure="site"] .m-fig {
+  margin-top: 12px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--satis-steel);
+}
+/* Each drawing sets its own height (MiniCutover.astro). */
+[data-figure="site"] .m-page .m-svg {
+  display: none;
+  width: 100%;
+}
+[data-figure="site"] .m-page .m-svg[data-layout="phone"] {
+  display: block;
+}
+@container mini (min-width: 40rem) {
+  [data-figure="site"] .m-page .m-svg[data-layout="phone"] {
+    display: none;
+  }
+  [data-figure="site"] .m-page .m-svg[data-layout="tablet"] {
+    display: block;
+  }
+}
+@container mini (min-width: 64rem) {
+  [data-figure="site"] .m-page .m-svg[data-layout="tablet"] {
+    display: none;
+  }
+  [data-figure="site"] .m-page .m-svg[data-layout="desktop"] {
+    display: block;
+  }
+}
+.m-svg .m-climb {
+  visibility: hidden;
+}
+
+/* The bugs (on while the figure carries data-case and not data-fixed) and their fixes. */
+[data-figure="site"][data-case="fonts"][data-fixed] .m-svg[data-layout="tablet"] [data-path="route"] {
+  visibility: hidden;
+}
+[data-figure="site"][data-case="fonts"][data-fixed] .m-climb {
+  visibility: visible;
+}
+@container mini (min-width: 40rem) {
+  [data-figure="site"][data-case="hero"]:not([data-fixed]) .m-hero,
+  .m-hero:has(.m-portrait) {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 1rem;
+    align-items: end;
+  }
+}
+[data-figure="site"][data-case="media"]:not([data-fixed]) .m-page:not(.loaded) .m-img {
+  height: 0;
+}
+[data-figure="site"][data-case="line"]:not([data-fixed]) .m-code {
+  max-width: none;
+  width: max-content;
+  overflow: visible;
+}
+
+/* What failed, outlined in the failing frames. */
+[data-figure="site"][data-case="fonts"] .sf[data-result="fail"] .m-label {
+  fill: var(--satis-error);
+}
+[data-figure="site"][data-case="hero"] .sf[data-result="fail"] .m-h1,
+[data-figure="site"][data-case="media"] .sf[data-result="fail"] .m-img,
+[data-figure="site"][data-case="line"] .sf[data-result="fail"] .m-code {
+  outline: 3px solid var(--site-fail);
+  outline-offset: 2px;
+}

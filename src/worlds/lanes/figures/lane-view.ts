@@ -5,6 +5,7 @@ import { ACTION_LABEL, journey, NO_SWITCHES, reviewersFor, STATIONS, type Stop, 
 import { ease } from "../../../design/figure/ease";
 import { prefersReducedMotion, startLoop, whileOnScreen } from "../../../design/figure/loop";
 import { tickGoal, wireControls } from "../../../design/figure/controls";
+import { nearestAlong } from "./nearest";
 
 const SPEED = 170; // track units per second
 // Where the token rests at a station: this far along the track before its centre, just clear of the disc (r 34)
@@ -37,14 +38,7 @@ export function mount(root: HTMLElement, kept: Partial<LanesKept> = {}): () => v
   const along: Record<string, number> = {};
   for (const id of STATIONS) {
     const g = stationEl(id).transform.baseVal.consolidate()!.matrix;
-    let best = 0;
-    let bestD = Infinity;
-    for (let d = 0; d <= total; d += 2) {
-      const p = track.getPointAtLength(d);
-      const dist = Math.hypot(p.x - g.e, p.y - g.f);
-      if (dist < bestD) [best, bestD] = [d, dist];
-    }
-    along[id] = best;
+    along[id] = nearestAlong((d) => track.getPointAtLength(d), total, g.e, g.f);
   }
   // Short of the station; the first one, at the very start of the track, rests just past it instead.
   const rest = (id: string) => (along[id] >= REST ? along[id] - REST : along[id] + REST);
@@ -63,7 +57,14 @@ export function mount(root: HTMLElement, kept: Partial<LanesKept> = {}): () => v
     const p = track.getPointAtLength(d);
     token.setAttribute("transform", `translate(${p.x} ${p.y})`);
   };
+  // The caption is a live region, but autoplay would have it speak every 1.4-2.2 s. It is heard when the reader caused
+  // the stop (a switch, Play, Reset, the action) or the token is held there (waiting, failed); otherwise it changes
+  // quietly, and stays readable.
+  let readerActed = false;
+  const heard = () => (readerActed = true);
   function show(stop: Stop) {
+    caption.setAttribute("aria-live", readerActed || stop.kind !== "pass" ? "polite" : "off");
+    readerActed = false;
     caption.textContent = stop.caption;
     for (const id of STATIONS) stationEl(id).setAttribute("class", `lst${id === stop.at ? ` ${stop.kind === "pass" ? "now" : stop.kind}` : ""}`);
     token.setAttribute("class", `lanes-token${stop.kind === "pass" ? "" : ` ${stop.kind}`}`);
@@ -117,9 +118,15 @@ export function mount(root: HTMLElement, kept: Partial<LanesKept> = {}): () => v
 
   const loop = startLoop(frame, { autoplay: kept.playing ?? !reduced });
   const offScreen = whileOnScreen(root, loop);
-  const unwire = wireControls(root, loop, restart);
+  const unwire = wireControls(root, loop, () => {
+    heard();
+    restart();
+  });
+  const playPause = root.querySelector("[data-playpause]");
+  playPause?.addEventListener("click", heard);
   const onAct = () => {
     if (phase !== "await") return; // nothing waiting, or already pressed (Review Focus 2)
+    heard();
     leave();
     loop.wake();
   };
@@ -128,6 +135,7 @@ export function mount(root: HTMLElement, kept: Partial<LanesKept> = {}): () => v
       const key = b.dataset.switch as keyof Switches;
       sw = { ...sw, [key]: !sw[key] };
       b.setAttribute("aria-pressed", String(sw[key]));
+      heard();
       restart(); // Review Focus 1: a changed lane starts over
     };
     b.addEventListener("click", fn);
@@ -143,6 +151,7 @@ export function mount(root: HTMLElement, kept: Partial<LanesKept> = {}): () => v
     unwire();
     offs.forEach((f) => f());
     act.removeEventListener("click", onAct);
+    playPause?.removeEventListener("click", heard);
     place(rest("issue"));
   };
 }

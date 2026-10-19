@@ -59,6 +59,17 @@ describe("pageScriptBytes", () => {
     expect(pageScriptBytes(html, dir)).toBe(files.reduce((a, b) => a + b, 0));
   });
 
+  // The minifier writes a lazy figure's import with backticks: import(`./view.js`). Missing it left every figure's
+  // view out of its page's budget.
+  it("counts a chunk imported with a template literal", () => {
+    const dir = fixtureDir({
+      "_astro/entry.js": "t(()=>import(`./view.js`).then(e=>e.mount(n)),[]);",
+      "_astro/view.js": "export const mount = () => 'v'.repeat(60);",
+    });
+    const files = ["entry", "view"].map((n) => gzipSync(readFileSync(join(dir, "_astro", `${n}.js`))).length);
+    expect(pageScriptBytes('<script type="module" src="/_astro/entry.js"></script>', dir)).toBe(files[0] + files[1]);
+  });
+
   it("refuses third-party scripts", () => {
     expect(() => pageScriptBytes('<script src="https://cdn.example.com/x.js"></script>', fixtureDir({}))).toThrow(
       /third-party script/,

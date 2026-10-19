@@ -10,6 +10,8 @@ import CutoverFigure from "../worlds/satis/figures/CutoverFigure.astro";
 import Cover from "../worlds/satis/Cover.astro";
 import LanePathFigure from "../worlds/lanes/figures/LanePathFigure.astro";
 import LanesCover from "../worlds/lanes/Cover.astro";
+import SiteFigure from "../worlds/site/figures/SiteFigure.astro";
+import SiteCover from "../worlds/site/Cover.astro";
 
 const sample = {
   name: "Sample project",
@@ -77,6 +79,12 @@ const swatches = ["paper", "raised", "ink", "ink-soft", "muted", "accent", "rule
       <div class="section-head"><p class="kicker">World · lanes</p><h2>Figure</h2></div>
       <div class="kit-still"><LanesCover still /></div>
       <LanePathFigure />
+    </section>
+
+    <section class="kit-writing page reveal world-site">
+      <div class="section-head"><p class="kicker">World · leonardonunez.dev</p><h2>Figure</h2></div>
+      <div class="kit-still"><SiteCover still /></div>
+      <SiteFigure />
     </section>
 
     <!-- Laid out like a case study (prose on the left, margin free for sidenotes),
