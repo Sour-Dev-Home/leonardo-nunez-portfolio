@@ -1,5 +1,6 @@
-/* The lanes world. PLACEHOLDER colours until the palette round (plan Task 8).
-   Roles are fixed: the token, pass, fail (red is failure only), wait-on-owner, and the track. */
+/* The lanes world: "Signal teal" (palette A, kept by the owner on 2026-10-18). Dark slate with a cool teal token,
+   clearly apart from satis's amber-on-steel. Roles are fixed: the token, pass, fail (red is failure only),
+   wait-on-owner, and the track. */
 .world-lanes {
   --lanes-bg: #182028;
   --lanes-body: #26313b;
