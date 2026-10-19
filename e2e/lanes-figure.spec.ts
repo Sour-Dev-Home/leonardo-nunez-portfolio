@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { labelCollisions } from "./figures";
+import { NO_SWITCHES, reviewersFor } from "../src/worlds/lanes/model/path";
 
 const FIG = 'figure[data-figure="lanes"]';
 
@@ -113,6 +114,37 @@ test.describe("lanes figure", () => {
     expect(at.gap).toBeGreaterThanOrEqual(0); // clear of the disc, so it covers no part of the icon
   });
 
+  // A screen reader hears a stop when the reader caused it or the lane is held there, not every autoplay pass stop.
+  test("the caption is announced only after the reader acts or when the token waits or fails", async ({ page }) => {
+    await ready(page);
+    // Log every caption change with the aria-live it was made under, so the checks don't race the autoplay.
+    await caption(page).evaluate((el) => {
+      const log: [string, string | null][] = [];
+      (window as unknown as { heard: typeof log }).heard = log;
+      new MutationObserver(() => log.push([el.textContent ?? "", el.getAttribute("aria-live")])).observe(el, { childList: true, characterData: true, subtree: true });
+    });
+    const pp = page.locator(`${FIG} button[data-playpause]`);
+    await expect(caption(page)).toContainText("Task contract complete", { timeout: 10_000 });
+    await pp.click(); // pause
+    await page.locator(`${FIG} button[data-switch="rules"]`).click(); // restarts the lane
+    await expect(caption(page)).toContainText("A task issue");
+    await pp.click(); // play
+    await expect(caption(page)).toContainText("waiting for a code-owner review", { timeout: 25_000 });
+    await act(page).click();
+    await expect(caption(page)).toHaveText("Merged to main.", { timeout: 15_000 });
+    const heard = await page.evaluate(() => (window as unknown as { heard: [string, string | null][] }).heard);
+    const at = (start: string, from = 0) => heard.findIndex(([text], i) => i >= from && text.startsWith(start));
+    const live = (start: string, from = 0) => heard[at(start, from)]?.[1];
+    const restart = at("A task issue");
+    expect(live("Task contract complete")).toBe("off"); // an autoplay pass stop
+    expect(live("A task issue")).toBe("polite"); // the reader pressed a switch
+    expect(live("Task contract complete", restart)).toBe("polite"); // the reader pressed Play
+    expect(live("A fresh Claude session", restart)).toBe("off");
+    expect(live("lanes/gate: waiting", restart)).toBe("polite"); // held for the reader
+    expect(live("lanes/gate: approved", restart)).toBe("polite"); // the reader approved
+    expect(live("The merge queue runs", restart)).toBe("off");
+  });
+
   test("opens paused under reduced motion, on a meaningful frame", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/kit");
@@ -136,25 +168,33 @@ test.describe("lanes figure", () => {
 test.describe("lanes figure on phones", () => {
   test("uses the vertical drawing below 40rem, readable and collision-free", async ({ page, viewport }) => {
     test.skip(viewport!.width > 640, "phones only");
-    await page.goto("/kit");
-    await page.locator(FIG).scrollIntoViewIfNeeded();
+    await ready(page);
     await expect(page.locator(`${FIG} svg[data-layout="phone"]`)).toBeVisible();
     await expect(page.locator(`${FIG} svg[data-layout="desktop"]`)).toBeHidden();
     const smallest = await page
       .locator(`${FIG} svg[data-layout="phone"] text`)
       .evaluateAll((ts) => Math.min(...ts.map((t) => t.getBoundingClientRect().height)));
     expect(smallest).toBeGreaterThanOrEqual(9);
-    expect(await labelCollisions(page, FIG)).toEqual([]);
-    const clipped = await page.locator(FIG).evaluate((fig) => {
-      const f = fig.getBoundingClientRect();
-      return [...fig.querySelectorAll(".fig-bar button, svg[data-layout='phone'] text")]
-        .filter((el) => {
-          const r = el.getBoundingClientRect();
-          return r.width > 0 && (r.left < f.left - 0.5 || r.right > f.right + 0.5);
-        })
-        .map((el) => el.textContent?.trim());
-    });
-    expect(clipped).toEqual([]);
+    const fits = async () => {
+      expect(await labelCollisions(page, FIG)).toEqual([]);
+      const clipped = await page.locator(FIG).evaluate((fig) => {
+        const f = fig.getBoundingClientRect();
+        return [...fig.querySelectorAll(".fig-bar button, svg[data-layout='phone'] text")]
+          .filter((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && (r.left < f.left - 0.5 || r.right > f.right + 0.5);
+          })
+          .map((el) => el.textContent?.trim());
+      });
+      expect(clipped).toEqual([]);
+    };
+    const sub = page.locator(`${FIG} svg[data-layout="phone"] [data-station="reviewers"] [data-sub]`);
+    await expect(sub).toHaveText(reviewersFor(NO_SWITCHES).join(", "));
+    await fits();
+    // Touching the rules adds the security reviewer: the longest sub-label must still fit.
+    await page.locator(`${FIG} button[data-switch="rules"]`).click();
+    await expect(sub).toHaveText(reviewersFor({ ...NO_SWITCHES, rules: true }).join(", "));
+    await fits();
   });
 
   test("resizing across the breakpoint remounts once (Review Focus 4)", async ({ page, viewport }) => {
