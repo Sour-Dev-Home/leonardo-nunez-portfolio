@@ -28,9 +28,10 @@ export function pageScriptUrls(html: string): string[] {
 }
 
 // Static `import … from "./x.js"`, bare `import "./x.js"`, `export … from "./x.js"`
-// and dynamic `import("./x.js")`: the shared chunks an island pulls in never
-// appear in the HTML, only in the files that import them.
-const IMPORT = /(?:\bfrom\s*|\bimport\s*\(?\s*)["'](\.{1,2}\/[^"']+)["']/g;
+// and dynamic `import("./x.js")` (which the minifier writes with backticks): the
+// shared chunks an island pulls in never appear in the HTML, only in the files
+// that import them.
+const IMPORT = /(?:\bfrom\s*|\bimport\s*\(?\s*)["'`](\.{1,2}\/[^"'`]+)["'`]/g;
 
 /** Root-relative URLs of a script and every local chunk it imports, transitively. */
 function withImports(url: string, distDir: string, seen: Set<string>): void {
