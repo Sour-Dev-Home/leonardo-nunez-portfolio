@@ -1,23 +1,24 @@
-/* The leonardonunez.dev world. Placeholder colours until the palette round; the roles are fixed: pass, fail, and
-   the outline marking what failed. The miniature pages keep the site's own paper and ink. */
+/* The leonardonunez.dev world: "Ink and violet" (palette B, the owner's pick on 2026-10-19). Deep indigo with a
+   violet action, apart from satis's amber and lanes' teal. Roles are fixed: pass, fail, and the outline marking
+   what failed. The miniature pages keep the site's own paper and ink. */
 .world-site {
-  --site-bg: #1c1d22;
-  --site-ink: #e9e7e1;
-  --site-dim: #a7a7b1;
-  --site-pass: #6fd49a;
-  --site-fail: #ef5350;
+  --site-bg: #1f1b2e;
+  --site-ink: #ece8f6;
+  --site-dim: #aca5c4;
+  --site-pass: #7fd8a6;
+  --site-fail: #ff6b6b;
   --site-paper: #f4f1ea;
   --site-text: #1d1f24;
   --site-muted: #50535b;
   --fig-bg: var(--site-bg);
   --fig-ink: var(--site-ink);
   --fig-dim: var(--site-dim);
-  --fig-rule: #55575f;
-  --fig-bar: #23242a;
-  --fig-btn: #34363d;
-  --fig-btn-hover: #43454d;
-  --fig-accent: #8fb3ff;
-  --fig-on-accent: #10131a;
+  --fig-rule: #5a5378;
+  --fig-bar: #262138;
+  --fig-btn: #363050;
+  --fig-btn-hover: #453e63;
+  --fig-accent: #b79cff;
+  --fig-on-accent: #1a1430;
   --fig-done: var(--site-pass);
   --fig-on: var(--site-pass);
   --fig-off: var(--site-fail);
