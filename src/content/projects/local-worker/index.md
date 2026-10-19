@@ -3,7 +3,7 @@ name: local-worker
 summary: >-
   An MCP server that hands bulk reading and first drafts to a local Ollama model, keeping large inputs out of Claude's context.
 description: >-
-  An MCP server that offloads bulk reading (CI logs, diffs, long docs) and first drafts to a local Ollama model on the GPU, so large inputs never enter Claude's context — plus Markdown-to-PDF rendering and a weekly devlog CLI. 233 tests, CI on Ubuntu and Windows, with path confinement hardened through an independent bug hunt and two security reviews.
+  An MCP server that offloads bulk reading (CI logs, diffs, long docs) and first drafts to a local Ollama model on the GPU, so large inputs never enter Claude's context — plus Markdown-to-PDF rendering and a weekly devlog CLI. 238 tests, CI on Ubuntu and Windows, with path confinement hardened through an independent bug hunt.
 status: shipped
 stack: [TypeScript, Node.js, MCP, Ollama, Vitest]
 repoUrl: https://github.com/Sour-Dev-Home/local-worker
