@@ -197,6 +197,14 @@ test.describe("cutover figure", () => {
     expect(Math.max(...widths) - Math.min(...widths), widths.join(", ")).toBeLessThanOrEqual(1);
   });
 
+  // The kit page has no article around the figure; the case study does, and its list styles must not reach the track.
+  test("lines every step in the track up on one row inside the case study, Freeze included", async ({ page }) => {
+    await page.goto("/projects/satisfactory-dash");
+    await page.locator(CUT).scrollIntoViewIfNeeded();
+    const tops = await page.locator(`${CUT} .fig-track .stp`).evaluateAll((els) => els.map((e) => e.getBoundingClientRect().top));
+    expect(Math.max(...tops) - Math.min(...tops), tops.join(", ")).toBeLessThanOrEqual(0.5);
+  });
+
   test("has no step numbers in its track (cutover)", async ({ page }) => {
     await page.goto("/kit");
     expect(await page.locator(`${CUT} .fig-track`).innerText()).not.toMatch(/\d/);

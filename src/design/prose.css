@@ -19,7 +19,9 @@
 .prose h3 {
   margin-top: var(--space-6);
 }
-.prose li + li {
+/* :where() keeps this at a single class's weight, so a figure's own list (the cutover track) can set its items'
+   margins without this article spacing reaching it. */
+.prose :where(li + li) {
   margin-top: var(--space-2);
 }
 .prose strong {
