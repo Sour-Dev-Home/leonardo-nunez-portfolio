@@ -15,7 +15,8 @@ this repo's own verified setup, since it's ahead of `satisfactory-dash` on most 
 ## Ground rules
 
 1. **Simple by design.** Static Astro site, no CMS, no backend. Pages are `/`,
-   `/projects/:slug` (one per project with a case study) and the 404 page; see
+   `/about`, `/projects/:slug` (one per project with a case study), `/kit` (every shared
+   component) and the 404 page; see
    `docs/superpowers/specs/2026-10-17-portfolio-overhaul-design.md` for why Astro.
    Don't add a route shape without a page that needs it — if a feature needs more
    than that, reconsider whether it belongs on this site before adding complexity.
