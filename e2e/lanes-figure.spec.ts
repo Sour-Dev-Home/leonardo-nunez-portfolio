@@ -104,7 +104,7 @@ test.describe("lanes figure", () => {
       // Centre it first (instantly: the site scrolls smoothly), or the sticky site header may be what's on top.
       tok.scrollIntoView({ block: "center", behavior: "instant" });
       const r = tok.getBoundingClientRect();
-      const halo = tok.ownerSVGElement!.querySelector('[data-station="contract"] .halo')!.getBoundingClientRect();
+      const halo = tok.closest("svg")!.querySelector('[data-station="contract"] .halo')!.getBoundingClientRect();
       const [cx, cy] = [r.left + r.width / 2, r.top + r.height / 2];
       const gap = Math.hypot(cx - (halo.left + halo.width / 2), cy - (halo.top + halo.height / 2)) - halo.width / 2 - r.width / 2;
       return { inSight: document.elementFromPoint(cx, cy) === tok, gap };
