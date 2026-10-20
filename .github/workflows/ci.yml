@@ -116,12 +116,12 @@ jobs:
 
       - run: npm ci
 
-      - uses: actions/download-artifact@v7.0.0
+      - uses: actions/download-artifact@v8.0.2
         with:
           pattern: screenshots-*
           path: shards/screenshots
 
-      - uses: actions/download-artifact@v7.0.0
+      - uses: actions/download-artifact@v8.0.2
         with:
           pattern: blob-report-*
           path: shards/blobs
