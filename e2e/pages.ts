@@ -24,6 +24,7 @@ export const SPECS: Record<string, readonly string[] | "tagged"> = {
   "frames.spec.ts": ["case-study"],
   "header.spec.ts": ["home", "about"],
   "lanes-figure.spec.ts": ["kit"],
+  "machine-states.spec.ts": "tagged",
   "layout.spec.ts": "tagged",
   "loading-helpers.spec.ts": [],
   "loading.spec.ts": "tagged",

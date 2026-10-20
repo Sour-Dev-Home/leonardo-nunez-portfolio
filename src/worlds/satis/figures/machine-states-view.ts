@@ -57,7 +57,7 @@ export function mount(root: HTMLElement): () => void {
     q<SVGRectElement>("[data-gauge=output]").style.transform = `scaleY(${Math.min(100, m.outputPercent) / 100})`;
     q("[data-input-sub]").textContent = m.fluidInput ? "fluid: no slot" : m.inputFill >= 100 ? "all full" : `${Math.round(m.inputFill)}% full`;
     q("[data-output-sub]").textContent = `${Math.round(m.outputPercent)}% of set rate`;
-    q("[data-status]").textContent = `Power ${m.powered ? "on" : "off"}  -  Recipe ${m.recipe ? "set" : "none"}  -  Output slot ${m.outputFull ? "full" : "has room"}${m.paused ? "  -  Paused" : ""}`;
+    q("[data-status]").textContent = [`Power ${m.powered ? "on" : "off"}`, `Recipe ${m.recipe ? "set" : "none"}`, `Output slot ${m.outputFull ? "full" : "has room"}`, ...(m.paused ? ["Paused"] : [])].join(" · ");
     q<SVGCircleElement>("[data-light]").classList.toggle("off", !m.powered);
     q<SVGPathElement>("[data-flow-in]").classList.toggle("off", !m.powered || m.inputFill <= 0);
     q<SVGPathElement>("[data-flow-out]").classList.toggle("off", !m.powered || m.outputPercent <= 0);

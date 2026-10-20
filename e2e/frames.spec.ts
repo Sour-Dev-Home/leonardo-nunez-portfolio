@@ -18,6 +18,8 @@ async function openPaused(page: Page, board: Capturable) {
   await page.clock.install({ time: 0 });
   await page.clock.pauseAt(1000);
   await page.goto(board.page);
+  // The sticky header and section heads would cover the top of the figure in a still.
+  await page.addStyleTag({ content: ".site-header, .section > .section-head { position: static !important; }" });
   const fig = page.locator(`figure[data-figure="${board.figure}"]`).first();
   await fig.scrollIntoViewIfNeeded();
   await fig.locator("[data-ready]").first().waitFor(); // a looped figure marks its play button; a still-state one marks its rule list
@@ -53,6 +55,9 @@ for (const board of BOARDS) {
         }
         await advance(f.at);
         // The sim's motion is JS on the page clock; CSS transitions run on real time, so they're finished.
+        // Read the figure's box after the input, so a caption that changed height is inside the still.
+        await fig.boundingBox();
+        await page.evaluate(() => document.body.offsetHeight);
         await fig.screenshot({ path: `${dir}/${f.name}.png`, animations: "disabled" });
       }
     });

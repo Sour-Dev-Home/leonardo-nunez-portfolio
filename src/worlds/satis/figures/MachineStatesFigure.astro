@@ -57,10 +57,10 @@ const rules = [
       <rect class="level" data-gauge="output" x="406" y="32" width="22" height="126" rx="3"></rect>
       <line class="tick" x1="398" x2="436" y1="36.5" y2="36.5"></line>
       <text class="dim" x="392" y="40" text-anchor="end">95%</text>
-      <text class="lbl" x="417" y="180" text-anchor="middle">Output</text>
-      <text class="dim" x="417" y="195" text-anchor="middle" data-output-sub>100% of set rate</text>
+      <text class="lbl" x="436" y="180" text-anchor="end">Output</text>
+      <text class="dim" x="436" y="195" text-anchor="end" data-output-sub>100% of set rate</text>
     </g>
-    <text class="dim status" x="230" y="232" text-anchor="middle" data-status>Power on  -  Recipe set  -  Output slot has room</text>
+    <text class="dim status" x="230" y="232" text-anchor="middle" data-status>Power on · Recipe set · Output slot has room</text>
   </svg>
   <ol class="ms-rules" aria-label="The dashboard checks these in order; the first yes decides." data-ready-mark>
     {
@@ -190,8 +190,8 @@ const rules = [
     stroke-linecap: round;
   }
   .ms .blank {
-    stroke: var(--satis-dim);
-    stroke-width: 1.2;
+    stroke: var(--satis-ink);
+    stroke-width: 1.6;
     stroke-dasharray: 2 1.6;
   }
   .ms .light {
@@ -216,35 +216,46 @@ const rules = [
     padding: 6px 10px;
     border: 1px solid var(--satis-line);
     border-radius: 6px;
-    opacity: 0.55;
+    position: relative;
+    padding-right: 3.2em;
     transition:
-      opacity var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out),
       border-color var(--dur-fast) var(--ease-out);
   }
   .ms-rules li b {
-    color: var(--satis-ink);
-  }
-  .ms-rules li.no {
-    opacity: 0.8;
+    color: var(--satis-dim);
   }
   .ms-rules li.hit {
-    opacity: 1;
-    border: 2px solid var(--st);
+    border-color: var(--st);
+    box-shadow: inset 0 0 0 1px var(--st);
     background: var(--satis-steel-2);
+    color: var(--satis-ink);
   }
   .ms-rules li.hit b,
-  .ms-rules .verdict {
+  .ms-rules li.hit .verdict {
     color: var(--st);
   }
   .ms-rules .verdict {
-    margin-left: auto;
+    position: absolute;
+    top: 6px;
+    right: 10px;
     font-weight: 700;
+    color: var(--satis-dim);
+  }
+  .ms :global(.fig-ibtn),
+  .ms :global(.fig-tbtn) {
+    height: 44px;
+    min-width: 44px;
+  }
+  .ms :global(.fig-ibtn) {
+    width: 44px;
   }
   .ms-slider {
+    order: -1;
+    min-height: 44px;
     display: flex;
     align-items: center;
     gap: 10px;
-    flex: 1;
     flex: 1 1 14rem;
     min-width: 0;
     font: 13px var(--font-text);
@@ -254,7 +265,20 @@ const rules = [
     min-width: 0;
   }
   .ms-slider span {
-    min-width: 5.5em;
+    flex: none;
+    width: 6.5em;
+  }
+  /* The longest caption's lines, reserved, so the figure doesn't change height from beat to beat. */
+  .ms :global(.fig-caption) {
+    min-height: 3em;
+  }
+  @media (max-width: 40rem) {
+    .ms :global(.fig-caption) {
+      min-height: 4.5em;
+    }
+    .ms-slider {
+      flex-basis: 100%;
+    }
   }
   .fig-limit {
     font: 12.5px/1.5 var(--font-text);
