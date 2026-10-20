@@ -19,7 +19,7 @@ const rules = [
 
 <Goals
   goals={[
-    { id: "underfed", text: "Lower the input fill and the output rate until the machine reads underfed." },
+    { id: "underfed", text: "Lower the ingredients and the output rate until the machine reads underfed." },
     { id: "slot", text: "Fill the output slot to back the machine up." },
     { id: "throttled", text: "Fill every input, empty the slot and drop the output under 95%: backed up, not underfed." },
     { id: "order", text: "Cut the power, then pause it, and see which rule wins." },
@@ -76,8 +76,8 @@ const rules = [
     }
   </ol>
   <Controls label="Machine controls" speed={false} play={false}>
-    <label class="ms-slider"><span>Ingredients in stock</span><input class="fig-range" type="range" min="0" max="100" step="1" value="100" data-ctl="input" /></label>
-    <label class="ms-slider"><span>Output vs. set rate</span><input class="fig-range" type="range" min="0" max="100" step="1" value="100" data-ctl="output" /></label>
+    <label class="ms-slider"><span>Ingredients</span><input class="fig-range" type="range" min="0" max="100" step="1" value="100" data-ctl="input" /></label>
+    <label class="ms-slider"><span>Output rate</span><input class="fig-range" type="range" min="0" max="100" step="1" value="100" data-ctl="output" /></label>
     <button class="fig-tbtn" type="button" data-ctl="slot" aria-pressed="false">Output slot full</button>
     <button class="fig-tbtn" type="button" data-ctl="power" aria-pressed="false">Cut power</button>
     <button class="fig-tbtn" type="button" data-ctl="paused" aria-pressed="false">Pause</button>
