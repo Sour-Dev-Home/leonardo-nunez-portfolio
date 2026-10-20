@@ -21,7 +21,8 @@ this repo's own verified setup, since it's ahead of `satisfactory-dash` on most 
    Don't add a route shape without a page that needs it — if a feature needs more
    than that, reconsider whether it belongs on this site before adding complexity.
 2. **Projects are data, not prose.** Every project shown is the frontmatter of
-   `src/content/projects/<slug>/index.md`, validated by `src/lib/projects.ts`. Never
+   `src/content/projects/<slug>/index.md` (or `index.mdx`, when its case study embeds
+   figures), validated by `src/lib/projects.ts`. Never
    hand-edit project copy directly into JSX — edit the frontmatter instead, so the
    same structure works whether a human or the portfolio-updater agent (see below)
    makes the change. A file with a body gets a case-study page; one without is a card
@@ -48,9 +49,11 @@ this repo's own verified setup, since it's ahead of `satisfactory-dash` on most 
 
 ## Stack
 
-Astro (static; React components rendered at build time; client JavaScript only for
-interactive figures, within the per-page budget in `tests/dist/budget.ts`) +
-TypeScript, deployed as a Cloudflare Worker with static assets by Workers Builds
+Astro (static, `build.format: "file"`; file-based routes in `src/pages/`; MDX case
+studies via `@astrojs/mdx`; React components rendered at build time, with no
+`client:` islands; client JavaScript only for interactive figures, vanilla TypeScript
+on `src/design/figure/` (new figures follow `.claude/skills/storyboard-motion`),
+within the per-page budget in `tests/dist/budget.ts`) + TypeScript, deployed as a Cloudflare Worker with static assets by Workers Builds
 (build command `npm run build`, Node from `.node-version`; `wrangler.json` serves
 `dist/` with a real 404 page and slashless URLs; `public/_headers` sets browser
 caching: hashed `/_astro/*` files for a year, fonts 30 days, pictures a day, pages

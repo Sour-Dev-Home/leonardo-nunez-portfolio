@@ -14,6 +14,8 @@ dist-ssr
 playwright-report/
 blob-report/
 test-results/
+# Storyboard stills from e2e/frames.spec.ts: review material, never committed
+.frames/
 .lighthouseci/
 *.local
 
