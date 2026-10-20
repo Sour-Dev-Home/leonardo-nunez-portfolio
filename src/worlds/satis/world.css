@@ -13,6 +13,10 @@
   --satis-dropped: #c9a27a;
   --satis-backup: #9b8cf0;
   --satis-ok: #6fd49a;
+  /* Figure 3 (machine states): the dash's warn amber (its --color-warn, frontend/src/index.css:37) marks
+     backed up; info (the AWS zone's ink) marks underfed. Both are distinct from the snapshot orange. */
+  --satis-warn: #e9c46a;
+  --satis-info: var(--satis-zone-aws-ink);
   --satis-zone-pc: #26292d;
   --satis-zone-pc-rule: #4a5157;
   --satis-zone-pc-ink: #c8cdd2;
