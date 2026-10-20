@@ -83,7 +83,7 @@ The second round answered the rest:
 
 That last one failed first too. The game joins circuits behind a switch into one group, and the pass rule had only judged lone circuits ([#18](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/18)).
 
-All seven claims hold on a real server, so the gates did their job. The build waits, though. Its trigger in the decision record is a player whose rented server can't run the agent. And a few questions are still open, such as the game's terms on mods and the licence of a GPL mod beside this AGPL app. Until then, the agent stays the supported path.
+All seven claims hold on a real server, so the gates did their job. The decision record had parked the build until a player's rented server couldn't run the agent. I un-parked it with my own goal instead, moving the agent off my PC and into the mod ([ADR-0042](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0042-build-the-mod.md)). The build has started: its plan is merged ([#28](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/28)), and so is its first task, the HTTP transport and the game module, with a probe that runs on the test server ([#29](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/29)). Until the mod matches the agent, the agent stays the supported path.
 
 ## What I’d do differently
 
@@ -101,6 +101,8 @@ The credits run out in a few months, and the exit is already written: the same i
 
 ## How it was built
 
-<Sidenote id="agents" lead="psst">Development started with three Claude agents: a developer, an architect and a frontend agent. Midway through I tried more thorough task management with my own tool, lanes, and it ran the rest of the project.</Sidenote>
+<Sidenote id="agents" lead="psst">Development started with three Claude agents: a developer, an architect and a frontend agent. Midway through I tried more thorough task management with my own tool, lanes, and it ran most of the build before I retired it.</Sidenote>
 
-I built satisfactory-dash with Claude Code, most of it through [lanes](https://github.com/Sour-Dev-Home/lanes): one fresh session per GitHub issue, gated by required checks and reviewer agents, with every change reviewed by me before it merged. The [repository](https://github.com/Sour-Dev-Home/satisfactory-dash) is public.
+I built satisfactory-dash with Claude Code, most of it through [lanes](https://github.com/Sour-Dev-Home/lanes): one fresh session per GitHub issue, gated by required checks and reviewer agents. Its gates cost more than they returned here, though: even a dependency bump needed its own issue, and I kept stepping in by hand. So I replaced it with plain CI/CD ([ADR-0043](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0043-retire-lanes.md), [#482](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/482)). A session opens the pull request, runs the reviewer agents itself (tests, UI and security), and the change merges once the required checks pass.
+
+CI now runs only what a change touches ([#483](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/483)). A one-line backend change checks in 1m47s instead of the full 4m29s, and a docs-only change in 26 seconds. The [repository](https://github.com/Sour-Dev-Home/satisfactory-dash) is public.
