@@ -5,34 +5,32 @@
 //   W = docs-vault/wiki/machine-states.md
 // The beats follow the dash's own order of checks (C:39-48): paused, unpowered, idle, backed up,
 // underfed, producing. The question: why does the dashboard call this machine what it calls it?
-// The captions live here until the view exists; then the view owns them and this imports them.
+// The captions are the view's (machine-states-view.ts); this file imports them.
+import { CAPTION } from "./machine-states-view";
 import { classify, runningMachine, type Machine } from "../model/machineState";
 import type { Input, Storyboard } from "../../../design/figure/storyboard";
 
 const SEED = 0; // the model is not random; unused
 
-/** Reader actions, as buttons for now (the sliders arrive with the view). Times are sim seconds. */
-const btn = (what: string) => `button[data-set="${what}"]`;
+/** The reader's actions on the figure's real controls (MachineStatesFigure.astro). Times are sim seconds.
+ *  Sliders are dragged (`value`); the toggles are clicked, so their apply flips the field. */
+const ctl = (k: string) => (k === "input" || k === "output" ? `input[data-ctl="${k}"]` : `button[data-ctl="${k}"]`);
+const flip = (field: "outputFull" | "powered" | "paused" | "recipe") => (m: Machine) => void (m[field] = !m[field]);
 const inputs: Input<Machine>[] = [
-  { at: 7, click: btn("input-40"), apply: (m) => Object.assign(m, { inputFill: 40, outputPercent: 40 }) },
-  { at: 13, click: btn("output-full"), apply: (m) => Object.assign(m, { inputFill: 100, outputPercent: 0, outputFull: true }) },
-  { at: 19, click: btn("output-slow"), apply: (m) => Object.assign(m, { outputFull: false, outputPercent: 9.4 }) },
-  { at: 25, click: btn("power-off"), apply: (m) => Object.assign(m, { powered: false }) },
-  { at: 29, click: btn("power-on"), apply: (m) => Object.assign(m, { powered: true }) },
-  { at: 31, click: btn("pause"), apply: (m) => Object.assign(m, { paused: true }) },
-  { at: 35, click: btn("resume"), apply: (m) => Object.assign(m, { paused: false }) },
-  { at: 37, click: btn("clear-recipe"), apply: (m) => Object.assign(m, { recipe: false }) },
+  { at: 7, click: ctl("input"), value: 40, apply: (m) => void (m.inputFill = 40) },
+  { at: 7, click: ctl("output"), value: 40, apply: (m) => void (m.outputPercent = 40) },
+  { at: 13, click: ctl("input"), value: 100, apply: (m) => void (m.inputFill = 100) },
+  { at: 13, click: ctl("output"), value: 0, apply: (m) => void (m.outputPercent = 0) },
+  { at: 13, click: ctl("slot"), apply: flip("outputFull") },
+  { at: 19, click: ctl("slot"), apply: flip("outputFull") },
+  { at: 19, click: ctl("output"), value: 10, apply: (m) => void (m.outputPercent = 10) },
+  { at: 25, click: ctl("power"), apply: flip("powered") },
+  { at: 29, click: ctl("power"), apply: flip("powered") },
+  { at: 31, click: ctl("paused"), apply: flip("paused") },
+  { at: 35, click: ctl("paused"), apply: flip("paused") },
+  { at: 37, click: ctl("recipe"), apply: flip("recipe") },
 ];
 
-export const CAPTION = {
-  producing: "Inputs are in and the output runs at the set rate: producing.",
-  underfed: "Input is short and the output is under 95% of the set rate: underfed, and the dash names the missing input.",
-  backedUp: "An output slot is full: backed up, whatever the inputs are doing.",
-  throttled: "Every input is full but the output is under 95%: the output is the bottleneck, so backed up, not underfed.",
-  unpowered: "Off the grid, or the fuse tripped: unpowered, whatever the buffers hold.",
-  paused: "Paused is checked first, so it beats even a power cut.",
-  idle: "No recipe set: idle. Only paused and unpowered are checked before it.",
-} as const;
 
 /** A limit the stills print under a beat. W:54-55: a fluid ingredient has no inventory slot, so a machine with a
  *  fluid input (a refinery) is never "inputs full", and an output-throttled refinery still reads underfed. */
@@ -68,7 +66,7 @@ export const machineStatesStoryboard: Storyboard<Machine> = {
       teaches: "Short of input, the output falls under 95% of the set rate: underfed (C:71-77).",
       caption: CAPTION.underfed,
       at: 9,
-      enter: { dur: "base", ease: "ease-out", reduced: "instant", moves: "the input buffer drains; the output gauge falls under the 95% mark" },
+      enter: { dur: "base", ease: "ease-in-out", reduced: "instant", moves: "the input buffer drains; the output gauge falls under the 95% mark" },
       holds: (m) => (!m.outputFull && m.inputFill < 100 && m.outputPercent < 95 && classify(m).state === "underfed") || is(m, "underfed"),
     },
     {

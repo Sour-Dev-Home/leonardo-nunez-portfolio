@@ -65,6 +65,12 @@ describe("classify (the dash's classifyBuilding)", () => {
     expect(classify(refinery).state).toBe("underfed");
   });
 
+  it("says why it is backed up: a full slot, or full inputs under a low output", () => {
+    expect(classify(runningMachine({ outputFull: true, outputPercent: 0 })).why).toBe("slot");
+    expect(classify(runningMachine({ outputPercent: 10 })).why).toBe("inputs");
+    expect(classify(runningMachine()).why).toBeUndefined();
+  });
+
   it("reports which rule decided, in the dash's order", () => {
     expect(classify(runningMachine({ paused: true })).rule).toBe(0);
     expect(classify(runningMachine()).rule).toBe(5);

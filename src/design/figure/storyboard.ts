@@ -21,6 +21,8 @@ export interface Transition {
 export interface Input<S> {
   at: number;
   click: string;
+  /** For a range input: the value the reader drags it to (capture sets it and fires "input" instead of clicking). */
+  value?: number;
   apply: (s: S) => void;
 }
 
@@ -64,7 +66,7 @@ export interface Frame {
 export interface Capturable {
   figure: string;
   page: string;
-  inputs: readonly { at: number; click: string }[];
+  inputs: readonly { at: number; click: string; value?: number }[];
   beats: readonly { id: string; at: number; mids?: number[] }[];
 }
 

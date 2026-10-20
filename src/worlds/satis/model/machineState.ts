@@ -52,6 +52,8 @@ export interface Classification {
   rule: number;
   /** For underfed: the input is what is short (the dash names the ingredient with the lowest ConsPercent). */
   missingInput?: true;
+  /** For backedUp: an output slot is full ("slot", rule 4) or every input is full while the output is under 95% (issue 201, "inputs"). */
+  why?: "slot" | "inputs";
 }
 
 /** FRM's `inputsFull`: every input buffer at capacity, and a fluid input never is. */
@@ -64,10 +66,10 @@ export function classify(m: Machine): Classification {
   if (m.paused) return at("paused");
   if (!m.powered) return at("unpowered");
   if (!m.recipe) return at("idle");
-  if (m.outputFull) return at("backedUp");
+  if (m.outputFull) return { ...at("backedUp"), why: "slot" };
   if (m.outputPercent < UNDERFED_BELOW_PERCENT) {
     // Issue 201: a low percent with every input buffer full is throttled by its output, not short of input.
-    if (inputsFull(m)) return at("backedUp");
+    if (inputsFull(m)) return { ...at("backedUp"), why: "inputs" };
     return { ...at("underfed"), missingInput: true };
   }
   return at("producing");
