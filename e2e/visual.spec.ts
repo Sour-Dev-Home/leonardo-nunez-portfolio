@@ -13,7 +13,10 @@ test.skip(!process.env.PW_VISUAL, "visual comparisons run in the Playwright cont
 // pixels, enough to hide a missing badge or icon. Full pages get more room than
 // first screens: Chrome rasterises a 12,000 px page in tiles and text edges vary by
 // up to ~900 scattered pixels between identical runs; a missing badge is ~3,400.
-const loaded = { fullPage: true, maxDiffPixels: 1500 } as const;
+// That same tile noise can keep two back-to-back captures from agreeing, and the
+// default 5 s settle then fails the tallest page (/kit at 1280, PR #53's CI twice),
+// so full pages get 15 s of attempts.
+const loaded = { fullPage: true, maxDiffPixels: 1500, timeout: 15_000 } as const;
 const firstScreen = { fullPage: false, maxDiffPixels: 200 } as const;
 
 // font-display: optional can skip a font that misses its first ~100 ms; a first
