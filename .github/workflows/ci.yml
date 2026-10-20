@@ -31,9 +31,64 @@ jobs:
 
       - run: npm run test:dist
 
+  # Which pages this change touches. A pull request builds itself and its base and
+  # compares them page by page (scripts/e2e-select.ts); e2e, Lighthouse and links
+  # then test only the changed pages, or nothing when no built page changed. A
+  # change to the test setup, and every push to main, tests everything.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.select.outputs.mode }}
+      pages: ${{ steps.select.outputs.pages }}
+      grep: ${{ steps.select.outputs.grep }}
+      lighthouse: ${{ steps.select.outputs.lighthouse }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      # With the setup unchanged, the base builds with this change's dependencies and
+      # selection script, which are then the same as its own.
+      - name: Build this change and its base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git diff --name-only "$BASE" HEAD > "$RUNNER_TEMP/changed.txt"
+          setup=$(node scripts/e2e-select.ts setup-changed "$RUNNER_TEMP/changed.txt")
+          if [ -n "$setup" ]; then
+            echo "The test setup changed, so everything runs:"
+            echo "$setup"
+            exit 0
+          fi
+          npm run build
+          node scripts/e2e-select.ts manifest dist "$RUNNER_TEMP/head.json"
+          git checkout --quiet --detach "$BASE"
+          npm run build
+          node scripts/e2e-select.ts manifest dist "$RUNNER_TEMP/base.json"
+          git checkout --quiet --detach "$GITHUB_SHA"
+
+      - name: Choose what to test
+        id: select
+        run: |
+          if [ -f "$RUNNER_TEMP/changed.txt" ]; then
+            node scripts/e2e-select.ts select "$RUNNER_TEMP/changed.txt" "$RUNNER_TEMP/base.json" "$RUNNER_TEMP/head.json" >> "$GITHUB_OUTPUT"
+          else
+            node scripts/e2e-select.ts select >> "$GITHUB_OUTPUT"
+          fi
+
   # One job per viewport (the projects in playwright.config.ts), in parallel. The
   # required check is the `e2e` job below, which waits for all four.
   e2e-shard:
+    needs: changes
+    if: needs.changes.outputs.mode != 'none'
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.64.1-noble
@@ -63,8 +118,11 @@ jobs:
 
       # Changed screenshots fail with a diff. Missing ones are written (Playwright
       # counts that as a pass), so the next step fails the job instead and the
-      # artifact below carries the new images in the right folders.
-      - run: npx playwright test --project=${{ matrix.project }} --update-snapshots=missing
+      # artifact below carries the new images in the right folders. E2E_GREP, when
+      # set, holds the tests of the changed pages.
+      - run: npx playwright test --project=${{ matrix.project }} --update-snapshots=missing ${E2E_GREP:+--grep "$E2E_GREP"}
+        env:
+          E2E_GREP: ${{ needs.changes.outputs.grep }}
 
       - name: Fail if any screenshot had no baseline
         run: |
@@ -99,34 +157,41 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
 
-  # The required check: passes only if every viewport passed. It also merges the
-  # shards' screenshots into one `screenshots` artifact (same folders as before)
-  # and their reports into one HTML `playwright-report`.
+  # The required check: passes only if every viewport passed, or if no page changed
+  # and the shards were skipped. It also merges the shards' screenshots into one
+  # `screenshots` artifact (same folders as before) and their reports into one HTML
+  # `playwright-report`.
   e2e:
     if: always()
-    needs: e2e-shard
+    needs: [changes, e2e-shard]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - if: needs.e2e-shard.result != 'skipped'
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v7
+      - if: needs.e2e-shard.result != 'skipped'
+        uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: npm
 
-      - run: npm ci
+      - if: needs.e2e-shard.result != 'skipped'
+        run: npm ci
 
-      - uses: actions/download-artifact@v8.0.2
+      - if: needs.e2e-shard.result != 'skipped'
+        uses: actions/download-artifact@v8.0.2
         with:
           pattern: screenshots-*
           path: shards/screenshots
 
-      - uses: actions/download-artifact@v8.0.2
+      - if: needs.e2e-shard.result != 'skipped'
+        uses: actions/download-artifact@v8.0.2
         with:
           pattern: blob-report-*
           path: shards/blobs
 
       - name: Merge the shards
+        if: needs.e2e-shard.result != 'skipped'
         run: |
           mkdir -p screenshots blob-reports
           for d in shards/screenshots/screenshots-*; do
@@ -139,25 +204,32 @@ jobs:
             npx playwright merge-reports --reporter html ./blob-reports
           fi
 
-      - uses: actions/upload-artifact@v7.0.2
+      - if: needs.e2e-shard.result != 'skipped'
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: screenshots
           path: screenshots/
           if-no-files-found: ignore
 
-      - uses: actions/upload-artifact@v7.0.2
+      - if: needs.e2e-shard.result != 'skipped'
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: playwright-report
           path: playwright-report/
           if-no-files-found: ignore
 
+      # Skipped is a pass only when `changes` worked and found no changed page.
       - name: Fail unless every viewport passed
-        if: needs.e2e-shard.result != 'success'
+        if: >-
+          needs.changes.result != 'success' ||
+          (needs.e2e-shard.result != 'success' && !(needs.e2e-shard.result == 'skipped' && needs.changes.outputs.mode == 'none'))
         run: |
-          echo "::error::e2e-shard finished as '${{ needs.e2e-shard.result }}'. Open the failing viewport's job."
+          echo "::error::changes finished as '${{ needs.changes.result }}', e2e-shard as '${{ needs.e2e-shard.result }}'. Open the failing job."
           exit 1
 
   lighthouse:
+    needs: changes
+    if: needs.changes.outputs.lighthouse == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -173,7 +245,13 @@ jobs:
 
       # Lighthouse CI runs through npx at a pinned version rather than as a
       # dependency: its own dependencies carry advisories that would fail npm audit.
-      - run: npm run lhci
+      # It audits only the changed pages' URLs from lighthouserc.json.
+      - name: Lighthouse
+        env:
+          PAGES: ${{ needs.changes.outputs.pages }}
+        run: |
+          node scripts/e2e-select.ts lighthouse-config lighthouserc.json "$PAGES" > "$RUNNER_TEMP/lighthouserc.json"
+          npm run lhci -- --config="$RUNNER_TEMP/lighthouserc.json"
 
       - if: always()
         uses: actions/upload-artifact@v7.0.2
@@ -182,7 +260,11 @@ jobs:
           path: .lighthouseci/
           if-no-files-found: ignore
 
+  # Skipped when no built page changed: the links are then the base's, and the
+  # nightly links.yml run catches external links that break on their own.
   links:
+    needs: changes
+    if: needs.changes.outputs.mode != 'none'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

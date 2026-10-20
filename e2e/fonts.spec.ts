@@ -1,10 +1,10 @@
 import { expect, test, type Route } from "@playwright/test";
-import { PAGES } from "./pages";
+import { PAGES, pageTag } from "./pages";
 
 // font-display: optional means a font that arrives late is not swapped in, so
 // holding the fonts back must not change the layout once they are released.
 for (const { name, path } of PAGES.filter((p) => p.status === 200)) {
-  test(`${name}: a late font doesn't reflow the page`, async ({ page }) => {
+  test(`${name}: a late font doesn't reflow the page`, { tag: pageTag(name) }, async ({ page }) => {
     const held: Route[] = [];
     let released = false;
     await page.route("**/fonts/*.woff2", (route) => (released ? route.continue() : void held.push(route)));

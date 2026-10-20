@@ -61,7 +61,13 @@ links, media sizes, JS budget, 404). Playwright (`e2e/`) checks every page at 36
 oxlint for linting. CI (`.github/workflows/ci.yml`) runs `verify`
 (lint/typecheck/test/build/test:dist), `e2e` (Playwright in its official container,
 screenshots included; one `e2e-shard` job per viewport, which `e2e` waits for and merges), `lighthouse` (mobile, ≥ 90) and `links` (lychee; also
-nightly in `links.yml`) on every push and PR.
+nightly in `links.yml`) on every push and PR. On a PR, the `changes` job builds the PR
+and its base and compares them page by page (`scripts/e2e-select.ts`): e2e,
+Lighthouse and links then test only the pages whose built output changed, and skip
+when none did. A change to the test setup (`e2e/`, configs, dependencies, `ci.yml`)
+and every push to `main` test everything. A new spec must be listed in `SPECS` in
+`e2e/pages.ts`, and a test in a per-page loop needs `{ tag: pageTag(name) }`; the unit
+tests fail otherwise.
 
 **Visual changes:** screenshot baselines in `e2e/__screenshots__/` are valid only
 from the Playwright container. Never commit screenshots taken on Windows or macOS;

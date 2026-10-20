@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { holdMedia, scrubAnimations } from "./loading";
-import { PAGES } from "./pages";
+import { PAGES, pageTag } from "./pages";
 
 // Fonts render differently per OS, so baselines exist only for the Playwright
 // container that CI uses. Elsewhere these tests skip.
@@ -26,7 +26,7 @@ async function warm(page: Page, path: string) {
 }
 
 for (const { name, path } of PAGES) {
-  test(`${name} looks the same when loaded`, async ({ page }) => {
+  test(`${name} looks the same when loaded`, { tag: pageTag(name) }, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await warm(page, path);
     await page.goto(path, { waitUntil: "networkidle" });
@@ -39,7 +39,7 @@ for (const { name, path } of PAGES) {
     await expect(page).toHaveScreenshot(`${name}.png`, { ...loaded, clip, animations: "disabled" });
   });
 
-  test(`${name} looks the same while its media loads`, async ({ page }) => {
+  test(`${name} looks the same while its media loads`, { tag: pageTag(name) }, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await warm(page, path);
     await holdMedia(page);
@@ -47,14 +47,14 @@ for (const { name, path } of PAGES) {
     await expect(page).toHaveScreenshot(`${name}-loading.png`, { ...firstScreen, animations: "disabled" });
   });
 
-  test(`${name} looks the same halfway through its animations`, async ({ page }) => {
+  test(`${name} looks the same halfway through its animations`, { tag: pageTag(name) }, async ({ page }) => {
     await warm(page, path);
     await page.goto(path, { waitUntil: "networkidle" });
     await scrubAnimations(page, 0.5);
     await expect(page).toHaveScreenshot(`${name}-midway.png`, { ...firstScreen, animations: "allow" });
   });
 
-  test(`${name} looks the same in dark mode`, async ({ page }) => {
+  test(`${name} looks the same in dark mode`, { tag: pageTag(name) }, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "dark" });
     await warm(page, path);
     await page.goto(path, { waitUntil: "networkidle" });
