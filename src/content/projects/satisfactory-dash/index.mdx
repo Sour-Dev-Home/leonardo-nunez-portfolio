@@ -66,15 +66,24 @@ Moving a live service is mostly about never being stuck. The [runbook](https://g
 </Aside>
 </details>
 
-## Next: the agent moves into the game
+## Could the agent move into the game?
 
-The backend left the PC, but the agent can't: it has to sit beside the game. Most players rent their server from a host and have no machine to run it on. So the next step is to make the agent a server mod, written against Satisfactory's mod loader, SML ([ADR-0039](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0039-mod-as-end-state-research.md)).
+The backend left the PC, but the agent can't: it has to sit beside the game. Most players rent their server from a host and have no machine to run it on. So the idea is to make the agent a server mod, written against Satisfactory's mod loader, SML ([ADR-0039](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0039-mod-as-end-state-research.md)).
 
 Modding is thinly documented, and an AI assistant will happily invent an engine call that doesn't exist. So nothing gets built on trust. The work passes evidence gates, and no product code is written until a later decision record approves it. Every engine or SML call in the [mod repository](https://github.com/Sour-Dev-Home/satisfactory-dash-mod) needs a row citing the header file and line that declares it, and CI fails any call without one.
 
 <Sidenote id="refused" lead="true story">The harness refused its very first run: my own game server was still up.</Sidenote>
 
 The questions are answered by small throwaway mods, each run by a harness against a separate test server, which produces a pass or a fail plus the logs behind it. So far, a mod loads on the dedicated server ([#6](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/6)) and can send an HTTP request ([#7](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/7)). HTTPS works too, and a server with the wrong certificate is refused ([#8](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/8)). And a mod posting every 30 seconds leaves the server's tick rate where it was: 22.0 against 22.3 without it ([#9](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/9)). The first run of that test failed: the server runs faster for a while after it boots, and the harness had been measuring across the drop.
+
+The second round answered the rest:
+- A mod reads a credential from its config without ever logging it ([#14](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/14)).
+- It enrols with a one-time code and pushes a snapshot to a throwaway copy of the backend ([#15](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/15)).
+- On a copy of my own save, it reads the power grid within 1% of what an existing monitoring mod reports ([#16](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/16)).
+
+That last one failed first too. The game joins circuits behind a switch into one group, and the pass rule had only judged lone circuits ([#18](https://github.com/Sour-Dev-Home/satisfactory-dash-mod/pull/18)).
+
+All seven claims hold on a real server, so the gates did their job. The build waits, though. Its trigger in the decision record is a player whose rented server can't run the agent. And a few questions are still open, such as the game's terms on mods and the licence of a GPL mod beside this AGPL app. Until then, the agent stays the supported path.
 
 ## What I’d do differently
 
