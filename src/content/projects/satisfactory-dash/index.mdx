@@ -37,7 +37,9 @@ For its first months the backend and its database ran on my gaming PC, beside th
 <p id="demo-video-description">The recording starts on the demo's entry screen, which explains that the factory is made up and needs no sign-in, and clicks Enter demo. The Overview page shows all systems operational: a server with 3 of 4 players connected, two power circuits drawing 4,232.5 MW of 6,150 MW capacity, and 9 factory machines with 1 backed up. The Power tab shows each circuit's production, consumption, capacity, peak demand and battery state, with a chart of the last five minutes. The Factory tab lists every machine with its recipe and output rate, and marks a Rotor assembler as backed up. The Settings tab ticks the auto-pause option, and the page shows the change as pending until the server applies it. The tour ends back on the Overview page. A banner across the top of every screen says the data is not live.</p>
 </details>
 
-The dashboard sorts every machine into one of six states, and the order of its checks decides which one. Try it:
+In Satisfactory, each machine runs one recipe. Ingredients arrive on a belt and wait in its input slots, the machine crafts them, and the result sits in its output slot until the outgoing belt takes it away. For every machine, the dashboard reads how stocked those input slots are, whether the output slot is full, and how fast the machine is producing compared with the rate it's set to run at.
+
+From those readings it sorts every machine into one of six states, and the order of its checks decides which one. A machine that's starved of ingredients is underfed; one whose output has nowhere to go is backed up. Try it:
 
 <MachineStatesFigure />
 
