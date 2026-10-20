@@ -68,7 +68,7 @@ Moving a live service is mostly about never being stuck. The [runbook](https://g
 
 ## Could the agent move into the game?
 
-The backend left the PC, but the agent can't: it has to sit beside the game. Most players rent their server from a host and have no machine to run it on. So the next step is to make the agent a server mod, written against Satisfactory's mod loader, SML ([ADR-0039](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0039-mod-as-end-state-research.md)).
+The backend left the PC, but the agent can't: it has to sit beside the game. Most players rent their server from a host and have no machine to run it on. So the idea is to make the agent a server mod, written against Satisfactory's mod loader, SML ([ADR-0039](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0039-mod-as-end-state-research.md)).
 
 Modding is thinly documented, and an AI assistant will happily invent an engine call that doesn't exist. So nothing gets built on trust. The work passes evidence gates, and no product code is written until a later decision record approves it. Every engine or SML call in the [mod repository](https://github.com/Sour-Dev-Home/satisfactory-dash-mod) needs a row citing the header file and line that declares it, and CI fails any call without one.
 
