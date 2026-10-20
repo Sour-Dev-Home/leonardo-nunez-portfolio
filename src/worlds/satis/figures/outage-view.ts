@@ -8,7 +8,7 @@ import { tickGoal, wireControls } from "../../../design/figure/controls";
 import { OUTAGE, type OutageLayout } from "./layouts";
 
 const NS = "http://www.w3.org/2000/svg";
-const CAPTION = {
+export const CAPTION = {
   ok: "The agent sends each snapshot as it's taken; the backend stores it in PostgreSQL.",
   waking: "It's back, but the agent doesn't know yet: it finds out at its next retry, then sends the backlog oldest first.",
   be: "The backend is unreachable, so Cloudflare answers with an error. The snapshot keeps its place at the front of the queue; each retry waits longer, with jitter. When the queue is full, the oldest is dropped.",
