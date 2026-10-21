@@ -15,7 +15,7 @@ describe("satisfactory-dash case study", () => {
       `${SITE}/projects/satisfactory-dash`,
     );
     expect(metaContent(doc, 'meta[property="og:type"]')).toBe("article");
-    expect(metaContent(doc, 'meta[name="description"]')).toMatch(/^A dashboard and backend/);
+    expect(metaContent(doc, 'meta[name="description"]')).toMatch(/^A Satisfactory server dashboard/);
   });
 
   it("renders the heading, stack and every section", () => {
@@ -23,8 +23,10 @@ describe("satisfactory-dash case study", () => {
     expect(doc.querySelectorAll(".stack-list li").map((li) => li.text)).toContain("PostgreSQL");
     expect(doc.querySelectorAll(".case-study-body h2").map((h) => h.text.trim())).toEqual([
       "The problem",
+      "Finding the bottleneck",
       "How data gets in",
       "The move to AWS",
+      "Keeping it running",
       "Could the agent move into the game?",
       "What I’d do differently",
       "How it was built",
