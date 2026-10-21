@@ -83,7 +83,7 @@ Moving a live service is mostly about never being stuck. The [runbook](https://g
 
 ## Keeping it running
 
-A service you can't watch needs to say when it is failing. Background workers now count consecutive failures and, past a threshold of about five minutes of failing, log one error that a CloudWatch alarm picks up. An alert evaluator heartbeat shows it is still ticking, and an unhandled error logs a sanitised line and exits instead of limping on ([#565](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/565)). The alarms are defined in Terraform, with a second one for bursts of failed sign-ins.
+A service you can't watch needs to say when it is failing. Background workers now count consecutive failures and, past a threshold of about five minutes of failing, log one error that a CloudWatch alarm picks up. An alert evaluator heartbeat shows it is still ticking, and an unhandled error logs a sanitised line and exits instead of limping on ([#565](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/565)). The alarms are defined in Terraform and live on AWS, with a second one for bursts of failed sign-ins.
 
 I also ran an OWASP Top 10:2025 check with three read-only security reviews, `npm audit` and a personal-data scan. It found no High findings. It did find a Medium, the backend's base image pinned by tag instead of by digest, and the fixes include pinning it and a one-year HSTS header ([#563](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/563), [#566](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/566)).
 
