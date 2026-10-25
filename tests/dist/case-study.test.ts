@@ -27,6 +27,7 @@ describe("satisfactory-dash case study", () => {
       "How data gets in",
       "The move to AWS",
       "Keeping it running",
+      "Shipping it",
       "Could the agent move into the game?",
       "What I’d do differently",
       "How it was built",
