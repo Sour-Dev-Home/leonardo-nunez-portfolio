@@ -1,0 +1,205 @@
+---
+// Figure 4: how the Planner groups machines into logical factories. The first frame is static markup (the old
+// proximity grouping); factories-view.ts moves the groups and reads the controls, from ../model/factories.ts.
+// The drawing is a made-up seven-group example, not a real save.
+import Goals from "../../../design/figure/Goals.astro";
+import Controls from "../../../design/figure/Controls.astro";
+import "../../../design/figure/figure.css";
+import "../world.css";
+import { GROUPS, linksFor, ownersFor } from "../model/factories";
+import { CAPTION, DEFAULT_SPLIT, NODE_R } from "./factories-view";
+
+const owners = ownersFor(DEFAULT_SPLIT);
+const xs = GROUPS.map((g) => g.at.x);
+const ys = GROUPS.map((g) => g.at.y);
+const hull = { x: Math.min(...xs) - 40, y: Math.min(...ys) - 36, w: Math.max(...xs) - Math.min(...xs) + 80, h: Math.max(...ys) - Math.min(...ys) + 84 };
+const at = (id: string) => GROUPS.find((g) => g.id === id)!.at;
+const line = (from: string, to: string) => {
+  const a = at(from);
+  const b = at(to);
+  const d = Math.hypot(b.x - a.x, b.y - a.y);
+  const ux = (b.x - a.x) / d;
+  const uy = (b.y - a.y) / d;
+  return { x1: a.x + ux * NODE_R, y1: a.y + uy * NODE_R, x2: b.x - ux * (NODE_R + 3), y2: b.y - uy * (NODE_R + 3) };
+};
+---
+
+<Goals
+  goals={[
+    { id: "feeds", text: "Group by what the machines feed, and see the ore farm join the product it supplies." },
+    { id: "handover", text: "Send 95% or more of the shared smelters' output to one product, and see them join it." },
+  ]}
+/>
+<figure class="fig fa" data-figure="factories" data-mode="distance" data-tray>
+  <svg
+    viewBox="0 0 520 270"
+    data-mode="distance"
+    data-tray
+    role="img"
+    aria-label="Seven machine groups and the links between them. Grouped by distance they form one site; grouped by what they feed they form a factory for Product A, one for Product B, and a shared tray."
+  >
+    <defs>
+      <marker id="fa-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path class="arrow" d="M0 0 8 4 0 8z"></path>
+      </marker>
+    </defs>
+    <rect class="hull" x={hull.x} y={hull.y} width={hull.w} height={hull.h} rx="26"></rect>
+    <text class="dim hull-lbl" x={hull.x + 14} y={hull.y + 16}>One site: every group is within 150 m of another</text>
+    <rect class="card card-a" x="10" y="34" width="240" height="140" rx="10"></rect>
+    <text class="lbl card-lbl card-lbl-a" x="10" y="26">Product A factory</text>
+    <rect class="card card-b" x="285" y="34" width="225" height="140" rx="10"></rect>
+    <text class="lbl card-lbl card-lbl-b" x="285" y="26">Product B factory</text>
+    <rect class="card card-tray" x="170" y="190" width="180" height="70" rx="10"></rect>
+    <text class="lbl card-lbl card-lbl-s" x="170" y="184">Shared</text>
+    {
+      linksFor(60).map((l) => {
+        const p = line(l.from, l.to);
+        return <line class="link" data-link data-from={l.from} data-to={l.to} x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2} marker-end="url(#fa-arrow)"></line>;
+      })
+    }
+    {
+      GROUPS.map((g) => (
+        <g data-group={g.id} data-owner={owners[g.id]} transform={`translate(${g.at.x} ${g.at.y})`}>
+          {g.final ? <rect class="node final" x={-NODE_R} y={-NODE_R} width={NODE_R * 2} height={NODE_R * 2} rx="7"></rect> : <circle class="node" r={NODE_R}></circle>}
+          <text class="lbl name" y={NODE_R + 14} text-anchor="middle">{g.label}</text>
+        </g>
+      ))
+    }
+  </svg>
+  <Controls label="Grouping controls" speed={false} play={false}>
+    <label class="fa-slider"><span>Smelters' output</span><input class="fig-range" type="range" min="0" max="100" step="1" value={DEFAULT_SPLIT} data-ctl="split" aria-describedby="fa-split-text" /><output id="fa-split-text" data-split-text>{DEFAULT_SPLIT}% to A, {100 - DEFAULT_SPLIT}% to B</output></label>
+    <button class="fig-tbtn" type="button" data-ctl="distance" aria-pressed="true">By distance</button>
+    <button class="fig-tbtn" type="button" data-ctl="feeds" aria-pressed="false">By what it feeds</button>
+  </Controls>
+  <p class="fig-caption" aria-live="polite" data-ready-mark>{CAPTION.distance}</p>
+</figure>
+
+<script>
+  import { whenVisible } from "../../../design/figure/lazy";
+  for (const el of document.querySelectorAll<HTMLElement>('figure[data-figure="factories"]')) {
+    whenVisible(el, () => {
+      void import("./factories-view").then((m) => m.mount(el));
+    });
+  }
+</script>
+
+<style>
+  .fa svg {
+    font-family: var(--font-text);
+  }
+  .fa .lbl {
+    fill: var(--satis-ink);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .fa .dim {
+    fill: var(--satis-dim);
+    font-size: 11.5px;
+  }
+  .fa .hull {
+    fill: none;
+    stroke: var(--satis-dim);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+    transition: opacity var(--dur) var(--ease-in-out);
+  }
+  .fa .hull-lbl {
+    transition: opacity var(--dur) var(--ease-in-out);
+  }
+  .fa[data-mode="feeds"] .hull,
+  .fa[data-mode="feeds"] .hull-lbl {
+    opacity: 0;
+  }
+  .fa .card,
+  .fa .card-lbl {
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease-in-out);
+  }
+  .fa .card {
+    fill: var(--satis-zone-pc);
+    stroke: var(--satis-line);
+    stroke-width: 1.5;
+  }
+  .fa[data-mode="feeds"] .card-a,
+  .fa[data-mode="feeds"] .card-b,
+  .fa[data-mode="feeds"] .card-lbl-a,
+  .fa[data-mode="feeds"] .card-lbl-b,
+  .fa[data-mode="feeds"] svg[data-tray] .card-tray,
+  .fa[data-mode="feeds"] svg[data-tray] .card-lbl-s {
+    opacity: 1;
+  }
+  .fa .card-a {
+    stroke: var(--satis-info);
+  }
+  .fa .card-b {
+    stroke: var(--satis-route);
+  }
+  .fa .card-tray {
+    stroke: var(--satis-backup);
+    stroke-dasharray: 5 4;
+  }
+  .fa .link {
+    stroke: var(--satis-dim);
+    stroke-width: 2;
+    transition: opacity var(--dur) var(--ease-in-out);
+  }
+  .fa .arrow {
+    fill: var(--satis-dim);
+  }
+  .fa .node {
+    fill: var(--satis-steel-2);
+    stroke: var(--satis-line);
+    stroke-width: 2;
+    transition:
+      stroke var(--dur) var(--ease-in-out),
+      fill var(--dur) var(--ease-in-out);
+  }
+  .fa .final {
+    stroke-width: 3;
+  }
+  .fa[data-mode="feeds"] [data-owner="A"] .node {
+    stroke: var(--satis-info);
+  }
+  .fa[data-mode="feeds"] [data-owner="B"] .node {
+    stroke: var(--satis-route);
+  }
+  .fa[data-mode="feeds"] [data-owner="shared"] .node {
+    stroke: var(--satis-backup);
+  }
+  .fa :global(.fig-tbtn) {
+    height: 44px;
+    min-width: 44px;
+  }
+  .fa-slider {
+    order: -1;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 100%;
+    min-width: 0;
+    font: 13px var(--font-text);
+    color: var(--fig-ink);
+  }
+  .fa-slider span {
+    flex: none;
+    width: 8em;
+  }
+  .fa-slider output {
+    flex: none;
+    width: 9.5em;
+    color: var(--fig-dim);
+  }
+  .fa-slider .fig-range {
+    min-width: 0;
+  }
+  /* The longest caption's lines, reserved, so the figure doesn't change height from beat to beat. */
+  .fa :global(.fig-caption) {
+    min-height: 5.5em;
+  }
+  @media (max-width: 40rem) {
+    .fa :global(.fig-caption) {
+      min-height: 9em;
+    }
+  }
+</style>

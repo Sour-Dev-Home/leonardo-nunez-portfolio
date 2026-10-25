@@ -19,6 +19,7 @@ export const pageTag = (name: string) => `@page:${name}`;
 export const SPECS: Record<string, readonly string[] | "tagged"> = {
   "a11y.spec.ts": "tagged",
   "checks.spec.ts": [],
+  "factories.spec.ts": ["case-study"],
   "figures.spec.ts": ["kit", "case-study"],
   "fonts.spec.ts": "tagged",
   "frames.spec.ts": ["case-study"],

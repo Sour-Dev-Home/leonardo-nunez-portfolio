@@ -17,6 +17,7 @@ cover:
 
 import OutageFigure from "../../../worlds/satis/figures/OutageFigure.astro";
 import MachineStatesFigure from "../../../worlds/satis/figures/MachineStatesFigure.astro";
+import FactoriesFigure from "../../../worlds/satis/figures/FactoriesFigure.astro";
 import CutoverFigure from "../../../worlds/satis/figures/CutoverFigure.astro";
 import Sidenote from "../../../design/components/Sidenote.astro";
 import Aside from "../../../design/components/Aside.astro";
@@ -50,6 +51,35 @@ Knowing a machine is underfed doesn't say why. The cause can be several machines
 It works in two levels. First it follows items through the factory: which machines make what a starved machine needs, and how much they actually produce. Then it treats every belt, lift and pipe as a pipe of fixed capacity and runs a max-flow (Dinic's algorithm) over the whole network. The smallest cut in that network is the conveyor that limits the flow, and the page names it with its tier, rate and position ([#570](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/570), [#575](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/575), [#578](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/578), [#581](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/581)).
 
 The finder is a pure function of the factory and its connections, so it is easy to test: it has 48 tests, and on a generated factory ten times the size of mine it ran in about 50 ms. Before building the visible part I checked two things on a separate test server, never my own game: that a rebuilt belt shows up on the next read, and what unit a pipe's speed is reported in. Both held, and the second changed the design: a belt or pipe reports its tier's maximum, not the flow actually moving, so the finder can name a capacity cap but cannot see how full a belt is.
+
+## The production planner
+
+The bottleneck finder explains one starved machine. The Planner answers a wider question: what does the whole factory look like, and what feeds what? It draws the factory as a graph, and the hard part is deciding what not to draw. The largest site on my save has 385 machines, joined by a great many belt segments ([ADR-0050](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0050-production-planner.md)).
+
+The first step collapses the belt segments into a graph of machine groups and the links between them. On that site that is 385 machines in 160 groups with 204 links. Loops, where a belt feeds back into its own line, are found as strongly connected components (Tarjan's algorithm).
+
+Then comes the question of what counts as one factory. The first rule was distance: machines within 150 m of each other were one site. I measured the result read-only on my own save, and it was wrong in a useful way. That one "site" was 10 separate weakly connected components that the proximity rule had glued together, 91 of its 204 links were bridges (cut one and the graph falls in two), and the graph was 8 layers deep. A better rule had to follow the items, not the map.
+
+That is the logical factory ([ADR-0055](https://github.com/Sour-Dev-Home/satisfactory-dash/blob/main/docs-vault/wiki/decisions/0055-planner-logical-factories.md), [#669](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/669)). Each group is assigned by its share of output to each final product, worked out from the machines' maximum rates, so there is no live belt polling. A remote raw-material farm joins the factory it feeds, not the one it stands near. Try it, on a made-up example:
+
+<FactoriesFigure />
+
+A group that sends less than 95% of its output to one product is marked shared, rather than forced into a factory it only half belongs to. Small dependent offshoots fold into their factory: fewer than 4 machines, every input from one factory, and nothing leaving by transport, depot or the sink. Collapsing a whole upstream subtree on the canvas uses post-dominators (the Cooper–Harvey–Kennedy algorithm). The reduction is cheap: about 1.5 ms on a real-size graph, and about 98 ms in the capped worst case.
+
+<details>
+<summary>More detail: transport and excess</summary>
+<Aside>
+- A train route becomes one link with a carrier count.
+- Depot uploads link to one shared depot node.
+- Excess sent to the AWESOME Sink and to storage is drawn as its own flows.
+</Aside>
+</details>
+
+The canvas opens on a factory overview. Click a factory to drill into it, and its recipe bubbles open in place. You can collapse a whole upstream subtree, transport links carry an icon, and a motion toggle respects reduced motion ([#672](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/672), [#677](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/677), [#690](https://github.com/Sour-Dev-Home/satisfactory-dash/pull/690)). The [bottleneck finder](#finding-the-bottleneck) is described above and isn't repeated here.
+
+<Figure caption="The Planner's factory overview, on made-up sample data: two factories joined by a link of about 48 items a minute.">
+  <img src="/demo/planner-factories.png" width="1440" height="900" loading="lazy" decoding="async" alt="The Production planner tab showing two factory cards. The Iron Plate factory has 9 machines and makes 48 of 80 items a minute; the Iron Rod factory has 3 machines. A dashed link labelled Iron Ingot, about 48 items a minute, joins them." style="width: 100%; height: auto" />
+</Figure>
 
 ## How data gets in
 
