@@ -24,6 +24,7 @@ describe("satisfactory-dash case study", () => {
     expect(doc.querySelectorAll(".case-study-body h2").map((h) => h.text.trim())).toEqual([
       "The problem",
       "Finding the bottleneck",
+      "The production planner",
       "How data gets in",
       "The move to AWS",
       "Keeping it running",
