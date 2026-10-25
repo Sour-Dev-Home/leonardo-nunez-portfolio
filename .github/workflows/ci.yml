@@ -12,9 +12,9 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
           cache: npm
@@ -43,11 +43,11 @@ jobs:
       grep: ${{ steps.select.outputs.grep }}
       lighthouse: ${{ steps.select.outputs.lighthouse }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
           cache: npm
@@ -100,9 +100,9 @@ jobs:
       PW_VISUAL: "1"
       PW_BLOB: "1"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
           cache: npm
@@ -136,14 +136,14 @@ jobs:
 
       # This viewport's folder only; the `e2e` job puts the four back together.
       - if: always()
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-${{ matrix.project }}
           path: e2e/__screenshots__/${{ matrix.project }}/
           if-no-files-found: ignore
 
       - if: always()
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: blob-report-${{ matrix.project }}
           path: blob-report/
@@ -151,7 +151,7 @@ jobs:
 
       # Traces and videos of failed tests: open with `npx playwright show-trace`.
       - if: failure()
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-results-${{ matrix.project }}
           path: test-results/
@@ -167,10 +167,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - if: needs.e2e-shard.result != 'skipped'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - if: needs.e2e-shard.result != 'skipped'
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
           cache: npm
@@ -179,13 +179,13 @@ jobs:
         run: npm ci
 
       - if: needs.e2e-shard.result != 'skipped'
-        uses: actions/download-artifact@v8.0.2
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: screenshots-*
           path: shards/screenshots
 
       - if: needs.e2e-shard.result != 'skipped'
-        uses: actions/download-artifact@v8.0.2
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: blob-report-*
           path: shards/blobs
@@ -205,14 +205,14 @@ jobs:
           fi
 
       - if: needs.e2e-shard.result != 'skipped'
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots
           path: screenshots/
           if-no-files-found: ignore
 
       - if: needs.e2e-shard.result != 'skipped'
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-report
           path: playwright-report/
@@ -232,9 +232,9 @@ jobs:
     if: needs.changes.outputs.lighthouse == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
           cache: npm
@@ -254,7 +254,7 @@ jobs:
           npm run lhci -- --config="$RUNNER_TEMP/lighthouserc.json"
 
       - if: always()
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: lighthouse
           path: .lighthouseci/
@@ -267,9 +267,9 @@ jobs:
     if: needs.changes.outputs.mode != 'none'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
           cache: npm
@@ -284,7 +284,7 @@ jobs:
       # build-output tests), and a new page isn't live until its PR merges. Internal
       # links are root-relative and checked against dist/. The glob is quoted so
       # lychee expands it: the action's bash has no globstar.
-      - uses: lycheeverse/lychee-action@v2.9.0
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: >-
             --no-progress
@@ -301,7 +301,7 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Check for PII or hardcoded local paths
         env:
@@ -340,7 +340,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
           cache: npm
