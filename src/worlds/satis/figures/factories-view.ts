@@ -3,7 +3,7 @@
 // (inOutCubic, 0.6 s); colours and cards fade through CSS on the design tokens. Under prefers-reduced-motion
 // everything lands at once. The slider moves nothing while it is dragged (only its readout follows); the drawing
 // changes once, when it is let go (`change`), so a drag never restarts the move on every step.
-import { GROUPS, NODE_R, SHARE_THRESHOLD, factoryPlace, linksFor, ownersFor, type Owner } from "../model/factories";
+import { GROUPS, NODE_R, SHARE_THRESHOLD, factoryPlace, labelDy, labelSide, linksFor, ownersFor, type Owner } from "../model/factories";
 import { ease, lerp } from "../../../design/figure/ease";
 import { prefersReducedMotion } from "../../../design/figure/loop";
 import { tickGoal } from "../../../design/figure/controls";
@@ -104,7 +104,12 @@ export function mount(root: HTMLElement): () => void {
     root.dataset.mode = mode;
     svg.dataset.mode = mode;
     svg.toggleAttribute("data-tray", Object.values(owners).includes("shared"));
-    for (const g of GROUPS) nodes.get(g.id)!.dataset.owner = owners[g.id] as Owner;
+    for (const g of GROUPS) {
+      const node = nodes.get(g.id)!;
+      node.dataset.owner = owners[g.id] as Owner;
+      // Grouped by what it feeds, the top row's names go above their icons, clear of the arrows from below.
+      node.querySelector("text.name")!.setAttribute("y", String(labelDy(labelSide(g.id, mode))));
+    }
     for (const ln of lines) {
       const l = linksFor(toA).find((x) => x.from === ln.dataset.from && x.to === ln.dataset.to)!;
       ln.style.opacity = l.rate === 0 ? "0" : "";

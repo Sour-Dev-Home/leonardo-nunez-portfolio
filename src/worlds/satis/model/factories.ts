@@ -29,13 +29,16 @@ export interface Link {
 }
 
 export const GROUPS: readonly Group[] = [
-  { id: "finalA", label: "Product A", icon: "assembler", at: { x: 70, y: 60 }, final: "A" },
+  // Placed so every link runs clear of every name (the layout test checks it), and each group stays within
+  // PROXIMITY_RADIUS of another: one site under the old rule.
+  { id: "finalA", label: "Product A", icon: "assembler", at: { x: 55, y: 60 }, final: "A" },
   { id: "smelA", label: "Smelters", icon: "smelter", at: { x: 150, y: 60 } },
   { id: "farm", label: "Ore farm", icon: "miner-mk2", at: { x: 420, y: 140 } },
-  { id: "mineS", label: "Local miners", icon: "miner-mk1", at: { x: 130, y: 205 } },
-  { id: "smelS", label: "Shared smelters", icon: "smelter", at: { x: 190, y: 140 } },
-  { id: "partsB", label: "Parts B", icon: "constructor", at: { x: 275, y: 140 } },
-  { id: "finalB", label: "Product B", icon: "manufacturer", at: { x: 345, y: 190 }, final: "B" },
+  // Level with the shared smelters it feeds, so its link runs sideways, not up through their name.
+  { id: "mineS", label: "Local miners", icon: "miner-mk1", at: { x: 85, y: 140 } },
+  { id: "smelS", label: "Shared smelters", icon: "smelter", at: { x: 200, y: 140 } },
+  { id: "partsB", label: "Parts B", icon: "constructor", at: { x: 285, y: 140 } },
+  { id: "finalB", label: "Product B", icon: "manufacturer", at: { x: 355, y: 190 }, final: "B" },
 ];
 
 /** The drawing's size and the factory cards (drawing units), shared by the figure and its overlap test. */
@@ -129,8 +132,20 @@ export function factoryPlace(id: string, owner: Owner): { x: number; y: number }
   return { x: id === "smelS" ? 320 : 210, y: 222 };
 }
 
-/** The box a group's name takes, centred under its icon (drawing units; `y` is the top). */
-export function labelBox(label: string, at: { x: number; y: number }): { x: number; y: number; w: number; h: number } {
+const TOP_ROW = new Set(["finalA", "smelA", "farm", "partsB", "finalB"]);
+
+/**
+ * Which side of its icon a group's name sits on. Grouped by what it feeds, the top row is fed from below, so its names
+ * go above the icons and the arrows arrive clear of them; everywhere else the name sits under the icon.
+ */
+export function labelSide(id: string, mode: "distance" | "feeds"): "above" | "below" {
+  return mode === "feeds" && TOP_ROW.has(id) ? "above" : "below";
+}
+/** A name's baseline, from its icon's centre. Above: as far over the icon as below is under it, less the descent. */
+export const labelDy = (side: "above" | "below"): number => (side === "below" ? LABEL_DY : -(NODE_R + 5));
+
+/** The box a group's name takes, centred on its icon (drawing units; `y` is the top). */
+export function labelBox(label: string, at: { x: number; y: number }, side: "above" | "below" = "below"): { x: number; y: number; w: number; h: number } {
   const w = label.length * LABEL_CHAR_W;
-  return { x: at.x - w / 2, y: at.y + LABEL_DY - LABEL_PX, w, h: LABEL_PX + 3 };
+  return { x: at.x - w / 2, y: at.y + labelDy(side) - LABEL_PX, w, h: LABEL_PX + 3 };
 }

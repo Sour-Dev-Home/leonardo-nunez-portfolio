@@ -6,13 +6,14 @@ import Goals from "../../../design/figure/Goals.astro";
 import Controls from "../../../design/figure/Controls.astro";
 import "../../../design/figure/figure.css";
 import "../world.css";
-import { CARDS, GROUPS, LABEL_DY, VIEW, linksFor, ownersFor } from "../model/factories";
+import { CARDS, GROUPS, VIEW, labelDy, labelSide, linksFor, ownersFor } from "../model/factories";
 import { CAPTION, DEFAULT_SPLIT, NODE_R } from "./factories-view";
 
 const owners = ownersFor(DEFAULT_SPLIT);
 const xs = GROUPS.map((g) => g.at.x);
 const ys = GROUPS.map((g) => g.at.y);
-const hull = { x: Math.min(...xs) - 40, y: Math.min(...ys) - 36, w: Math.max(...xs) - Math.min(...xs) + 80, h: Math.max(...ys) - Math.min(...ys) + 84 };
+// The top edge sits far enough above the first row that its sentence clears the icons.
+const hull = { x: Math.min(...xs) - 40, y: Math.min(...ys) - 44, w: Math.max(...xs) - Math.min(...xs) + 80, h: Math.max(...ys) - Math.min(...ys) + 92 };
 const at = (id: string) => GROUPS.find((g) => g.id === id)!.at;
 const line = (from: string, to: string) => {
   const a = at(from);
@@ -63,7 +64,7 @@ const line = (from: string, to: string) => {
           {/* The game's building icon on a chip (public/images/satis, see its NOTICE); the chip's outline takes the owner's colour. */}
           <rect class:list={["node", { final: g.final }]} x={-NODE_R} y={-NODE_R} width={NODE_R * 2} height={NODE_R * 2} rx="7"></rect>
           <image href={`/images/satis/${g.icon}.webp`} x={-NODE_R + 3} y={-NODE_R + 3} width={NODE_R * 2 - 6} height={NODE_R * 2 - 6} aria-hidden="true"></image>
-          <text class="name" y={LABEL_DY} text-anchor="middle">{g.label}</text>
+          <text class="name" y={labelDy(labelSide(g.id, "distance"))} text-anchor="middle">{g.label}</text>
         </g>
       ))
     }
@@ -99,6 +100,15 @@ const line = (from: string, to: string) => {
     fill: var(--satis-ink);
     font-size: 11px;
     font-weight: 600;
+    /* A halo in the figure's background, so a link passing under a name never cuts through it. */
+    paint-order: stroke;
+    stroke: var(--fig-bg);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
+  /* Grouped by what it feeds, every name sits on its factory's card. */
+  .fa[data-mode="feeds"] .name {
+    stroke: var(--satis-zone-pc);
   }
   .fa .dim {
     fill: var(--satis-dim);

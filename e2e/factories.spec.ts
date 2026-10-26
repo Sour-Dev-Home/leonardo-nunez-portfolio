@@ -35,6 +35,26 @@ test.describe("factories figure", () => {
     await expect(page.locator('[data-goal="handover"]')).toHaveClass(/done/);
   });
 
+  test("moves nothing while the slider is dragged, and applies it when the slider is let go", tag, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await ready(page);
+    await btn(page, "feeds").click();
+    const smelters = page.locator(`${FIG} [data-group="smelS"]`);
+    const shared = await smelters.getAttribute("transform");
+    const before = await caption(page).textContent();
+    // A drag fires `input` on every step and `change` only on release.
+    await page.locator(`${FIG} input[data-ctl="split"]`).evaluate((el: HTMLInputElement) => {
+      el.value = "97";
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await expect(page.locator(`${FIG} [data-split-text]`)).toHaveText("97% to A, 3% to B");
+    await expect(smelters).toHaveAttribute("transform", shared!);
+    await expect(caption(page)).toHaveText(before!);
+    await page.locator(`${FIG} input[data-ctl="split"]`).evaluate((el: HTMLInputElement) => el.dispatchEvent(new Event("change", { bubbles: true })));
+    await expect(smelters).not.toHaveAttribute("transform", shared!);
+    await expect(caption(page)).toContainText("they join its factory");
+  });
+
   test("lands at once under reduced motion", tag, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await ready(page);
