@@ -1,14 +1,15 @@
 // Draws figure 4 from the factory model (../model/factories.ts). The model decides who owns what; this file
 // only moves the groups there and reads the controls. Groups travel between places, so they ease in and out
 // (inOutCubic, 0.6 s); colours and cards fade through CSS on the design tokens. Under prefers-reduced-motion
-// everything lands at once.
-import { GROUPS, SHARE_THRESHOLD, factoryPlace, linksFor, ownersFor, type Owner } from "../model/factories";
+// everything lands at once. The slider moves nothing while it is dragged (only its readout follows); the drawing
+// changes once, when it is let go (`change`), so a drag never restarts the move on every step.
+import { GROUPS, NODE_R, SHARE_THRESHOLD, factoryPlace, linksFor, ownersFor, type Owner } from "../model/factories";
 import { ease, lerp } from "../../../design/figure/ease";
 import { prefersReducedMotion } from "../../../design/figure/loop";
 import { tickGoal } from "../../../design/figure/controls";
 
+export { NODE_R };
 export const TRAVEL_SECONDS = 0.6;
-export const NODE_R = 17;
 export const DEFAULT_SPLIT = 60;
 const PCT = Math.round(SHARE_THRESHOLD * 100);
 
@@ -131,7 +132,13 @@ export function mount(root: HTMLElement): () => void {
   };
   on(bDist, "click", setMode("distance"));
   on(bFeeds, "click", setMode("feeds"));
+  // While dragging, only the readout follows; the groups, colours and caption change on release.
   on(range, "input", () => {
+    range.style.setProperty("--p", `${range.value}%`);
+    rangeText.textContent = `${range.value}% to A, ${100 - +range.value}% to B`;
+  });
+  on(range, "change", () => {
+    if (+range.value === toA) return;
     toA = +range.value;
     render();
     retarget();

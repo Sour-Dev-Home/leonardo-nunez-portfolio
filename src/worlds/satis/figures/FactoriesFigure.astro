@@ -6,7 +6,7 @@ import Goals from "../../../design/figure/Goals.astro";
 import Controls from "../../../design/figure/Controls.astro";
 import "../../../design/figure/figure.css";
 import "../world.css";
-import { GROUPS, linksFor, ownersFor } from "../model/factories";
+import { CARDS, GROUPS, LABEL_DY, VIEW, linksFor, ownersFor } from "../model/factories";
 import { CAPTION, DEFAULT_SPLIT, NODE_R } from "./factories-view";
 
 const owners = ownersFor(DEFAULT_SPLIT);
@@ -32,7 +32,7 @@ const line = (from: string, to: string) => {
 />
 <figure class="fig fa" data-figure="factories" data-mode="distance" data-tray>
   <svg
-    viewBox="0 0 520 270"
+    viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
     data-mode="distance"
     data-tray
     role="img"
@@ -45,12 +45,12 @@ const line = (from: string, to: string) => {
     </defs>
     <rect class="hull" x={hull.x} y={hull.y} width={hull.w} height={hull.h} rx="26"></rect>
     <text class="dim hull-lbl" x={hull.x + 14} y={hull.y + 16}>One site: every group is within 150 m of another</text>
-    <rect class="card card-a" x="10" y="34" width="240" height="140" rx="10"></rect>
-    <text class="lbl card-lbl card-lbl-a" x="10" y="26">Product A factory</text>
-    <rect class="card card-b" x="285" y="34" width="225" height="140" rx="10"></rect>
-    <text class="lbl card-lbl card-lbl-b" x="285" y="26">Product B factory</text>
-    <rect class="card card-tray" x="170" y="190" width="180" height="70" rx="10"></rect>
-    <text class="lbl card-lbl card-lbl-s" x="170" y="184">Shared</text>
+    <rect class="card card-a" x={CARDS.A.x} y={CARDS.A.y} width={CARDS.A.w} height={CARDS.A.h} rx="10"></rect>
+    <text class="lbl card-lbl card-lbl-a" x={CARDS.A.x} y={CARDS.A.y - 8}>{CARDS.A.label}</text>
+    <rect class="card card-b" x={CARDS.B.x} y={CARDS.B.y} width={CARDS.B.w} height={CARDS.B.h} rx="10"></rect>
+    <text class="lbl card-lbl card-lbl-b" x={CARDS.B.x} y={CARDS.B.y - 8}>{CARDS.B.label}</text>
+    <rect class="card card-tray" x={CARDS.shared.x} y={CARDS.shared.y} width={CARDS.shared.w} height={CARDS.shared.h} rx="10"></rect>
+    <text class="lbl card-lbl card-lbl-s" x={CARDS.shared.x} y={CARDS.shared.y - 6}>{CARDS.shared.label}</text>
     {
       linksFor(60).map((l) => {
         const p = line(l.from, l.to);
@@ -60,8 +60,10 @@ const line = (from: string, to: string) => {
     {
       GROUPS.map((g) => (
         <g data-group={g.id} data-owner={owners[g.id]} transform={`translate(${g.at.x} ${g.at.y})`}>
-          {g.final ? <rect class="node final" x={-NODE_R} y={-NODE_R} width={NODE_R * 2} height={NODE_R * 2} rx="7"></rect> : <circle class="node" r={NODE_R}></circle>}
-          <text class="lbl name" y={NODE_R + 14} text-anchor="middle">{g.label}</text>
+          {/* The game's building icon on a chip (public/images/satis, see its NOTICE); the chip's outline takes the owner's colour. */}
+          <rect class:list={["node", { final: g.final }]} x={-NODE_R} y={-NODE_R} width={NODE_R * 2} height={NODE_R * 2} rx="7"></rect>
+          <image href={`/images/satis/${g.icon}.webp`} x={-NODE_R + 3} y={-NODE_R + 3} width={NODE_R * 2 - 6} height={NODE_R * 2 - 6} aria-hidden="true"></image>
+          <text class="name" y={LABEL_DY} text-anchor="middle">{g.label}</text>
         </g>
       ))
     }
@@ -90,6 +92,12 @@ const line = (from: string, to: string) => {
   .fa .lbl {
     fill: var(--satis-ink);
     font-size: 13px;
+    font-weight: 600;
+  }
+  /* A group's name under its icon: smaller than the card names, so a full row of groups fits (the model's LABEL_PX). */
+  .fa .name {
+    fill: var(--satis-ink);
+    font-size: 11px;
     font-weight: 600;
   }
   .fa .dim {
