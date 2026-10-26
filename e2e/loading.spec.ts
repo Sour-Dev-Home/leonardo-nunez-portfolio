@@ -8,7 +8,13 @@ for (const { name, path } of pages) {
   test(`${name}: media keeps its size and nothing moves while it loads`, { tag: pageTag(name) }, async ({ page }) => {
     const media = await holdMedia(page);
     await page.goto(path, { waitUntil: "domcontentloaded" });
-    const expected = await page.$$eval("img[src], video[poster]", (els) => els.length);
+    // SVG <image> icons count too (figures draw game icons with them), once per file: the document fetches a file two
+    // icons share only once, even with the cache off.
+    const expected = await page.evaluate(
+      () =>
+        document.querySelectorAll("img[src], video[poster]").length +
+        new Set([...document.querySelectorAll("svg image[href]")].map((el) => el.getAttribute("href"))).size,
+    );
     await expect.poll(media.held).toBe(expected);
     const before = { boxes: await mediaBoxes(page), height: await page.evaluate(() => document.body.scrollHeight) };
 
