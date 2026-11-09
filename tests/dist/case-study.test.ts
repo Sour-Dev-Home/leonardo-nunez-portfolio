@@ -29,7 +29,10 @@ describe("satisfactory-dash case study", () => {
       "The move to AWS",
       "Keeping it running",
       "Shipping it",
-      "Could the agent move into the game?",
+      "Moving the agent into the game",
+      "The mod’s workflow",
+      "One way in",
+      "How to set it up",
       "What I’d do differently",
       "How it was built",
     ]);
@@ -52,11 +55,9 @@ describe("satisfactory-dash case study", () => {
     const links = hrefs(doc);
     expect(links).toContain("/");
     for (const path of [
-      "agent/src/queue.ts",
-      "agent/src/pusher.ts",
-      "agent/src/backoff.ts",
-      "agent/src/agentRunner.ts",
       "frontend/src/components/DataAge.tsx",
+      "docs-vault/wiki/decisions/0058-native-readers-remove-frm.md",
+      "docs-vault/wiki/decisions/0066-mod-only-retire-node-agent-and-direct-poll.md",
       "infra/aws/ecs.tf",
       "docs-vault/wiki/runbooks/aws.md",
       "docs-vault/wiki/decisions/0031-edge-agent.md",
@@ -64,6 +65,10 @@ describe("satisfactory-dash case study", () => {
       "docs-vault/wiki/decisions/0035-backups-off-aws.md",
     ]) {
       expect(links.some((h) => h.startsWith(GH + path)), path).toBe(true);
+    }
+    // ADR-0066 deleted the Node agent's and the Electron app's workspaces, so links into them 404.
+    for (const gone of ["agent/", "server-manager/"]) {
+      expect(links.filter((h) => h.startsWith(GH + gone)), gone).toEqual([]);
     }
     expect(links).toContain("https://demo.satis-manager.com");
     expect(links).toContain("https://satis-manager.com");
