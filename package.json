@@ -16,26 +16,26 @@
     "render:covers": "node scripts/render-covers.mjs"
   },
   "dependencies": {
-    "@astrojs/mdx": "8.1.1",
-    "@astrojs/react": "7.1.1",
-    "astro": "7.4.2",
+    "@astrojs/mdx": "8.1.3",
+    "@astrojs/react": "7.1.4",
+    "astro": "7.4.7",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
-    "@playwright/test": "1.64.1",
+    "@playwright/test": "1.65.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
-    "jsdom": "^30.1.3",
-    "node-html-parser": "^9.0.5",
-    "oxlint": "^1.89.0",
+    "jsdom": "^31.0.0",
+    "node-html-parser": "^9.0.7",
+    "oxlint": "^1.92.0",
     "sharp": "^0.35.5",
     "typescript": "~7.0.2",
-    "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   }
 }
