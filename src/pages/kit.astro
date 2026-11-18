@@ -107,7 +107,12 @@ const swatches = ["paper", "raised", "ink", "ink-soft", "muted", "accent", "rule
         <Callout>A note callout, for something the reader should know.</Callout>
         <Callout kind="warning">A warning callout, for something that can go wrong.</Callout>
         <Figure caption="A figure with its caption.">
-          <img src="/diagrams/satisfactory-dash-backend-modules.svg" width="2663" height="2417" alt="Backend modules diagram" />
+          <img
+            src="/diagrams/satisfactory-dash-backend-modules.svg"
+            width="6968"
+            height="4195"
+            alt="Component diagram of the satisfactory-dash backend. The web app calls eight modules: identity for sign-in and sessions, servers for the server list, telemetry for status, power, factory history and the production planner, map for the world map, alerts for alert rules sent to Discord and web push, agents for pairing edge agents, metrics for the operator metrics page, and settings for auto-pause. Only the gameserver module reaches the game, through the game-adapter package, which the edge agent also uses."
+          />
         </Figure>
       </div>
     </section>
