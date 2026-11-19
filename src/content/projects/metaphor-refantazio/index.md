@@ -107,6 +107,10 @@ The setup for a human collaborator is planned in an open issue ([#309](https://g
 - **Personal information.** The check command scans for general patterns and, on pushes to `main`, for a private list held as a repository secret.
 - **Supply chain.** The repository settings require every action to be pinned by commit SHA and allow only GitHub's own actions and the Scorecard action ([PR #326](https://github.com/Sour-Dev-Home/metaphor-accessibility/pull/326)). Read-only tokens by default, CodeQL on the C# code and the workflows and a known-vulnerability check as required jobs, Dependabot weekly for NuGet, npm and Actions, a weekly OpenSSF Scorecard, secret scanning with push protection, and a CI rebuild in a second checkout that must match byte for byte.
 
+## Where the practices come from
+
+The pipeline and its security gates draw most on *Continuous Delivery* by Jez Humble and David Farley. The way I work with AI coding agents, and the push for a codebase that people and agents can both read, come from Matt Pocock's teaching on coding with AI and from recent talks by engineers at Google and Anthropic.
+
 ## Progress so far
 
 Work started in mid-November 2026, and there is no release or tag yet.
