@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const card = ".work-card:has(.work-card-link)";
+// A case-study card with a cover: not every card has one, so the first card may not.
+const card = ".work-card:has(.work-card-link):has(.work-card-media img)";
 const media = `${card} .work-card-media img`;
 const filter = (page: Page) => page.locator(media).first().evaluate((el) => getComputedStyle(el).filter);
 const arrow = (page: Page) =>
