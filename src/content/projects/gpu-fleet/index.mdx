@@ -41,7 +41,7 @@ The broker is a FastAPI service with its jobs in SQLite. Workers are a small Pyt
 Every step is a span in one trace, across both services:
 
 <Figure caption="The slowest job of the three-worker GPU run in Grafana's trace view: 310 ms, of which 291 ms is the model call. The broker's own span sits under the worker's complete call.">
-  <img src="/images/gpu-fleet/job-trace.webp" width="1368" height="556" loading="lazy" decoding="async" alt="A Tempo trace waterfall for one fleet-worker job lasting 310 milliseconds. Its child spans are lease 6.8 ms, run 291 ms, store 4.8 ms and complete 6.8 ms, with the fleet-broker span POST /complete, 5.9 ms, nested under complete." style="width: 100%; height: auto" />
+  <img src="/images/gpu-fleet/job-trace.webp" width="1368" height="556" decoding="async" alt="A Tempo trace waterfall for one fleet-worker job lasting 310 milliseconds. Its child spans are lease 6.8 ms, run 291 ms, store 4.8 ms and complete 6.8 ms, with the fleet-broker span POST /complete, 5.9 ms, nested under complete." style="width: 100%; height: auto" />
 </Figure>
 
 ## When a worker dies
@@ -93,13 +93,13 @@ Each was run once, so small differences are noise. The cold run includes loading
 The dashboard, both alerts and the service-level objective (95% of jobs done within 15 minutes) are files in the repo that Grafana loads read-only, so what Grafana shows can't drift from the code.
 
 <Figure caption="The Fleet dashboard after the GPU runs. The stack had only just started, so the graphs hold a few minutes of data at their right edge.">
-  <img src="/images/gpu-fleet/dashboard.webp" width="1538" height="456" loading="lazy" decoding="async" alt="Grafana's Fleet dashboard. Stat panels read Queued 0, Oldest queued job 0 seconds, Dead letters 0, SLO done within 15 minutes 100.0 percent, and Error budget left 100 percent. Below, a Jobs by state graph rises to 40 done, and a Throughput by model graph shows one point for qwen3:8b." style="width: 100%; height: auto" />
+  <img src="/images/gpu-fleet/dashboard.webp" width="1538" height="456" decoding="async" alt="Grafana's Fleet dashboard. Stat panels read Queued 0, Oldest queued job 0 seconds, Dead letters 0, SLO done within 15 minutes 100.0 percent, and Error budget left 100 percent. Below, a Jobs by state graph rises to 40 done, and a Throughput by model graph shows one point for qwen3:8b." style="width: 100%; height: auto" />
 </Figure>
 
 To see an alert fire, I then dead-lettered a job on purpose: leased it by hand three times, let each lease expire, and the fourth claim moved it to `dead`.
 
 <Figure caption="A few minutes later, after one job was dead-lettered on purpose: the Dead letters alert is firing. Alerts show in Grafana only; nothing notifies anyone yet.">
-  <img src="/images/gpu-fleet/alert-rules.webp" width="1256" height="222" loading="lazy" decoding="async" alt="Grafana's alert rule list with two provisioned rules: Dead letters, marked as firing, and Oldest queued job waiting over 10 minutes, marked normal." style="width: 100%; height: auto" />
+  <img src="/images/gpu-fleet/alert-rules.webp" width="1256" height="222" decoding="async" alt="Grafana's alert rule list with two provisioned rules: Dead letters, marked as firing, and Oldest queued job waiting over 10 minutes, marked normal." style="width: 100%; height: auto" />
 </Figure>
 
 Measuring also turned up a blind spot. Right after a fresh start, the SLO panels missed the whole first batch: the turnaround counter only appears once the first job finishes, so the first sample already reads 20, and a rate over it has no earlier sample to compare with. A long-running broker isn't affected, but it's on the list.
