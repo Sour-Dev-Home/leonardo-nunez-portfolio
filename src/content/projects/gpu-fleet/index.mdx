@@ -1,0 +1,124 @@
+---
+name: gpu-fleet
+summary: >-
+  A pull-based GPU job fleet: a small broker leases jobs to workers meant to run on any backend. A cloud and DevOps build.
+description: >-
+  A compute-agnostic GPU worker fleet: a small FastAPI broker hands out leased jobs, and the same worker is meant to run unchanged on a local GPU, free notebooks, Cloud Run Jobs and Kubernetes. Its first workload will be cutscene audio descriptions for the Metaphor: ReFantazio accessibility mod. It's a learning project, built phase by phase to learn AWS, Google Cloud, Terraform, Docker and Kubernetes, with every decision recorded as an ADR. Today it runs in Docker Compose on one PC with an AMD GPU, with traces, a dashboard, alerts and an SLO kept as code; the cloud phases are next.
+status: in-progress
+stack: [Python, FastAPI, SQLite, Docker, Docker Compose, Ollama, ROCm, OpenTelemetry, Grafana, Prometheus, Tempo, Loki, Terraform, AWS S3, GitHub Actions, pytest, sops]
+repoUrl: https://github.com/Sour-Dev-Home/gpu-fleet
+emphasis: secondary
+order: 1
+---
+
+import Figure from "../../../design/components/Figure.astro";
+import ArchitectureFigure from "../../../components/fleet/ArchitectureFigure.astro";
+import ScalingFigure from "../../../components/fleet/ScalingFigure.astro";
+
+## The problem
+
+My [Metaphor: ReFantazio accessibility mod](/projects/metaphor-refantazio) will need audio descriptions of its cutscenes, and producing them is GPU work: a lot of small jobs, each one a model call. I have one AMD GPU at home, and free GPU time exists in places like Kaggle and Colab notebooks, none of which can be reached from outside.
+
+gpu-fleet is the system for that: a broker that holds a queue of jobs, and workers that pull them from wherever they run. It is also how I'm learning cloud and DevOps properly, phase by phase, on something real instead of a tutorial ([phases](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/phases.md)). Every design choice is written down as an architecture decision record, with the options I turned down.
+
+As of 25 November, phases 0 to 3b are done: it all runs on one PC. Nothing goes through the cloud yet.
+
+## How it's built
+
+<ArchitectureFigure />
+
+The broker is a FastAPI service with its jobs in SQLite. Workers are a small Python package in a container; Compose scales them from one to three. The model server, Ollama, runs natively on Windows and on the GPU, outside Docker: Docker Desktop has no supported path to an AMD GPU, and baking Ollama into the worker image would add 3 to 8 GB per GPU vendor ([ADR 0014](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0014-container-images-and-compose.md)).
+
+## One job, start to finish
+
+1. `fleet-enqueue` posts the job with the admin token: an input hash, the model, the prompt version and a data class. A retried post does nothing new.
+2. A worker asks for work, naming the prompt versions it supports and the models its model server has. In one SQL statement, the broker claims the oldest job that matches and that the worker's token is cleared for, and returns it with a fresh lease token.
+3. The worker computes the result's key, a SHA-256 over the input, model and prompt version. If that result already exists, it only reports the job done.
+4. Otherwise it runs the job, renewing the lease in the background, writes the result under its key and calls complete. The broker accepts it only with the current lease token.
+
+Every step is a span in one trace, across both services:
+
+<Figure caption="The slowest job of the three-worker GPU run in Grafana's trace view: 310 ms, of which 291 ms is the model call. The broker's own span sits under the worker's complete call.">
+  <img src="/images/gpu-fleet/job-trace.webp" width="1368" height="556" decoding="async" alt="A Tempo trace waterfall for one fleet-worker job lasting 310 milliseconds. Its child spans are lease 6.8 ms, run 291 ms, store 4.8 ms and complete 6.8 ms, with the fleet-broker span POST /complete, 5.9 ms, nested under complete." style="width: 100%; height: auto" />
+</Figure>
+
+## When a worker dies
+
+There is no reaper process. A lease lasts 60 seconds and the worker renews it at two thirds of that. If the worker dies, the renewals stop, and the next claim treats the expired lease as free work and hands it out again with a new token. After three attempts the job goes to `dead` instead ([ADR 0006](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0006-lease-lifecycle.md)).
+
+If the old worker comes back and tries to finish, the broker refuses it, because the token is no longer current. Even if both had written a result, nothing breaks: results are named by their content hash, so the second write is the same file ([ADR 0003](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0003-content-addressed-results.md)).
+
+## Decisions
+
+- **Workers pull from a broker; they never hold cloud keys.** Most places a worker runs sit behind NAT, so the broker can't push to them, and a notebook or a volunteer's machine shouldn't hold AWS credentials ([ADR 0002](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0002-pull-based-broker.md)).
+  <span class="tradeoff"><span class="tradeoff-label">Turned down</span>workers reading SQS directly, which puts AWS keys on every worker.</span>
+- **Results are named by their content, so duplicates are harmless.** That makes delivery "at least once" good enough, and every finished result doubles as a cache.
+  <span class="tradeoff"><span class="tradeoff-label">Turned down</span>random result IDs with a "done" flag (duplicates leave orphans), and exactly-once delivery (expensive, and unneeded once duplicates don't matter).</span>
+- **Short polling with capped, jittered backoff.** By my estimate, ten idle workers polling every second would make about 26 million requests a month, roughly 13 times Cloud Run's free tier. Long polling keeps an instance busy instead, about 14 times the free compute. Backing off to at most 60 seconds comes to about 430,000 requests: free ([ADR 0008](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0008-short-polling-with-backoff.md)).
+  <span class="tradeoff"><span class="tradeoff-label">The cost</span>an idle worker can take up to about a minute to notice new work.</span>
+- **The broker decides what a worker may see.** Each job has a data class, so copyrighted game footage can stay off untrusted machines. Clearance comes from the broker's config for the worker's token; capabilities come from the worker. Both are checked in the one claim ([ADR 0015](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0015-data-class-clearance-capabilities.md)).
+  <span class="tradeoff"><span class="tradeoff-label">Turned down</span>letting workers declare their own clearance. A security boundary the client declares isn't a boundary.</span>
+- **Telemetry is pushed with OpenTelemetry.** Workers and broker push metrics, logs and traces to a collector ([ADR 0018](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0018-observability-opentelemetry.md)).
+  <span class="tradeoff"><span class="tradeoff-label">Turned down</span>a vendor SDK (lock-in), and a scraped `/metrics` endpoint, which on a public broker would show queue sizes to anyone.</span>
+
+## What one GPU can do
+
+On 25 November I measured it in a throwaway copy of the stack, each run starting from empty volumes. Wall time is the broker's own clock, from the first job queued to the last one done.
+
+<ScalingFigure />
+
+Three workers on one GPU gave 1.6 times the jobs per second of one worker, not three times. The model call itself got slower, from a median of 149 to 248 ms, because the three workers' requests wait for each other at the one Ollama server. The jobs are tiny (16 tokens), so these runs say more about the pipeline than about the GPU. The model, qwen3:8b, took 4.92 GiB, all of it on the GPU.
+
+Without the GPU, the broker is the limit. Two hundred no-op jobs ran at 34 jobs a second with one worker and 33 with three: the extra workers made each broker call slower (median lease 6.5 to 19.3 ms), since every call goes through one process and one SQLite writer.
+
+<details>
+<summary>Every run</summary>
+
+| Run | Wall time | Jobs/s |
+| --- | --- | --- |
+| No-op, 200 jobs, 1 worker | 5.87 s | 34.1 |
+| No-op, 200 jobs, 3 workers | 6.07 s | 33.0 |
+| GPU, 20 jobs, 1 worker, cold | 8.00 s | 2.5 |
+| GPU, 20 jobs, 1 worker | 4.97 s | 4.0 |
+| GPU, 20 jobs, 3 workers | 3.05 s | 6.6 |
+
+Each was run once, so small differences are noise. The cold run includes loading the model, which took 3.1 s. Every job finished on its first lease, and none were dead-lettered.
+
+</details>
+
+## Watching it
+
+The dashboard, both alerts and the service-level objective (95% of jobs done within 15 minutes) are files in the repo that Grafana loads read-only, so what Grafana shows can't drift from the code.
+
+<Figure caption="The Fleet dashboard after the GPU runs. The stack had only just started, so the graphs hold a few minutes of data at their right edge.">
+  <img src="/images/gpu-fleet/dashboard.webp" width="1538" height="456" decoding="async" alt="Grafana's Fleet dashboard. Stat panels read Queued 0, Oldest queued job 0 seconds, Dead letters 0, SLO done within 15 minutes 100.0 percent, and Error budget left 100 percent. Below, a Jobs by state graph rises to 40 done, and a Throughput by model graph shows one point for qwen3:8b." style="width: 100%; height: auto" />
+</Figure>
+
+To see an alert fire, I then dead-lettered a job on purpose: leased it by hand three times, let each lease expire, and the fourth claim moved it to `dead`.
+
+<Figure caption="A few minutes later, after one job was dead-lettered on purpose: the Dead letters alert is firing. Alerts show in Grafana only; nothing notifies anyone yet.">
+  <img src="/images/gpu-fleet/alert-rules.webp" width="1256" height="222" decoding="async" alt="Grafana's alert rule list with two provisioned rules: Dead letters, marked as firing, and Oldest queued job waiting over 10 minutes, marked normal." style="width: 100%; height: auto" />
+</Figure>
+
+Measuring also turned up a blind spot. Right after a fresh start, the SLO panels missed the whole first batch: the turnaround counter only appears once the first job finishes, so the first sample already reads 20, and a rate over it has no earlier sample to compare with. A long-running broker isn't affected, but it's on the list.
+
+## Limits
+
+- One GPU on one machine, local only. Workers sharing it queue at the one model server.
+- SQLite won't work on Cloud Run, which has no shared disk, so phase 4 replaces it.
+- Dead jobs can't yet be inspected or requeued through the API, and there's no call to give a lease back, so a job that fails for good uses up an attempt.
+- One worker token means one clearance for every worker. Volunteers would need their own tokens first.
+
+## How it's checked
+
+Every pull request runs CI: secret scanning, linting, Terraform validation and tflint, Trivy and hadolint for the container setup, the Python tests and the image builds. Actions are pinned to commits. On 25 November, 291 tests passed in 25 seconds. A small mutation script breaks the code on purpose to check the tests catch it, and it has found real gaps, such as `<` where the dead-letter check needed `<=`. AWS changes go through Terraform, always from a reviewed plan, with short-lived logins instead of keys on disk ([ADR 0017](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0017-terraform-aws-layout-and-state.md)).
+
+## What's next
+
+Phase 4 puts the broker on the public internet, on Google Cloud Run ([ADR 0019](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr/0019-public-broker-on-cloud-run.md)). Its first step is merged: lease tokens stored only as hashes, token rotation, rate limits and a cap on request size. Next come a PostgreSQL job store, the Cloud Run deploy in Terraform, and results in S3 through presigned URLs, with no AWS keys on the broker. After that: notebook workers, Cloud Run Jobs on GPUs, Kubernetes, and finally the Metaphor mod's real run through the fleet.
+
+## Links
+
+- [Repository](https://github.com/Sour-Dev-Home/gpu-fleet)
+- [Phases](https://github.com/Sour-Dev-Home/gpu-fleet/blob/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/phases.md)
+- [Architecture decisions](https://github.com/Sour-Dev-Home/gpu-fleet/tree/19330ea08787b6bc6d1da5ea5f036d5f913c3e50/docs/adr)

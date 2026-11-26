@@ -4,6 +4,7 @@ export const PAGES = [
   { name: "lanes", path: "/projects/lanes", status: 200 },
   { name: "site", path: "/projects/leonardonunez-dev", status: 200 },
   { name: "metaphor", path: "/projects/metaphor-refantazio", status: 200 },
+  { name: "gpu-fleet", path: "/projects/gpu-fleet", status: 200 },
   { name: "about", path: "/about", status: 200 },
   { name: "kit", path: "/kit", status: 200 },
   { name: "not-found", path: "/no-such-page", status: 404 },

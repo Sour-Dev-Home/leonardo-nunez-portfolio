@@ -1,0 +1,151 @@
+---
+// gpu-fleet's architecture as it runs today, redrawn from the repo's architecture notes (compose.yaml,
+// compose.obs.yaml, ADR 0002/0014/0017/0018). Solid lines run today; dashed ones are planned.
+// Static SVG in the site's tokens, so it follows light and dark mode; no script.
+import Figure from "../../design/components/Figure.astro";
+---
+
+<Figure caption="What runs today, all on one PC: solid lines run now, dashed ones are planned. Workers only ever call out; the broker never connects to them.">
+  <svg class="fleet-arch" viewBox="0 0 400 640" role="img" aria-labelledby="fleet-arch-title fleet-arch-desc">
+    <title id="fleet-arch-title">gpu-fleet architecture</title>
+    <desc id="fleet-arch-desc">
+      On one Windows PC, Docker Compose runs the broker, one to three workers, a results volume and an optional
+      Grafana stack; Ollama runs natively on the AMD RX 9070. fleet-enqueue posts jobs to the broker with the admin
+      token. Workers call the broker to lease, heartbeat and complete jobs, call Ollama to generate, and write
+      results to the volume under a content hash. Broker and workers push telemetry to Grafana. Planned, outside the
+      PC: a Cloud Run broker, notebook, Cloud Run Jobs and Kubernetes workers, and results in S3, where the buckets
+      already exist but hold no jobs yet.
+    </desc>
+    <defs>
+      <marker id="fa-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 10 5 0 10z" class="fa-head"></path>
+      </marker>
+      <marker id="fa-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 10 5 0 10z" class="fa-head-accent"></path>
+      </marker>
+    </defs>
+
+    {/* The PC */}
+    <rect class="fa-frame" x="4" y="4" width="392" height="470"></rect>
+    <text class="fa-kicker" x="16" y="24">ONE WINDOWS PC · DOCKER COMPOSE</text>
+
+    {/* fleet-enqueue */}
+    <rect class="fa-box" x="20" y="38" width="340" height="44"></rect>
+    <text class="fa-name" x="34" y="58">fleet-enqueue</text>
+    <text class="fa-note" x="34" y="74">adds jobs with the admin token</text>
+    <line class="fa-line" x1="190" y1="82" x2="190" y2="118" marker-end="url(#fa-arrow)"></line>
+    <text class="fa-label" x="198" y="104">POST /jobs</text>
+
+    {/* broker */}
+    <rect class="fa-box" x="20" y="120" width="340" height="62"></rect>
+    <text class="fa-name" x="34" y="141">broker</text>
+    <text class="fa-note" x="34" y="158">FastAPI + SQLite (WAL)</text>
+    <text class="fa-note" x="34" y="174">leases, heartbeats, dead letters</text>
+
+    {/* worker pulls from broker */}
+    <line class="fa-line fa-pull" x1="190" y1="234" x2="190" y2="184" marker-end="url(#fa-arrow-accent)"></line>
+    <text class="fa-label fa-label-accent" x="198" y="205">lease · heartbeat · complete</text>
+    <text class="fa-label" x="198" y="221">worker token + traceparent</text>
+
+    {/* worker */}
+    <rect class="fa-box" x="20" y="236" width="340" height="44"></rect>
+    <text class="fa-name" x="34" y="256">worker × 1–3</text>
+    <text class="fa-note" x="34" y="272">runner: echo, or smoke on the GPU</text>
+
+    {/* worker to Ollama and results */}
+    <line class="fa-line" x1="105" y1="280" x2="105" y2="318" marker-end="url(#fa-arrow)"></line>
+    <text class="fa-label" x="112" y="304">generate</text>
+    <line class="fa-line" x1="275" y1="280" x2="275" y2="318" marker-end="url(#fa-arrow)"></line>
+    <text class="fa-label" x="282" y="304">put(hash)</text>
+
+    <rect class="fa-box" x="20" y="320" width="166" height="62"></rect>
+    <text class="fa-name" x="32" y="341">Ollama</text>
+    <text class="fa-note" x="32" y="358">native, outside Docker</text>
+    <text class="fa-note" x="32" y="374">AMD RX 9070 (ROCm)</text>
+
+    <rect class="fa-box" x="194" y="320" width="166" height="62"></rect>
+    <text class="fa-name" x="206" y="341">results volume</text>
+    <text class="fa-note" x="206" y="358">content-addressed:</text>
+    <text class="fa-note" x="206" y="374">a rerun is harmless</text>
+
+    {/* telemetry lane on the right */}
+    <path class="fa-line" d="M360 151 H380 V428 H362" marker-end="url(#fa-arrow)"></path>
+    <path class="fa-line" d="M360 258 H380"></path>
+
+    <rect class="fa-box" x="20" y="406" width="340" height="44"></rect>
+    <text class="fa-name" x="34" y="426">Grafana stack (opt-in)</text>
+    <text class="fa-note" x="34" y="442">OTLP in · Prometheus, Tempo, Loki</text>
+
+    {/* planned */}
+    <text class="fa-kicker" x="16" y="504">PLANNED · PHASE 4 ONWARDS</text>
+    <rect class="fa-box fa-planned" x="20" y="516" width="340" height="44"></rect>
+    <text class="fa-name fa-muted" x="34" y="536">Cloud Run broker; workers on</text>
+    <text class="fa-note" x="34" y="552">notebooks, Cloud Run Jobs, Kubernetes</text>
+    <line class="fa-line fa-planned" x1="190" y1="560" x2="190" y2="584" marker-end="url(#fa-arrow)"></line>
+    <rect class="fa-box fa-planned" x="20" y="586" width="340" height="44"></rect>
+    <text class="fa-name fa-muted" x="34" y="606">AWS S3 results, presigned URLs</text>
+    <text class="fa-note" x="34" y="622">buckets exist (Terraform), 0 objects</text>
+  </svg>
+</Figure>
+
+<style>
+  .fleet-arch {
+    display: block;
+    width: 100%;
+    max-width: 30rem;
+    height: auto;
+    font-family: var(--font-text);
+  }
+  .fa-frame {
+    fill: none;
+    stroke: var(--rule-soft);
+    stroke-width: 1;
+  }
+  .fa-box {
+    fill: var(--raised);
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+  .fa-planned {
+    fill: none;
+    stroke: var(--muted);
+    stroke-dasharray: 5 4;
+  }
+  .fa-line {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.5;
+  }
+  .fa-pull {
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .fa-head {
+    fill: var(--ink);
+  }
+  .fa-head-accent {
+    fill: var(--accent);
+  }
+  .fa-name {
+    fill: var(--ink);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .fa-note,
+  .fa-label {
+    fill: var(--muted);
+    font-size: 13px;
+  }
+  .fa-label-accent {
+    fill: var(--accent);
+    font-weight: 600;
+  }
+  .fa-muted {
+    fill: var(--muted);
+  }
+  .fa-kicker {
+    fill: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+</style>

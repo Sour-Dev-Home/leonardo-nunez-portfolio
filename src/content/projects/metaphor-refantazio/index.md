@@ -8,7 +8,7 @@ status: in-progress
 stack: [C#, .NET 9, Reloaded-II, Reloaded.SharedLib.Hooks, Prism (screen-reader speech), xUnit, CsCheck, Mono.Cecil, Stryker.NET, PowerShell, Pester, Bash, GitHub Actions, GitHub merge queue, CodeQL, OpenSSF Scorecard, Dependabot, GitHub secret scanning, Claude Code, Ghidra, markdownlint-cli2, Vale, lychee, jscpd]
 repoUrl: https://github.com/Sour-Dev-Home/metaphor-accessibility
 emphasis: secondary
-order: 6
+order: 2
 ---
 
 ## The problem
@@ -140,3 +140,4 @@ From the open issues on 22 November:
 - [Repository](https://github.com/Sour-Dev-Home/metaphor-accessibility) (code GPL-3.0, docs CC BY 4.0)
 - [Releases](https://github.com/Sour-Dev-Home/metaphor-accessibility/releases) (pre-releases only)
 - [Architecture decisions](https://github.com/Sour-Dev-Home/metaphor-accessibility/tree/8e055f1/docs/adr)
+- [gpu-fleet](/projects/gpu-fleet), the GPU job fleet being built to make the cutscene audio descriptions (planned, [#1013](https://github.com/Sour-Dev-Home/metaphor-accessibility/issues/1013))
