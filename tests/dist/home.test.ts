@@ -25,6 +25,7 @@ describe("home page", () => {
       "local-worker",
       "Home Lab",
       "Metaphor: ReFantazio accessibility mod",
+      "gpu-fleet",
     ]);
   });
 
@@ -51,6 +52,7 @@ describe("home page", () => {
       "/projects/lanes",
       "/projects/leonardonunez-dev",
       "/projects/metaphor-refantazio",
+      "/projects/gpu-fleet",
     ]);
   });
 

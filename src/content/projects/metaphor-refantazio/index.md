@@ -140,3 +140,4 @@ From the open issues on 22 November:
 - [Repository](https://github.com/Sour-Dev-Home/metaphor-accessibility) (code GPL-3.0, docs CC BY 4.0)
 - [Releases](https://github.com/Sour-Dev-Home/metaphor-accessibility/releases) (pre-releases only)
 - [Architecture decisions](https://github.com/Sour-Dev-Home/metaphor-accessibility/tree/8e055f1/docs/adr)
+- [gpu-fleet](/projects/gpu-fleet), the GPU job fleet being built to make the cutscene audio descriptions (planned, [#1013](https://github.com/Sour-Dev-Home/metaphor-accessibility/issues/1013))

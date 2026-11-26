@@ -1,0 +1,91 @@
+---
+// Three workers sharing one GPU, against one worker: measured jobs per second from the gpu-fleet portfolio
+// brief (2026-11-25, 20 smoke jobs on the RX 9070, model already loaded, one run each). The dashed outline is
+// what perfect 3x scaling would give. Static SVG in the site's tokens; the numbers are also in the text.
+import Figure from "../../design/components/Figure.astro";
+
+const max = 12;
+const x0 = 112;
+const w = 268;
+const at = (v: number) => x0 + (v / max) * w;
+const rows = [
+  { label: "1 worker", value: 4.0, y: 30, note: "4.0 jobs/s" },
+  { label: "3 workers", value: 6.6, y: 82, note: "6.6 jobs/s" },
+];
+const ticks = [0, 4, 8, 12];
+---
+
+<Figure caption="20 tiny jobs on the RX 9070 with the model loaded, one run each. Three workers manage 1.6× one worker, not 3× (dashed), because they queue at the one Ollama server.">
+  <svg class="fleet-scaling" viewBox="0 0 400 168" role="img" aria-labelledby="fleet-scaling-title fleet-scaling-desc">
+    <title id="fleet-scaling-title">Jobs per second on one GPU</title>
+    <desc id="fleet-scaling-desc">
+      One worker: 4.0 jobs per second. Three workers sharing the same GPU: 6.6 jobs per second, 1.6 times one
+      worker. Perfect scaling would be 12.0.
+    </desc>
+    {
+      rows.map((r) => (
+        <g>
+          <text class="fs-cat" x={x0 - 12} y={r.y + 20} text-anchor="end">
+            {r.label}
+          </text>
+          {r.label === "3 workers" && (
+            <>
+              <rect class="fs-ideal" x={x0} y={r.y} width={w} height={30} rx="4" />
+              <text class="fs-ideal-label" x={at(max) - 8} y={r.y + 50} text-anchor="end">
+                perfect 3× scaling: 12.0
+              </text>
+            </>
+          )}
+          <rect class="fs-bar" x={x0} y={r.y} width={at(r.value) - x0} height={30} rx="4" />
+          <text class="fs-value" x={at(r.value) + 8} y={r.y + 20}>
+            {r.note}
+          </text>
+        </g>
+      ))
+    }
+    <line class="fs-axis" x1={x0} y1="20" x2={x0} y2="140"></line>
+    {
+      ticks.map((t) => (
+        <text class="fs-tick" x={at(t)} y="160" text-anchor="middle">
+          {t}
+        </text>
+      ))
+    }
+  </svg>
+</Figure>
+
+<style>
+  .fleet-scaling {
+    display: block;
+    width: 100%;
+    max-width: 34rem;
+    height: auto;
+    font-family: var(--font-text);
+  }
+  .fs-bar {
+    fill: var(--accent);
+  }
+  .fs-ideal {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+  }
+  .fs-axis {
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+  .fs-cat,
+  .fs-value {
+    fill: var(--ink);
+    font-size: 14px;
+  }
+  .fs-value {
+    font-weight: 600;
+  }
+  .fs-ideal-label,
+  .fs-tick {
+    fill: var(--muted);
+    font-size: 12px;
+  }
+</style>
