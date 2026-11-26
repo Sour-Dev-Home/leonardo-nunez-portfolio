@@ -19,13 +19,13 @@ describe("home page", () => {
   it("lists every project in order", () => {
     const names = doc.querySelectorAll(".project-card h3").map((h) => h.text.trim());
     expect(names).toEqual([
+      "gpu-fleet",
+      "Metaphor: ReFantazio accessibility mod",
       "satisfactory-dash",
       "lanes",
       "leonardonunez.dev",
       "local-worker",
       "Home Lab",
-      "Metaphor: ReFantazio accessibility mod",
-      "gpu-fleet",
     ]);
   });
 
@@ -48,11 +48,11 @@ describe("home page", () => {
   it("links only to case studies that exist", () => {
     const caseLinks = hrefs(doc).filter((h) => h.startsWith("/projects/"));
     expect(caseLinks).toEqual([
+      "/projects/gpu-fleet",
+      "/projects/metaphor-refantazio",
       "/projects/satisfactory-dash",
       "/projects/lanes",
       "/projects/leonardonunez-dev",
-      "/projects/metaphor-refantazio",
-      "/projects/gpu-fleet",
     ]);
   });
 

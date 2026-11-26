@@ -8,7 +8,7 @@ status: in-progress
 stack: [C#, .NET 9, Reloaded-II, Reloaded.SharedLib.Hooks, Prism (screen-reader speech), xUnit, CsCheck, Mono.Cecil, Stryker.NET, PowerShell, Pester, Bash, GitHub Actions, GitHub merge queue, CodeQL, OpenSSF Scorecard, Dependabot, GitHub secret scanning, Claude Code, Ghidra, markdownlint-cli2, Vale, lychee, jscpd]
 repoUrl: https://github.com/Sour-Dev-Home/metaphor-accessibility
 emphasis: secondary
-order: 6
+order: 2
 ---
 
 ## The problem
