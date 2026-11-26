@@ -25,7 +25,6 @@ describe("home page", () => {
       "lanes",
       "leonardonunez.dev",
       "local-worker",
-      "Home Lab",
     ]);
   });
 
